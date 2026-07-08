@@ -5,6 +5,12 @@ import { NextResponse } from 'next/server'
 const isProtectedRoute = createRouteMatcher(['/dashboard(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
+  // Webhooks are verified via Svix signatures, not Clerk sessions.
+  // Bypassing middleware here prevents Next.js/Clerk header parsing bugs with svix-cli.
+  if (req.nextUrl.pathname.startsWith('/api/webhooks')) {
+    return NextResponse.next();
+  }
+
   if (isProtectedRoute(req)) {
     // 1. Ensure user is signed in
     await auth.protect();

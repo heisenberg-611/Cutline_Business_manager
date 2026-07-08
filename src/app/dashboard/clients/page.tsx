@@ -1,0 +1,83 @@
+import { getClients } from '@/modules/clients/actions'
+import { ClientForm } from '@/modules/clients/components/ClientForm'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Star } from 'lucide-react'
+
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+
+export default async function ClientsPage() {
+  const { orgId } = await auth()
+  
+  if (!orgId) {
+    redirect('/dashboard/select-business')
+  }
+
+  const clients = await getClients(orgId)
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
+        <div>
+          <h3 className="text-xl font-semibold leading-6 text-zinc-900 dark:text-zinc-100">
+            Client Directory
+          </h3>
+          <p className="mt-2 text-sm text-zinc-500">
+            Manage your repeat clients, view their ratings, and track their lifetime value.
+          </p>
+        </div>
+        <ClientForm />
+      </div>
+      
+      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+        {clients.length === 0 ? (
+          <div className="p-12 text-center text-zinc-500 text-sm">
+            You don't have any clients yet. Click "New Client" to get started!
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Client</TableHead>
+                <TableHead>Industry</TableHead>
+                <TableHead>Preferred Channel</TableHead>
+                <TableHead>Internal Rating</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {clients.map((client) => (
+                <TableRow key={client.id}>
+                  <TableCell className="font-medium">
+                    <div>{client.displayName}</div>
+                    {client.companyName && (
+                      <div className="text-xs text-zinc-500">{client.companyName}</div>
+                    )}
+                  </TableCell>
+                  <TableCell>{client.industry || '-'}</TableCell>
+                  <TableCell>{client.preferredChannel || '-'}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center text-amber-500">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`w-4 h-4 ${i < (client.internalRating || 0) ? 'fill-current' : 'text-zinc-200 dark:text-zinc-800'}`} 
+                        />
+                      ))}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </div>
+  )
+}

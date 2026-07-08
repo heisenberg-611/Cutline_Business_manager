@@ -21,6 +21,8 @@ model Business {
   memberships     BusinessMembership[]
   clients         Client[]
   projects        Project[]
+  workflowTemplates WorkflowTemplate[]
+  invoices        Invoice[]
 
   @@map("businesses")
 }
@@ -73,6 +75,7 @@ model Client {
 
   business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   projects Project[]
+  invoices Invoice[]
 
   @@index([businessId]) // Critical for tenant data isolation performance
   @@map("clients")
@@ -86,13 +89,111 @@ model Project {
   type       String?   // e.g., "YouTube Long-Form", "Corporate Ad"
   priority   String?
   deadline   DateTime?
+  statusStageId String?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  statusStage WorkflowStage? @relation(fields: [statusStageId], references: [id])
+  stageHistory ProjectStageHistory[]
+  invoices Invoice[]
 
   @@index([businessId])
   @@index([clientId])
+  @@index([statusStageId])
   @@map("projects")
+}
+
+// -----------------------------------------------------------------------------
+// WORKFLOW ENGINE
+// -----------------------------------------------------------------------------
+
+model WorkflowTemplate {
+  id          String   @id @default(cuid())
+  businessId  String
+  name        String
+  projectType String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  stages   WorkflowStage[]
+
+  @@index([businessId])
+  @@map("workflow_templates")
+}
+
+model WorkflowStage {
+  id             String   @id @default(cuid())
+  templateId     String
+  name           String
+  orderIndex     Int
+  estimatedHours Int?
+  billingTrigger Boolean  @default(false)
+
+  template WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  projects Project[]
+  history  ProjectStageHistory[]
+
+  @@index([templateId])
+  @@map("workflow_stages")
+}
+
+model ProjectStageHistory {
+  id        String    @id @default(cuid())
+  projectId String
+  stageId   String
+  enteredAt DateTime  @default(now())
+  exitedAt  DateTime?
+
+  project Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage   WorkflowStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([stageId])
+  @@map("project_stage_history")
+}
+
+// -----------------------------------------------------------------------------
+// FINANCIALS
+// -----------------------------------------------------------------------------
+
+model Invoice {
+  id          String   @id @default(cuid())
+  businessId  String
+  clientId    String
+  projectId   String?
+  currency    String   @default("USD")
+  subtotal    Int      // Stored in cents
+  taxAmount   Int      @default(0) // Stored in cents
+  total       Int      // Stored in cents
+  status      String   @default("DRAFT") // DRAFT, SENT, PAID, OVERDUE
+  dueDate     DateTime?
+  issuedAt    DateTime?
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  lineItems   InvoiceLineItem[]
+
+  @@index([businessId])
+  @@index([clientId])
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  description String
+  amount      Int      // Stored in cents
+  sourceType  String?  @default("manual") // manual, milestone, revision
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_line_items")
 }

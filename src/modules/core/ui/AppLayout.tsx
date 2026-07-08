@@ -30,8 +30,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { label: 'Dashboard', icon: Briefcase, href: '/dashboard' },
-    { label: 'Clients', icon: Users, href: '/dashboard/clients' },
+    { label: 'Pipeline', icon: FolderKanban, href: '/dashboard/pipeline' },
     { label: 'Projects', icon: FolderKanban, href: '/dashboard/projects' },
+    { label: 'Clients', icon: Users, href: '/dashboard/clients' },
     { label: 'Financials', icon: Wallet, href: '/dashboard/financials' },
   ]
 
@@ -97,7 +98,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top bar (for breadcrumbs or secondary actions, user profile) */}
         <header className="h-16 flex items-center justify-end px-6 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-          <UserButton afterSignOutUrl="/"/>
+          <UserButton />
         </header>
         
         {/* Page Content Scrollable Area */}
