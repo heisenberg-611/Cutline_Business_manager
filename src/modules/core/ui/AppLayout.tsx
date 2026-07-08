@@ -4,6 +4,13 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { OrganizationSwitcher, UserButton } from '@clerk/nextjs'
+import dynamic from 'next/dynamic'
+
+const GlobalSearch = dynamic(
+  () => import('./GlobalSearch').then(mod => mod.GlobalSearch), 
+  { ssr: false }
+)
+
 import { 
   Briefcase, 
   Users, 
@@ -200,31 +207,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* COMMAND PALETTE MODAL */}
-      {isCommandOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-start justify-center pt-[15vh] animate-in fade-in duration-150">
-          <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-white/10 overflow-hidden p-4">
-            <div className="text-sm font-medium text-zinc-500 mb-2">Jump to...</div>
-            <input 
-              autoFocus 
-              type="text" 
-              placeholder="Search projects, invoices, or clients..." 
-              className="w-full bg-transparent border-none focus:outline-none text-lg p-2 text-zinc-900 dark:text-zinc-100 font-sans"
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') setIsCommandOpen(false)
-              }}
-            />
-            <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-white/10 flex justify-between items-center">
-              <span className="text-xs text-zinc-400">Pro tip: use keyboard arrows to navigate</span>
-              <button 
-                onClick={() => setIsCommandOpen(false)}
-                className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-              >
-                esc to close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <GlobalSearch open={isCommandOpen} onOpenChange={setIsCommandOpen} />
     </div>
   )
 }
