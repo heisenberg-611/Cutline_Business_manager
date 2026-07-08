@@ -5,6 +5,7 @@ import prisma from '@/modules/core/db/prisma'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Download, Mail, Ban } from 'lucide-react'
 import { RecordPaymentDialog } from '@/modules/financials/components/RecordPaymentDialog'
+import { sendInvoice } from '@/modules/financials/actions'
 import { Badge } from '@/components/ui/badge'
 
 const formatMoney = (cents: number, currency = 'USD') => {
@@ -51,9 +52,14 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         
         <div className="flex items-center gap-2">
           {invoice.status === 'DRAFT' && (
-            <Button variant="outline" className="text-zinc-500">
-              <Mail className="h-4 w-4 mr-2" /> Send via Email
-            </Button>
+            <form action={async () => {
+              'use server'
+              await sendInvoice(invoice.id)
+            }}>
+              <Button type="submit" variant="outline" className="text-zinc-500">
+                <Mail className="h-4 w-4 mr-2" /> Mark as Sent
+              </Button>
+            </form>
           )}
           
           <a href={`/api/invoices/${invoice.id}/pdf`} target="_blank" rel="noreferrer">

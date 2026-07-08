@@ -3,6 +3,7 @@
 import { auth } from '@clerk/nextjs/server'
 import prisma from '@/modules/core/db/prisma'
 import { revalidatePath } from 'next/cache'
+import { sendInvoiceEmail } from '@/lib/email/resend'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
@@ -209,8 +210,11 @@ export async function voidInvoice(id: string) {
 export async function sendInvoice(id: string) {
   const { orgId } = await requireBusiness()
 
-  return await withAudit('Invoice', id, 'SENT', {}, async (tx) => {
-    const existing = await tx.invoice.findFirst({ where: { id, businessId: orgId } })
+  const result = await withAudit('Invoice', id, 'SENT', {}, async (tx) => {
+    const existing = await tx.invoice.findFirst({ 
+      where: { id, businessId: orgId },
+      include: { client: true, business: true }
+    })
     if (!existing) throw new Error('Invoice not found')
     if (existing.status !== 'DRAFT') throw new Error('Can only send DRAFT invoices')
 
@@ -219,17 +223,36 @@ export async function sendInvoice(id: string) {
       data: { 
         status: 'SENT', 
         issuedAt: new Date(),
-        // emailSentAt will be updated by the actual email sender function later
+        emailSentAt: new Date()
       }
     })
+
+    if (existing.client.email) {
+      const amountFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: existing.currency }).format(existing.amountDueCents / 100)
+      const dueDateFormatted = existing.dueDate ? existing.dueDate.toLocaleDateString() : 'Upon Receipt'
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      
+      await sendInvoiceEmail(existing.client.email, {
+        invoiceNumber: existing.invoiceNumber,
+        amountDue: amountFormatted,
+        dueDate: dueDateFormatted,
+        businessName: existing.business.name,
+        clientName: existing.client.displayName,
+        pdfLink: `${appUrl}/api/invoices/${id}/pdf`
+      })
+    }
   })
+
+  revalidatePath(`/dashboard/financials/${id}`)
+  revalidatePath('/dashboard/financials')
+  return result
 }
 
 export async function recordPayment(invoiceId: string, input: z.infer<typeof PaymentInputSchema>) {
   const { orgId, userId } = await requireBusiness()
   const data = PaymentInputSchema.parse(input)
 
-  return await withAudit('Payment', invoiceId, 'PAYMENT_RECORDED', { amountCents: data.amountCents }, async (tx) => {
+  const result = await withAudit('Payment', invoiceId, 'PAYMENT_RECORDED', { amountCents: data.amountCents }, async (tx) => {
     const invoice = await tx.invoice.findFirst({ where: { id: invoiceId, businessId: orgId } })
     if (!invoice) throw new Error('Invoice not found')
     if (invoice.status === 'VOID') throw new Error('Cannot pay a voided invoice')
@@ -265,6 +288,10 @@ export async function recordPayment(invoiceId: string, input: z.infer<typeof Pay
       }
     })
   })
+  
+  revalidatePath(`/dashboard/financials/${invoiceId}`)
+  revalidatePath('/dashboard/financials')
+  return result
 }
 
 export async function createCreditNote(invoiceId: string, amountCents: number, reason: string) {

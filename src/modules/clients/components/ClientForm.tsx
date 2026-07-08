@@ -60,6 +60,10 @@ export function ClientForm() {
             <Input id="companyName" name="companyName" placeholder="Acme Corporation (Optional)" />
           </div>
           <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
+            <Input id="email" name="email" type="email" placeholder="client@example.com (Required for Invoicing)" />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="industry">Industry</Label>
             <Input id="industry" name="industry" placeholder="e.g. YouTube, Tech, Real Estate" />
           </div>

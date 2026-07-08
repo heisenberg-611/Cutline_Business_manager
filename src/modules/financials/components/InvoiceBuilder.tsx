@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 type Client = { id: string, displayName: string }
 type Project = { id: string, title: string, clientId: string }
 
 export default function InvoiceBuilder({ clients, projects }: { clients: Client[], projects: Project[] }) {
+  const router = useRouter()
   const [clientId, setClientId] = useState('')
   const [projectId, setProjectId] = useState('')
   const [dueDate, setDueDate] = useState('')
@@ -61,7 +63,7 @@ export default function InvoiceBuilder({ clients, projects }: { clients: Client[
 
     setLoading(true)
     try {
-      await createInvoice({
+      const invoice = await createInvoice({
         clientId,
         projectId: projectId || undefined,
         dueDate: dueDate || undefined,
@@ -73,7 +75,7 @@ export default function InvoiceBuilder({ clients, projects }: { clients: Client[
           amountCents: Math.round(parseFloat(i.amount) * 100) // Convert to cents
         }))
       })
-      // Server action handles redirect
+      router.push(`/dashboard/financials/${invoice.id}`)
     } catch (err: any) {
       alert(err.message || 'Failed to create invoice')
       setLoading(false)

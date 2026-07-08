@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import prisma from '@/modules/core/db/prisma'
 import { format } from 'date-fns'
+import { getStudioHealth } from '@/modules/financials/dashboard-queries'
+import { StudioHealthFinanceStrip } from '@/modules/financials/components/StudioHealthFinanceStrip'
 
 export default async function DashboardPage() {
   const { orgId } = await auth()
@@ -12,7 +14,7 @@ export default async function DashboardPage() {
   }
 
   // Fetch metrics data
-  const [projects, invoices] = await Promise.all([
+  const [projects, invoices, studioHealth] = await Promise.all([
     prisma.project.findMany({
       where: { businessId: orgId },
       include: { statusStage: true, client: true },
@@ -20,12 +22,11 @@ export default async function DashboardPage() {
     }),
     prisma.invoice.findMany({
       where: { businessId: orgId }
-    })
+    }),
+    getStudioHealth(orgId)
   ])
 
   const activeProjectsCount = projects.filter(p => !p.statusStage?.name.toLowerCase().includes('final') && !p.statusStage?.name.toLowerCase().includes('archive')).length
-  const overdueInvoicesCount = invoices.filter(i => i.status === 'OVERDUE').length
-  const totalOutstanding = invoices.filter(i => i.status === 'SENT' || i.status === 'OVERDUE').reduce((sum, i) => sum + i.amountDueCents, 0)
 
   const formatCurrency = (cents: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
@@ -60,21 +61,16 @@ export default async function DashboardPage() {
         </p>
       </div>
       
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Finance Strip */}
+      <h4 className="font-medium text-sm text-zinc-500 uppercase tracking-wider mb-4">Financial Health</h4>
+      <StudioHealthFinanceStrip data={studioHealth} />
+
+      {/* Project Metrics */}
+      <h4 className="font-medium text-sm text-zinc-500 uppercase tracking-wider mb-4 mt-8">Project Health</h4>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
         <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
           <div className="text-sm font-medium text-zinc-500">Active Projects</div>
           <div className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{activeProjectsCount}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
-          <div className="text-sm font-medium text-zinc-500">Total Outstanding</div>
-          <div className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{formatCurrency(totalOutstanding)}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
-          <div className="text-sm font-medium text-zinc-500">Overdue Invoices</div>
-          <div className={`mt-2 text-3xl font-bold tracking-tight ${overdueInvoicesCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
-            {overdueInvoicesCount}
-          </div>
         </div>
         <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
           <div className="text-sm font-medium text-zinc-500">At-Risk Deadlines</div>
