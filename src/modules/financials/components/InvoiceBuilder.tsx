@@ -5,6 +5,7 @@ import { createInvoice } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2 } from 'lucide-react'
 
@@ -15,17 +16,19 @@ export default function InvoiceBuilder({ clients, projects }: { clients: Client[
   const [clientId, setClientId] = useState('')
   const [projectId, setProjectId] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [notes, setNotes] = useState('')
+  const [taxRatePct, setTaxRatePct] = useState('0')
   
-  const [lineItems, setLineItems] = useState([{ id: 1, description: '', amount: '' }])
+  const [lineItems, setLineItems] = useState([{ id: 1, description: '', quantity: '1', amount: '' }])
   const [loading, setLoading] = useState(false)
 
   // Filter projects by selected client
   const availableProjects = projectId && !clientId 
-    ? projects // if they haven't picked a client yet, show all? Better to restrict.
+    ? projects
     : projects.filter(p => p.clientId === clientId)
 
   const handleAddLine = () => {
-    setLineItems([...lineItems, { id: Date.now(), description: '', amount: '' }])
+    setLineItems([...lineItems, { id: Date.now(), description: '', quantity: '1', amount: '' }])
   }
 
   const handleRemoveLine = (id: number) => {
@@ -34,16 +37,21 @@ export default function InvoiceBuilder({ clients, projects }: { clients: Client[
     }
   }
 
-  const handleLineChange = (id: number, field: 'description' | 'amount', value: string) => {
+  const handleLineChange = (id: number, field: 'description' | 'amount' | 'quantity', value: string) => {
     setLineItems(lineItems.map(item => 
       item.id === id ? { ...item, [field]: value } : item
     ))
   }
 
-  const subtotal = lineItems.reduce((sum, item) => {
-    const parsed = parseFloat(item.amount)
-    return sum + (isNaN(parsed) ? 0 : parsed)
+  const subtotalCents = lineItems.reduce((sum, item) => {
+    const qty = parseInt(item.quantity) || 0
+    const amt = parseFloat(item.amount) || 0
+    return sum + Math.round(qty * amt * 100)
   }, 0)
+  
+  const taxRateBps = Math.round((parseFloat(taxRatePct) || 0) * 100)
+  const taxAmountCents = Math.round(subtotalCents * (taxRateBps / 10000))
+  const totalCents = subtotalCents + taxAmountCents
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,9 +65,12 @@ export default function InvoiceBuilder({ clients, projects }: { clients: Client[
         clientId,
         projectId: projectId || undefined,
         dueDate: dueDate || undefined,
+        notes: notes || undefined,
+        taxRateBps,
         lineItems: lineItems.map(i => ({
           description: i.description,
-          amount: Math.round(parseFloat(i.amount) * 100) // Convert to cents
+          quantity: parseInt(i.quantity) || 1,
+          amountCents: Math.round(parseFloat(i.amount) * 100) // Convert to cents
         }))
       })
       // Server action handles redirect
@@ -131,8 +142,18 @@ export default function InvoiceBuilder({ clients, projects }: { clients: Client[
                 required
               />
             </div>
+            <div className="w-24 space-y-2">
+              {index === 0 && <Label className="text-xs text-zinc-500">Qty</Label>}
+              <Input 
+                type="number" 
+                min="1"
+                value={item.quantity}
+                onChange={e => handleLineChange(item.id, 'quantity', e.target.value)}
+                required
+              />
+            </div>
             <div className="w-32 space-y-2">
-              {index === 0 && <Label className="text-xs text-zinc-500">Amount ($)</Label>}
+              {index === 0 && <Label className="text-xs text-zinc-500">Rate ($)</Label>}
               <Input 
                 type="number" 
                 step="0.01"
@@ -142,6 +163,12 @@ export default function InvoiceBuilder({ clients, projects }: { clients: Client[
                 onChange={e => handleLineChange(item.id, 'amount', e.target.value)}
                 required
               />
+            </div>
+            <div className="w-32 space-y-2">
+              {index === 0 && <Label className="text-xs text-zinc-500">Amount</Label>}
+              <div className="h-9 flex items-center justify-end px-3 bg-zinc-50 dark:bg-zinc-900 rounded-md border border-transparent font-medium">
+                ${((parseInt(item.quantity) || 0) * (parseFloat(item.amount) || 0)).toFixed(2)}
+              </div>
             </div>
             <div className={index === 0 ? "pt-6" : ""}>
               <Button 
@@ -168,28 +195,47 @@ export default function InvoiceBuilder({ clients, projects }: { clients: Client[
           <Plus className="w-3 h-3 mr-1" /> Add Line
         </Button>
       </div>
+      
+      <div className="space-y-2">
+        <Label>Notes / Payment Instructions</Label>
+        <Textarea 
+          placeholder="Thank you for your business!" 
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+        />
+      </div>
 
       {/* Totals */}
       <div className="flex justify-end pt-6 border-t border-zinc-200 dark:border-zinc-800">
         <div className="w-64 space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-zinc-500">Subtotal</span>
-            <span className="font-medium">${subtotal.toFixed(2)}</span>
+            <span className="font-medium">${(subtotalCents / 100).toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-zinc-500">Tax</span>
-            <span className="font-medium">$0.00</span>
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-500">Tax (%)</span>
+              <Input 
+                type="number" 
+                className="w-16 h-7 text-xs" 
+                value={taxRatePct} 
+                onChange={e => setTaxRatePct(e.target.value)}
+                min="0"
+                step="0.1"
+              />
+            </div>
+            <span className="font-medium">${(taxAmountCents / 100).toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-lg font-bold border-t border-zinc-200 dark:border-zinc-800 pt-3">
             <span>Total</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>${(totalCents / 100).toFixed(2)}</span>
           </div>
         </div>
       </div>
 
       <div className="flex justify-end pt-4">
         <Button type="submit" disabled={loading} className="w-40 bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
-          {loading ? "Generating..." : "Generate Invoice"}
+          {loading ? "Saving..." : "Create Invoice"}
         </Button>
       </div>
     </form>

@@ -25,7 +25,7 @@ export default async function DashboardPage() {
 
   const activeProjectsCount = projects.filter(p => !p.statusStage?.name.toLowerCase().includes('final') && !p.statusStage?.name.toLowerCase().includes('archive')).length
   const overdueInvoicesCount = invoices.filter(i => i.status === 'OVERDUE').length
-  const totalOutstanding = invoices.filter(i => i.status === 'SENT' || i.status === 'OVERDUE').reduce((sum, i) => sum + i.total, 0)
+  const totalOutstanding = invoices.filter(i => i.status === 'SENT' || i.status === 'OVERDUE').reduce((sum, i) => sum + i.amountDueCents, 0)
 
   const formatCurrency = (cents: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
