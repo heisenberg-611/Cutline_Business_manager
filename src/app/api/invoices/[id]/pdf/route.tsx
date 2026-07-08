@@ -1,49 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import prisma from '@/modules/core/db/prisma'
 import { renderToStream } from '@react-pdf/renderer'
 import { InvoiceTemplate } from '@/lib/pdf/invoice-template'
+import { getInvoiceDataForPdf } from '@/lib/invoices/pdf-data'
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+/**
+ * GET /api/invoices/[id]/pdf
+ *
+ * Server-side PDF generation via @react-pdf/renderer's renderToStream.
+ * This is the endpoint used for:
+ *   - Direct browser downloads (anchor tag with target="_blank")
+ *   - Server-side email attachments (fetch internally)
+ *   - Inline PDF preview in iframes
+ *
+ * Security: uses Clerk's auth() to resolve the orgId (businessId),
+ * which is then passed to the data mapper for multi-tenancy filtering.
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { orgId } = await auth()
-  
+
   if (!orgId) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
   const { id } = await params
 
-  const invoice = await prisma.invoice.findFirst({
-    where: { id, businessId: orgId },
-    include: {
-      business: true,
-      client: true,
-      lineItems: true
-    }
-  })
+  // Data mapper enforces businessId filter — no IDOR possible
+  const invoiceData = await getInvoiceDataForPdf(id, orgId)
 
-  if (!invoice) {
+  if (!invoiceData) {
     return new NextResponse('Not Found', { status: 404 })
   }
 
-  // The template requires dates to be Date objects
+  // Render the React PDF component to a Node.js readable stream.
+  // renderToStream is the correct modern API for @react-pdf/renderer v4+.
   const pdfStream = await renderToStream(
-    <InvoiceTemplate invoice={invoice as any} />
+    <InvoiceTemplate invoice={invoiceData} />
   )
 
-  // Convert Node readable stream to Web ReadableStream
-  const stream = new ReadableStream({
+  // Convert Node.js ReadableStream → Web ReadableStream for NextResponse
+  const webStream = new ReadableStream({
     start(controller) {
-      pdfStream.on('data', (chunk) => controller.enqueue(chunk))
+      pdfStream.on('data', (chunk: Buffer) => controller.enqueue(chunk))
       pdfStream.on('end', () => controller.close())
-      pdfStream.on('error', (err) => controller.error(err))
-    }
+      pdfStream.on('error', (err: Error) => controller.error(err))
+    },
   })
 
-  return new NextResponse(stream, {
+  return new NextResponse(webStream, {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename="invoice-${invoice.invoiceNumber}.pdf"`
-    }
+      'Content-Disposition': `inline; filename="invoice-${invoiceData.invoiceNumber}.pdf"`,
+      // Cache for 5 minutes on CDN, revalidate in background.
+      // The PDF changes rarely (only on invoice edits), so this is safe.
+      'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
+    },
   })
 }

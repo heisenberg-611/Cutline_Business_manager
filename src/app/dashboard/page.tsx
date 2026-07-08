@@ -52,7 +52,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
+      <div className="border-b border-zinc-200 dark:border-white/10 pb-5">
         <h3 className="text-xl font-semibold leading-6 text-zinc-900 dark:text-zinc-100">
           Studio Dashboard
         </h3>
@@ -68,11 +68,11 @@ export default async function DashboardPage() {
       {/* Project Metrics */}
       <h4 className="font-medium text-sm text-zinc-500 uppercase tracking-wider mb-4 mt-8">Project Health</h4>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
-        <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
+        <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 p-6">
           <div className="text-sm font-medium text-zinc-500">Active Projects</div>
           <div className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{activeProjectsCount}</div>
         </div>
-        <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
+        <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 p-6">
           <div className="text-sm font-medium text-zinc-500">At-Risk Deadlines</div>
           <div className={`mt-2 text-3xl font-bold tracking-tight ${atRiskProjectsCount > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
             {atRiskProjectsCount}
@@ -81,8 +81,8 @@ export default async function DashboardPage() {
       </div>
 
       {/* Recent Projects */}
-      <div className="mt-8 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-        <div className="px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50">
+      <div className="mt-8 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden">
+        <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
           <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
             Recent Projects
           </h3>

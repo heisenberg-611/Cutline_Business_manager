@@ -4,6 +4,8 @@ import { ensureDefaultTemplate } from '@/modules/workflow/actions'
 import { getProjects } from '@/modules/projects/actions'
 import PipelineBoard from '@/modules/workflow/components/PipelineBoard'
 
+import { LayoutGrid, List, TableProperties } from 'lucide-react'
+
 export default async function PipelinePage() {
   const { orgId } = await auth()
   
@@ -32,6 +34,21 @@ export default async function PipelinePage() {
           <p className="mt-2 text-sm text-zinc-500">
             Drag and drop your projects through the editing stages.
           </p>
+        </div>
+        
+        <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <button className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200 dark:border-zinc-800">
+            <LayoutGrid className="w-3.5 h-3.5" />
+            Board
+          </button>
+          <button className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+            <List className="w-3.5 h-3.5" />
+            Timeline
+          </button>
+          <button className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+            <TableProperties className="w-3.5 h-3.5" />
+            Table
+          </button>
         </div>
       </div>
       

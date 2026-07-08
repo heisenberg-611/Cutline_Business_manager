@@ -7,6 +7,8 @@ import { ArrowLeft, Download, Mail, Ban } from 'lucide-react'
 import { RecordPaymentDialog } from '@/modules/financials/components/RecordPaymentDialog'
 import { sendInvoice, deleteInvoice } from '@/modules/financials/actions'
 import { Badge } from '@/components/ui/badge'
+import { getInvoiceDataForPdf } from '@/lib/invoices/pdf-data'
+import { DownloadInvoiceButton } from '@/components/invoices/DownloadInvoiceButton'
 
 const formatMoney = (cents: number, currency = 'USD') => {
   return new Intl.NumberFormat('en-US', {
@@ -31,6 +33,13 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   })
 
   if (!invoice) return <div>Invoice not found</div>
+
+  // Get the type-safe InvoiceData for the PDF template.
+  // This is fetched alongside the main invoice query because:
+  //   1. The detail page needs the raw invoice for its own UI.
+  //   2. The DownloadInvoiceButton (client component) needs the mapped InvoiceData.
+  // Both queries filter by businessId — no IDOR possible.
+  const invoiceDataForPdf = await getInvoiceDataForPdf(id, orgId)
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -71,9 +80,15 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             </Button>
           </form>
           
+          {/* Client-side instant download (generates PDF in browser) */}
+          {invoiceDataForPdf && (
+            <DownloadInvoiceButton invoiceData={invoiceDataForPdf} />
+          )}
+          
+          {/* Fallback: server-side PDF (opens in new tab via API route) */}
           <a href={`/api/invoices/${invoice.id}/pdf`} target="_blank" rel="noreferrer">
-            <Button variant="outline" className="text-zinc-500">
-              <Download className="h-4 w-4 mr-2" /> Download PDF
+            <Button variant="ghost" size="sm" className="text-zinc-400 text-xs">
+              Open PDF
             </Button>
           </a>
           

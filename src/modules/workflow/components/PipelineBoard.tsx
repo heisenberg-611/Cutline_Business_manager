@@ -7,6 +7,38 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { format } from 'date-fns'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { 
+  Film, 
+  Clapperboard, 
+  Scissors, 
+  SlidersHorizontal, 
+  Palette, 
+  AudioWaveform, 
+  MonitorPlay, 
+  MessageSquare, 
+  PackageCheck, 
+  CircleDashed 
+} from 'lucide-react'
+
+/**
+ * Maps stage names → Lucide icons for the pipeline columns.
+ * Covers all 8 default stages:
+ *   Raw Footage, Sync & Prep, Rough Cut, Fine Cut,
+ *   Color & Sound, Client Review, Revisions, Final Delivery
+ */
+const getStageIcon = (name: string) => {
+  const lower = name.toLowerCase()
+  if (lower.includes('raw') || lower.includes('footage'))        return <Film className="w-4 h-4" />
+  if (lower.includes('sync') || lower.includes('prep'))          return <Clapperboard className="w-4 h-4" />
+  if (lower.includes('rough'))                                   return <Scissors className="w-4 h-4" />
+  if (lower.includes('fine'))                                    return <SlidersHorizontal className="w-4 h-4" />
+  if (lower.includes('color') || lower.includes('sound'))        return <Palette className="w-4 h-4" />
+  if (lower.includes('review'))                                  return <MonitorPlay className="w-4 h-4" />
+  if (lower.includes('revision'))                                return <MessageSquare className="w-4 h-4" />
+  if (lower.includes('deliver') || lower.includes('final'))      return <PackageCheck className="w-4 h-4 text-green-500" />
+  // Fallback for custom user-created stages
+  return <CircleDashed className="w-4 h-4" />
+}
 
 type Stage = {
   id: string
@@ -82,8 +114,13 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                 className={`flex flex-col w-80 shrink-0 rounded-xl border transition-colors ${snapshot.isDraggingOver ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : 'bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'}`}
               >
                 <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950/50 rounded-t-xl">
-                  <h4 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">{stage.name}</h4>
-                  <span className="text-xs font-medium bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-full">
+                  <div className="flex items-center gap-2">
+                    <div className="text-zinc-500 dark:text-zinc-400">
+                      {getStageIcon(stage.name)}
+                    </div>
+                    <h4 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">{stage.name}</h4>
+                  </div>
+                  <span className="text-xs font-mono font-medium bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-full">
                     {projectsByStage[stage.id]?.length || 0}
                   </span>
                 </div>
@@ -96,7 +133,7 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className={`bg-white dark:bg-zinc-950 p-4 rounded-lg border shadow-sm flex flex-col gap-3 ${snapshot.isDragging ? 'border-blue-500 shadow-md rotate-2' : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300'} ${isPending ? 'opacity-50 pointer-events-none' : ''}`}
+                          className={`bg-white dark:bg-zinc-950 p-4 rounded-lg border shadow-sm flex flex-col gap-3 transition-all duration-200 ease-out-smooth border-l-4 ${project.priority === 'High' ? 'border-l-red-500' : project.priority === 'Medium' ? 'border-l-amber-500' : project.priority === 'Low' ? 'border-l-green-500' : 'border-l-transparent'} ${snapshot.isDragging ? 'border-blue-500 shadow-xl scale-[1.02] rotate-1 z-50' : 'border-zinc-200 dark:border-zinc-800 hover:shadow-md hover:border-zinc-300'} ${isPending ? 'opacity-50 pointer-events-none' : ''}`}
                           style={{...provided.draggableProps.style}}
                         >
                           <div>

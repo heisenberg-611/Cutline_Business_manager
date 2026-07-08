@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { OrganizationSwitcher, UserButton } from '@clerk/nextjs'
 import { 
   Briefcase, 
@@ -11,18 +12,27 @@ import {
   Settings, 
   Search,
   Command as CmdIcon,
-  Box
+  Box,
+  ChevronLeft,
+  ChevronRight,
+  Plus
 } from 'lucide-react'
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isCommandOpen, setIsCommandOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false)
+  const pathname = usePathname()
 
-  // Typical keyboard shortcut for Command Palette (Cmd+K / Ctrl+K)
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setIsCommandOpen((open) => !open)
+      }
+      if (e.key === '+' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setIsQuickActionsOpen((open) => !open)
       }
     }
     document.addEventListener('keydown', down)
@@ -38,94 +48,173 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { label: 'Assets', icon: Box, href: '/dashboard/assets' },
   ]
 
+  // Contextual Topbar Logic
+  const getContextualTitle = () => {
+    if (pathname === '/dashboard') return 'Dashboard'
+    if (pathname.includes('/pipeline')) return 'Pipeline'
+    if (pathname.includes('/projects')) return 'Projects'
+    if (pathname.includes('/clients')) return 'Clients'
+    if (pathname.includes('/financials')) return 'Financials'
+    if (pathname.includes('/assets')) return 'Assets'
+    return 'Cutline'
+  }
+
   return (
-    <div className="flex h-screen w-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 overflow-hidden font-sans">
+    <div className="flex h-screen w-full bg-zinc-50 dark:bg-[#0A0A0A] text-zinc-900 dark:text-zinc-100 overflow-hidden font-sans">
       
-      {/* LEFT SIDEBAR (Linear / Stripe calm aesthetic) */}
-      <aside className="w-64 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 flex flex-col transition-all">
-        
+      {/* LEFT SIDEBAR */}
+      <aside 
+        className={`border-r border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-[#0A0A0A] flex flex-col transition-all duration-300 ease-in-out-smooth z-20 ${isCollapsed ? 'w-16' : 'w-64'}`}
+      >
         {/* Business Switcher Top Header */}
-        <div className="h-16 flex items-center px-4 border-b border-zinc-200 dark:border-zinc-800">
-          <OrganizationSwitcher 
-            hidePersonal
-            appearance={{
-              elements: {
-                organizationSwitcherTrigger: "focus:shadow-none focus:outline-none w-full justify-start",
-                organizationPreviewMainIdentifier: "font-semibold text-sm",
-              }
-            }}
-          />
+        <div className="h-14 flex items-center px-4 border-b border-zinc-200 dark:border-white/10 overflow-hidden">
+          <div className={`transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-full'}`}>
+            <OrganizationSwitcher 
+              hidePersonal
+              appearance={{
+                elements: {
+                  organizationSwitcherTrigger: "focus:shadow-none focus:outline-none w-full justify-start",
+                  organizationPreviewMainIdentifier: "font-semibold text-sm",
+                }
+              }}
+            />
+          </div>
+          {isCollapsed && (
+            <div className="w-full flex justify-center text-zinc-900 dark:text-white font-bold">
+              C
+            </div>
+          )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-3 space-y-1">
-          {navItems.map((item) => (
-            <Link 
-              key={item.href} 
-              href={item.href}
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          ))}
+        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+            return (
+              <Link 
+                key={item.href} 
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  isActive 
+                  ? 'bg-zinc-200/70 text-zinc-900 dark:bg-white/10 dark:text-white' 
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5'
+                } ${isCollapsed ? 'justify-center' : ''}`}
+                title={isCollapsed ? item.label : undefined}
+              >
+                <item.icon className="h-4 w-4 shrink-0" />
+                {!isCollapsed && <span>{item.label}</span>}
+              </Link>
+            )
+          })}
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+        <div className="p-3 border-t border-zinc-200 dark:border-white/10 space-y-1">
           <button 
             onClick={() => setIsCommandOpen(true)}
-            className="w-full flex items-center justify-between px-3 py-2 text-sm text-zinc-500 bg-zinc-200/50 dark:bg-zinc-800/50 rounded-md hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+            className={`w-full flex items-center px-3 py-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-md transition-colors ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+            title={isCollapsed ? 'Search (Cmd+K)' : undefined}
           >
-            <span className="flex items-center gap-2">
-              <Search className="h-4 w-4" />
-              Search...
-            </span>
-            <span className="flex items-center text-xs opacity-50">
-              <CmdIcon className="h-3 w-3 mr-0.5" /> K
-            </span>
+            <div className="flex items-center gap-3">
+              <Search className="h-4 w-4 shrink-0" />
+              {!isCollapsed && <span>Search...</span>}
+            </div>
+            {!isCollapsed && (
+              <span className="flex items-center text-xs opacity-50 bg-zinc-200 dark:bg-white/10 px-1.5 py-0.5 rounded">
+                <CmdIcon className="h-3 w-3 mr-0.5" /> K
+              </span>
+            )}
           </button>
           
           <Link 
             href="/dashboard/settings"
-            className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
+            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+            title={isCollapsed ? 'Settings' : undefined}
           >
-            <Settings className="h-4 w-4" />
-            Settings
+            <Settings className="h-4 w-4 shrink-0" />
+            {!isCollapsed && <span>Settings</span>}
           </Link>
+
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="w-full flex items-center justify-center py-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+          >
+            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
         </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top bar (for breadcrumbs or secondary actions, user profile) */}
-        <header className="h-16 flex items-center justify-end px-6 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-          <UserButton />
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        {/* Contextual Top bar */}
+        <header className="h-14 flex items-center justify-between px-6 border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0A0A0A] shrink-0">
+          <div className="flex items-center gap-4">
+            <h1 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{getContextualTitle()}</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsQuickActionsOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm hover:opacity-90 transition-opacity"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New
+            </button>
+            <UserButton />
+          </div>
         </header>
         
         {/* Page Content Scrollable Area */}
-        <div className="flex-1 overflow-auto p-6 md:p-10">
-          <div className="mx-auto max-w-5xl">
+        <div className="flex-1 overflow-auto p-6 md:p-10 relative">
+          <div className="mx-auto max-w-6xl">
             {children}
           </div>
         </div>
+
+        {/* QUICK ACTIONS SLIDE-OUT PANEL */}
+        {isQuickActionsOpen && (
+          <>
+            <div 
+              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity" 
+              onClick={() => setIsQuickActionsOpen(false)}
+            />
+            <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-white/10 shadow-2xl animate-in slide-in-from-right duration-200 ease-out-smooth">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Quick Actions</h2>
+                  <button onClick={() => setIsQuickActionsOpen(false)} className="text-zinc-500 hover:text-zinc-900 dark:hover:text-white text-xs">esc to close</button>
+                </div>
+                <div className="space-y-2">
+                  <Link href="/dashboard/projects/new" onClick={() => setIsQuickActionsOpen(false)} className="block p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-white/20 transition-colors">
+                    <div className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">New Project</div>
+                    <div className="text-xs text-zinc-500 mt-1">Start a new video editing project</div>
+                  </Link>
+                  <Link href="/dashboard/financials/new" onClick={() => setIsQuickActionsOpen(false)} className="block p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-white/20 transition-colors">
+                    <div className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">Create Invoice</div>
+                    <div className="text-xs text-zinc-500 mt-1">Bill a client for completed work</div>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </main>
 
-      {/* COMMAND PALETTE MODAL (Implementation Placeholder) */}
+      {/* COMMAND PALETTE MODAL */}
       {isCommandOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start justify-center pt-[15vh]">
-          <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden p-4">
-            <div className="text-sm text-zinc-500 mb-2">Command Palette (Placeholder)</div>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-start justify-center pt-[15vh] animate-in fade-in duration-150">
+          <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-white/10 overflow-hidden p-4">
+            <div className="text-sm font-medium text-zinc-500 mb-2">Jump to...</div>
             <input 
               autoFocus 
               type="text" 
-              placeholder="Type a command or search..." 
-              className="w-full bg-transparent border-none focus:outline-none text-lg p-2 text-zinc-900 dark:text-zinc-100"
+              placeholder="Search projects, invoices, or clients..." 
+              className="w-full bg-transparent border-none focus:outline-none text-lg p-2 text-zinc-900 dark:text-zinc-100 font-sans"
               onKeyDown={(e) => {
                 if (e.key === 'Escape') setIsCommandOpen(false)
               }}
             />
-            <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-end">
+            <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-white/10 flex justify-between items-center">
+              <span className="text-xs text-zinc-400">Pro tip: use keyboard arrows to navigate</span>
               <button 
                 onClick={() => setIsCommandOpen(false)}
                 className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
