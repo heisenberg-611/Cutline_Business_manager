@@ -34,6 +34,41 @@ export async function createClient(data: FormData) {
   revalidatePath('/dashboard/clients')
 }
 
+export async function updateClient(clientId: string, data: { displayName: string, companyName: string, industry: string, preferredChannel: string }) {
+  const { orgId } = await auth()
+  if (!orgId) throw new Error('Unauthorized')
+
+  // Verify ownership
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, businessId: orgId }
+  })
+  if (!client) throw new Error('Client not found')
+
+  await prisma.client.update({
+    where: { id: clientId },
+    data
+  })
+
+  revalidatePath('/dashboard/clients')
+}
+
+export async function deleteClient(clientId: string) {
+  const { orgId } = await auth()
+  if (!orgId) throw new Error('Unauthorized')
+
+  // Verify ownership
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, businessId: orgId }
+  })
+  if (!client) throw new Error('Client not found')
+
+  await prisma.client.delete({
+    where: { id: clientId }
+  })
+
+  revalidatePath('/dashboard/clients')
+}
+
 export async function getClients(orgId: string) {
   if (!orgId) {
     return []

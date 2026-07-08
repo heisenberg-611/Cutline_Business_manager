@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getProjectDetails } from '@/modules/projects/detail-actions'
 import { NotesPanel } from '@/modules/projects/components/NotesPanel'
 import { TimePanel } from '@/modules/projects/components/TimePanel'
+import { ProjectActions } from '@/modules/projects/components/ProjectActions'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Clock, CalendarDays, Folder } from 'lucide-react'
@@ -48,6 +49,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             </div>
           </div>
         </div>
+        <ProjectActions project={{
+          id: project.id,
+          title: project.title,
+          priority: project.priority,
+          deadline: project.deadline
+        }} />
       </div>
       
       {/* Main Content Area - Split into Panels */}

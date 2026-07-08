@@ -41,6 +41,41 @@ export async function createProject(data: FormData) {
   revalidatePath('/dashboard/projects')
 }
 
+export async function updateProject(projectId: string, data: { title: string, deadline: Date | null, priority: string | null }) {
+  const { orgId } = await auth()
+  if (!orgId) throw new Error('Unauthorized')
+
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, businessId: orgId }
+  })
+  if (!project) throw new Error('Project not found')
+
+  await prisma.project.update({
+    where: { id: projectId },
+    data
+  })
+
+  revalidatePath('/dashboard/projects')
+  revalidatePath(`/dashboard/projects/${projectId}`)
+}
+
+export async function deleteProject(projectId: string) {
+  const { orgId } = await auth()
+  if (!orgId) throw new Error('Unauthorized')
+
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, businessId: orgId }
+  })
+  if (!project) throw new Error('Project not found')
+
+  await prisma.project.delete({
+    where: { id: projectId }
+  })
+
+  revalidatePath('/dashboard/projects')
+  revalidatePath('/dashboard/pipeline')
+}
+
 export async function getProjects(orgId: string) {
   if (!orgId) {
     return []

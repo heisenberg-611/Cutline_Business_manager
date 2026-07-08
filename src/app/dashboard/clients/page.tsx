@@ -1,5 +1,6 @@
 import { getClients } from '@/modules/clients/actions'
 import { ClientForm } from '@/modules/clients/components/ClientForm'
+import { ClientActions } from '@/modules/clients/components/ClientActions'
 import {
   Table,
   TableBody,
@@ -49,6 +50,7 @@ export default async function ClientsPage() {
                 <TableHead>Industry</TableHead>
                 <TableHead>Preferred Channel</TableHead>
                 <TableHead>Internal Rating</TableHead>
+                <TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -70,6 +72,17 @@ export default async function ClientsPage() {
                           className={`w-4 h-4 ${i < (client.internalRating || 0) ? 'fill-current' : 'text-zinc-200 dark:text-zinc-800'}`} 
                         />
                       ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end">
+                      <ClientActions client={{
+                        id: client.id,
+                        displayName: client.displayName,
+                        companyName: client.companyName || '',
+                        industry: client.industry || '',
+                        preferredChannel: client.preferredChannel || ''
+                      }} />
                     </div>
                   </TableCell>
                 </TableRow>
