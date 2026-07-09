@@ -15,6 +15,10 @@ const CurrencyConverter = dynamic(
   () => import('./CurrencyConverter').then(mod => mod.CurrencyConverter),
   { ssr: false }
 )
+const NotificationCenter = dynamic(
+  () => import('@/modules/notifications/components/NotificationCenter').then(m => m.NotificationCenter),
+  { ssr: false }
+)
 import { ThemeToggle } from '@/components/theme-toggle'
 
 import { 
@@ -136,13 +140,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               >
                 <Link 
                   href={item.href}
-                  className={`group flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`group relative z-0 flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     isActive 
-                    ? 'bg-zinc-200/70 text-zinc-900 dark:bg-white/10 dark:text-white' 
+                    ? 'text-zinc-900 dark:text-white' 
                     : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5'
                   } ${isCollapsed ? 'justify-center' : ''}`}
                   title={isCollapsed ? item.label : undefined}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavPill"
+                      className="absolute inset-0 bg-zinc-200/70 dark:bg-white/10 rounded-md -z-10"
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    />
+                  )}
                   <motion.div
                     variants={{
                       initial: { scale: 1 },
@@ -276,6 +287,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 New
               </button>
             )}
+            <NotificationCenter />
             <UserButton />
           </div>
         </header>

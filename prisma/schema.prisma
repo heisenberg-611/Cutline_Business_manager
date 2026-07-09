@@ -38,6 +38,7 @@ model Business {
   creditNotes     CreditNote[]
   invoiceReminders InvoiceReminder[]
   auditLogs       AuditLog[]
+  notifications   Notification[]
 
   @@map("businesses")
 }
@@ -52,6 +53,7 @@ model User {
   updatedAt DateTime             @updatedAt
 
   memberships BusinessMembership[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -450,4 +452,22 @@ model ProjectLink {
 
   @@index([projectId])
   @@map("project_links")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  businessId  String
+  userId      String
+  title       String
+  message     String
+  type        String   @default("system") // e.g., 'invoice', 'project', 'client', 'system'
+  isRead      Boolean  @default(false)
+  actionUrl   String?
+  createdAt   DateTime @default(now())
+
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, userId])
+  @@map("notifications")
 }
