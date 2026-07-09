@@ -43,6 +43,8 @@ src/
     ├── clients/          # Client CRM logic, actions, and specific components
     ├── projects/         # Pipeline, tasks, and project specific UI
     ├── financials/       # Invoicing, payments, and PDF generation
+    ├── prodp/            # Production Hub (Intake & Post-Production reviews)
+    ├── feedback/         # Client feedback forms, scoring, and testimonials
     └── settings/         # Business configuration and preferences
 ```
 * **Why this structure?** Keeping Server Actions, specialized UI components, and data fetching logic co-located within `src/modules/<feature>/` prevents the `app/` router from becoming bloated. It enforces domain-driven design, ensuring that the "Financials" team doesn't accidentally entangle code with the "Clients" team.
@@ -86,6 +88,9 @@ Floating-point arithmetic introduces microscopic rounding errors that are entire
 | **WorkflowStage** | Customizable Kanban columns/stages. | Belongs to Business. Has many Projects. |
 | **Invoice** | A financial record billing a Client. | Belongs to Business, Client. Has many LineItems, Payments. |
 | **Asset** | Licenses, fonts, or stock footage. | Belongs to Business. Linked to many Projects (M:N). |
+| **FeedbackRequest** | A secure tokenized request sent to clients. | Belongs to Business, Client, Project. Has one FeedbackResponse. |
+| **FeedbackResponse** | The submitted client feedback and scores. | Belongs to Business, FeedbackRequest. Has one Testimonial. |
+| **ReviewRequest** | A Post-Production revision request. | Belongs to Business, Client, Project. |
 
 ### Indexing & Performance
 * **Multi-tenant Indexing:** Since almost all queries filter by `businessId`, composite indexes starting with `businessId` (e.g., `@@index([businessId, clientId])`) are heavily utilized to ensure extremely fast tenant-scoped lookups.

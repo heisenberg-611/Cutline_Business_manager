@@ -107,6 +107,17 @@ Experience the elegant, professional interface of Cutline OS:
 - **Project Notes**: Capture shots, client feedback, ideas, and todos
 - **Deadline Tracking**: Never miss a deadline with visual priority indicators
 
+### 🎬 **Production Hub (ProdP)**
+- **Client Intake Forms**: Share secure links with prospective clients to capture project briefs, scripts, and raw footage links. Auto-generates a pipeline project upon submission.
+- **Post-Production Reviews**: Generate targeted review links for clients to drop revision notes and link updated assets directly into your dashboard.
+- **State Persistence**: Tabs dynamically retain their state via local storage for a seamless workflow.
+
+### ⭐ **Client Feedback System**
+- **Automated Feedback Requests**: Automatically trigger aesthetic feedback forms (`/feedback/[token]`) after final project delivery.
+- **Comprehensive Reviews**: Collect overall scores, granular dimension scores, text comments, and video testimonials.
+- **Testimonial Conversion**: 1-click conversion from private feedback into a publishable testimonial.
+- **Inbox Management**: Dedicated dashboard for reviewing, filtering, and deleting client feedback.
+
 ### 🎵 **Asset & License Vault**
 - Manage creative assets (Music, Fonts, LUTs, Plugins, Stock Footage, SFX, Vectors, Templates)
 - Track license types and expiration dates
