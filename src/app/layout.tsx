@@ -1,3 +1,4 @@
+import "../polyfill";
 import type { Metadata } from "next";
 import { Outfit, JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs'

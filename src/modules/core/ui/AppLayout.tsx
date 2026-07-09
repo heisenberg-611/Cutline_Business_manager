@@ -38,7 +38,9 @@ import {
   PinOff,
   BarChart3,
   Calculator,
-  Archive
+  Archive,
+  MessageSquare,
+  Video
 } from 'lucide-react'
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -83,10 +85,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { label: 'Dashboard', icon: Briefcase, href: '/dashboard' },
     { label: 'Pipeline', icon: Kanban, href: '/dashboard/pipeline' },
     { label: 'Projects', icon: FolderKanban, href: '/dashboard/projects' },
+    { label: 'ProdP', icon: Video, href: '/dashboard/prodp' },
     { label: 'Clients', icon: Users, href: '/dashboard/clients' },
     { label: 'Financials', icon: Wallet, href: '/dashboard/financials' },
     { label: 'Reports', icon: BarChart3, href: '/dashboard/reports' },
     { label: 'Assets', icon: Box, href: '/dashboard/assets' },
+    { label: 'Feedback', icon: MessageSquare, href: '/dashboard/feedback' },
     { label: 'Archive', icon: Archive, href: '/dashboard/archive' },
   ].filter(item => {
     if (orgRole === 'org:member') {

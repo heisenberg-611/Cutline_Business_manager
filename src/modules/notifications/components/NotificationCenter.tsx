@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
-import { Bell, Check, Loader2 } from "lucide-react"
-import { getNotifications, markAsRead, markAllAsRead } from "../actions"
+import { Bell, Check, Loader2, Trash2 } from "lucide-react"
+import { getNotifications, markAsRead, markAllAsRead, clearAllNotifications } from "../actions"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -21,11 +21,47 @@ export function NotificationCenter() {
   const [notifications, setNotifications] = React.useState<Notification[]>([])
   const [loading, setLoading] = React.useState(true)
   const [open, setOpen] = React.useState(false)
+  const prevTopNotificationId = React.useRef<string | null>(null)
+
+  const playNotificationSound = React.useCallback(() => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.15);
+      
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start();
+      osc.stop(ctx.currentTime + 0.15);
+    } catch (e) {
+      console.log("Audio playback failed or blocked", e);
+    }
+  }, [])
 
   const fetchNotifications = async () => {
     try {
       const data = await getNotifications()
       setNotifications(data)
+      
+      // Check if there is a new unread notification at the top
+      if (data.length > 0 && !data[0].isRead) {
+        if (prevTopNotificationId.current && prevTopNotificationId.current !== data[0].id) {
+          playNotificationSound()
+        }
+        prevTopNotificationId.current = data[0].id
+      } else if (data.length > 0) {
+        prevTopNotificationId.current = data[0].id
+      }
     } catch (e) {
       console.error(e)
     } finally {
@@ -35,7 +71,6 @@ export function NotificationCenter() {
 
   React.useEffect(() => {
     fetchNotifications()
-    // Poll every 30 seconds
     const interval = setInterval(fetchNotifications, 30000)
     return () => clearInterval(interval)
   }, [])
@@ -53,6 +88,11 @@ export function NotificationCenter() {
     await markAllAsRead()
   }
 
+  const handleClearAll = async () => {
+    setNotifications([])
+    await clearAllNotifications()
+  }
+
   const timeAgo = (date: Date) => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000)
     if (seconds < 60) return `${seconds}s ago`
@@ -66,10 +106,10 @@ export function NotificationCenter() {
 
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
-      <PopoverPrimitive.Trigger className="relative flex items-center justify-center p-2 rounded-md hover:bg-zinc-200/50 dark:hover:bg-white/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+      <PopoverPrimitive.Trigger className="relative flex items-center justify-center p-2.5 rounded-md hover:bg-zinc-200/50 dark:hover:bg-white/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
         <Bell className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#0A0A0A]" />
+          <span className="absolute top-2 right-2.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-zinc-950" />
         )}
       </PopoverPrimitive.Trigger>
 
@@ -84,14 +124,25 @@ export function NotificationCenter() {
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/10">
               <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Notifications</h2>
-              {unreadCount > 0 && (
-                <button 
-                  onClick={handleMarkAllAsRead}
-                  className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
-                >
-                  Mark all read
-                </button>
-              )}
+              <div className="flex gap-3">
+                {unreadCount > 0 && (
+                  <button 
+                    onClick={handleMarkAllAsRead}
+                    className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+                  >
+                    Mark all read
+                  </button>
+                )}
+                {notifications.length > 0 && (
+                  <button 
+                    onClick={handleClearAll}
+                    className="text-xs font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 flex items-center gap-1"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
             
             <div className="max-h-[350px] overflow-y-auto overflow-x-hidden p-1">

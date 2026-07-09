@@ -15,6 +15,8 @@ export function InvoiceSettingsForm({ business }: { business: any }) {
   const [subjectTemplate, setSubjectTemplate] = useState(business.emailSubjectTemplate || '')
   const [bodyTemplate, setBodyTemplate] = useState(business.emailBodyTemplate || '')
   const [paymentInstructions, setPaymentInstructions] = useState(business.paymentInstructions || '')
+  const [feedbackSubjectTemplate, setFeedbackSubjectTemplate] = useState(business.feedbackEmailSubjectTemplate || '')
+  const [feedbackBodyTemplate, setFeedbackBodyTemplate] = useState(business.feedbackEmailBodyTemplate || '')
   
   const [isPending, startTransition] = useTransition()
   
@@ -28,7 +30,9 @@ export function InvoiceSettingsForm({ business }: { business: any }) {
           invoiceSeparator: separator,
           emailSubjectTemplate: subjectTemplate,
           emailBodyTemplate: bodyTemplate,
-          paymentInstructions: paymentInstructions
+          paymentInstructions: paymentInstructions,
+          feedbackEmailSubjectTemplate: feedbackSubjectTemplate,
+          feedbackEmailBodyTemplate: feedbackBodyTemplate
         })
         alert("Settings saved successfully")
       } catch (err: any) {
@@ -39,6 +43,10 @@ export function InvoiceSettingsForm({ business }: { business: any }) {
 
   const insertPlaceholder = (placeholder: string | null) => {
     if (placeholder) setBodyTemplate((prev: string) => prev + placeholder)
+  }
+
+  const insertFeedbackPlaceholder = (placeholder: string | null) => {
+    if (placeholder) setFeedbackBodyTemplate((prev: string) => prev + placeholder)
   }
 
   return (
@@ -122,6 +130,53 @@ export function InvoiceSettingsForm({ business }: { business: any }) {
                 .replace(/\{\{total_amount\}\}/g, '$1,200.00')
                 .replace(/\{\{business_name\}\}/g, business.name)
                 .replace(/\{\{payment_link\}\}/g, 'https://pay.stripe.com/abc')
+              }
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800">
+        <CardHeader>
+          <CardTitle>Feedback Email Template Editor</CardTitle>
+          <CardDescription>Customize the email sent to request feedback from clients after final delivery.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Subject Line</Label>
+            <Input 
+              value={feedbackSubjectTemplate} 
+              onChange={(e) => setFeedbackSubjectTemplate(e.target.value)} 
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-end">
+              <Label>Email Body</Label>
+              <Select onValueChange={insertFeedbackPlaceholder} value="">
+                <SelectTrigger className="w-[180px] h-8 text-xs">
+                  <SelectValue placeholder="Insert Placeholder" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="{{client_name}}">Client Name</SelectItem>
+                  <SelectItem value="{{project_name}}">Project Name</SelectItem>
+                  <SelectItem value="{{business_name}}">Business Name</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Textarea 
+              value={feedbackBodyTemplate} 
+              onChange={(e) => setFeedbackBodyTemplate(e.target.value)} 
+              className="min-h-[200px]"
+            />
+          </div>
+
+          <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+            <h4 className="text-sm font-semibold">Live Preview</h4>
+            <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-md text-sm whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
+              {feedbackBodyTemplate
+                .replace(/\{\{client_name\}\}/g, 'Acme Corp')
+                .replace(/\{\{project_name\}\}/g, 'Awesome Video Project')
+                .replace(/\{\{business_name\}\}/g, business.name)
               }
             </div>
           </div>

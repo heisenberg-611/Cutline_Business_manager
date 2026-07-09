@@ -12,47 +12,53 @@ datasource db {
 // -----------------------------------------------------------------------------
 
 model Business {
-  id              String               @id // Matches Clerk Organization ID
+  id              String @id // Matches Clerk Organization ID
   name            String
-  defaultCurrency String               @default("USD")
-  
+  defaultCurrency String @default("USD")
+
   // Invoice & Email Settings
-  invoicePrefix        String          @default("INV")
-  invoiceSeparator     String          @default("-")
-  invoiceSequence      Int             @default(0)
-  emailSubjectTemplate String          @default("Invoice {{invoice_number}} from {{business_name}}")
-  emailBodyTemplate    String          @default("Hi {{client_name}},\n\nHere is your invoice for {{total_amount}}.\n\nDue Date: {{due_date}}\n\nThank you!")
-  paymentInstructions  String          @default("Please send payment via bank transfer to:\nBank: \nAccount Number: \nRouting Number: ")
+  invoicePrefix                String @default("INV")
+  invoiceSeparator             String @default("-")
+  invoiceSequence              Int    @default(0)
+  emailSubjectTemplate         String @default("Invoice {{invoice_number}} from {{business_name}}")
+  emailBodyTemplate            String @default("Hi {{client_name}},\n\nHere is your invoice for {{total_amount}}.\n\nDue Date: {{due_date}}\n\nThank you!")
+  paymentInstructions          String @default("Please send payment via bank transfer to:\nBank: \nAccount Number: \nRouting Number: ")
+  feedbackEmailSubjectTemplate String @default("We'd love your feedback on {{project_name}}")
+  feedbackEmailBodyTemplate    String @default("Hi {{client_name}},\n\nYour project \"{{project_name}}\" has just been delivered by {{business_name}}.\nWe hope you love the final result!\n\nCould you take 2 minutes to let us know how we did? Your feedback helps us improve and serve you better.\n\nThanks for trusting us with your project.\n- The {{business_name}} Team")
 
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  memberships     BusinessMembership[]
-  clients         Client[]
-  projects        Project[]
+  memberships       BusinessMembership[]
+  clients           Client[]
+  projects          Project[]
   workflowTemplates WorkflowTemplate[]
-  invoices        Invoice[]
-  assets          Asset[]
-  payments        Payment[]
-  expenses        Expense[]
-  creditNotes     CreditNote[]
-  invoiceReminders InvoiceReminder[]
-  auditLogs       AuditLog[]
-  notifications   Notification[]
+  invoices          Invoice[]
+  assets            Asset[]
+  payments          Payment[]
+  expenses          Expense[]
+  creditNotes       CreditNote[]
+  invoiceReminders  InvoiceReminder[]
+  auditLogs         AuditLog[]
+  notifications     Notification[]
+  feedbackRequests  FeedbackRequest[]
+  feedbackResponses FeedbackResponse[]
+  testimonials      Testimonial[]
+  reviewRequests    ReviewRequest[]
 
   @@map("businesses")
 }
 
 model User {
-  id        String               @id // Matches Clerk User ID
-  email     String               @unique
+  id        String   @id // Matches Clerk User ID
+  email     String   @unique
   firstName String?
   lastName  String?
   imageUrl  String?
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  memberships BusinessMembership[]
+  memberships   BusinessMembership[]
   notifications Notification[]
 
   @@map("users")
@@ -62,12 +68,12 @@ model BusinessMembership {
   id         String   @id @default(cuid())
   businessId String
   userId     String
-  role       String   // e.g., "org:admin", "org:member"
+  role       String // e.g., "org:admin", "org:member"
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([businessId, userId])
   @@index([userId])
@@ -92,38 +98,44 @@ model Client {
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
-  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  projects Project[]
-  invoices Invoice[]
+  business         Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  projects         Project[]
+  invoices         Invoice[]
+  feedbackRequests FeedbackRequest[]
+  testimonials     Testimonial[]
+  reviewRequests   ReviewRequest[]
 
   @@index([businessId]) // Critical for tenant data isolation performance
   @@map("clients")
 }
 
 model Project {
-  id         String    @id @default(cuid())
-  businessId String
-  clientId   String
-  title      String
-  type       String?   // e.g., "YouTube Long-Form", "Corporate Ad"
-  priority   String?
-  deadline   DateTime?
+  id            String    @id @default(cuid())
+  businessId    String
+  clientId      String
+  title         String
+  type          String? // e.g., "YouTube Long-Form", "Corporate Ad"
+  priority      String?
+  deadline      DateTime?
   statusStageId String?
-  orderIndex Int       @default(0)
-  isArchived Boolean   @default(false)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  orderIndex    Int       @default(0)
+  isArchived    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  statusStage WorkflowStage? @relation(fields: [statusStageId], references: [id])
-  stageHistory ProjectStageHistory[]
-  invoices Invoice[]
-  notes    Note[]
-  links    ProjectLink[]
-  timeEntries TimeEntry[]
-  assets   ProjectAsset[]
-  expenses Expense[]
+  business         Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client           Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  statusStage      WorkflowStage?        @relation(fields: [statusStageId], references: [id])
+  stageHistory     ProjectStageHistory[]
+  invoices         Invoice[]
+  notes            Note[]
+  links            ProjectLink[]
+  timeEntries      TimeEntry[]
+  assets           ProjectAsset[]
+  expenses         Expense[]
+  feedbackRequests FeedbackRequest[]
+  testimonials     Testimonial[]
+  reviewRequests   ReviewRequest[]
 
   @@index([businessId])
   @@index([clientId])
@@ -143,7 +155,7 @@ model WorkflowTemplate {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
   stages   WorkflowStage[]
 
   @@index([businessId])
@@ -151,14 +163,14 @@ model WorkflowTemplate {
 }
 
 model WorkflowStage {
-  id             String   @id @default(cuid())
+  id             String  @id @default(cuid())
   templateId     String
   name           String
   orderIndex     Int
   estimatedHours Int?
-  billingTrigger Boolean  @default(false)
+  billingTrigger Boolean @default(false)
 
-  template WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  template WorkflowTemplate      @relation(fields: [templateId], references: [id], onDelete: Cascade)
   projects Project[]
   history  ProjectStageHistory[]
 
@@ -204,46 +216,46 @@ enum PaymentMethod {
 }
 
 model Invoice {
-  id              String         @id @default(cuid())
-  businessId      String
-  clientId        String
-  projectId       String?
-  
-  invoiceNumber   String         // e.g. CUT-2026-0042
-  currency        String         @default("USD")
-  
-  // Money in cents
-  subtotalCents   Int            @default(0)
-  taxRateBps      Int            @default(0) // Basis points e.g. 2000 = 20%
-  taxAmountCents  Int            @default(0)
-  totalCents      Int            @default(0)
-  amountPaidCents Int            @default(0)
-  amountDueCents  Int            @default(0)
-  
-  // For reporting
-  fxRateSnapshot  Decimal?       @db.Decimal(10, 6)
-  
-  status          InvoiceStatus  @default(DRAFT)
-  notes           String?        @db.Text
-  pdfUrl          String?
-  
-  issuedAt        DateTime?
-  dueDate         DateTime?
-  paidAt          DateTime?
-  emailSentAt     DateTime?
-  reminderCount   Int            @default(0)
-  
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id         String  @id @default(cuid())
+  businessId String
+  clientId   String
+  projectId  String?
 
-  business        Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  client          Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  project         Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  
-  lineItems       InvoiceLineItem[]
-  payments        Payment[]
-  creditNotes     CreditNote[]
-  reminders       InvoiceReminder[]
+  invoiceNumber String // e.g. CUT-2026-0042
+  currency      String @default("USD")
+
+  // Money in cents
+  subtotalCents   Int @default(0)
+  taxRateBps      Int @default(0) // Basis points e.g. 2000 = 20%
+  taxAmountCents  Int @default(0)
+  totalCents      Int @default(0)
+  amountPaidCents Int @default(0)
+  amountDueCents  Int @default(0)
+
+  // For reporting
+  fxRateSnapshot Decimal? @db.Decimal(10, 6)
+
+  status InvoiceStatus @default(DRAFT)
+  notes  String?       @db.Text
+  pdfUrl String?
+
+  issuedAt      DateTime?
+  dueDate       DateTime?
+  paidAt        DateTime?
+  emailSentAt   DateTime?
+  reminderCount Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project  Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  lineItems   InvoiceLineItem[]
+  payments    Payment[]
+  creditNotes CreditNote[]
+  reminders   InvoiceReminder[]
 
   @@unique([businessId, invoiceNumber])
   @@index([businessId])
@@ -253,38 +265,38 @@ model Invoice {
 }
 
 model InvoiceLineItem {
-  id          String   @id @default(cuid())
+  id          String @id @default(cuid())
   invoiceId   String
   description String
-  quantity    Int      @default(1)
-  amountCents Int      // Price per unit in cents
-  
-  // To trace back to origin
-  sourceType  String?  @default("manual") // manual, milestone, revision
-  sourceId    String?
+  quantity    Int    @default(1)
+  amountCents Int // Price per unit in cents
 
-  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  // To trace back to origin
+  sourceType String? @default("manual") // manual, milestone, revision
+  sourceId   String?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@index([invoiceId])
   @@map("invoice_line_items")
 }
 
 model Payment {
-  id                  String        @id @default(cuid())
-  businessId          String
-  invoiceId           String
-  amountCents         Int
-  method              PaymentMethod
-  reference           String?       // Check number, Stripe TX ID
-  
-  reconciledAt        DateTime?
-  reconciledByUserId  String?
-  
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  id          String        @id @default(cuid())
+  businessId  String
+  invoiceId   String
+  amountCents Int
+  method      PaymentMethod
+  reference   String? // Check number, Stripe TX ID
 
-  business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  invoice             Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  reconciledAt       DateTime?
+  reconciledByUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invoice  Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
   @@index([invoiceId])
@@ -292,23 +304,23 @@ model Payment {
 }
 
 model Expense {
-  id              String    @id @default(cuid())
-  businessId      String
-  projectId       String?
-  
-  amountCents     Int
-  currency        String    @default("USD")
-  fxRateSnapshot  Decimal?  @db.Decimal(10, 6)
-  
-  category        String    // e.g. "Software", "Travel", "Contractor"
-  description     String?
-  dateIncurred    DateTime  @default(now())
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id         String  @id @default(cuid())
+  businessId String
+  projectId  String?
 
-  business        Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  project         Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  amountCents    Int
+  currency       String   @default("USD")
+  fxRateSnapshot Decimal? @db.Decimal(10, 6)
+
+  category     String // e.g. "Software", "Travel", "Contractor"
+  description  String?
+  dateIncurred DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  project  Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
 
   @@index([businessId])
   @@index([projectId])
@@ -316,17 +328,17 @@ model Expense {
 }
 
 model CreditNote {
-  id                  String    @id @default(cuid())
-  businessId          String
-  originalInvoiceId   String
-  
-  amountCents         Int
-  reason              String
-  
-  createdAt           DateTime  @default(now())
+  id                String @id @default(cuid())
+  businessId        String
+  originalInvoiceId String
 
-  business            Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  originalInvoice     Invoice   @relation(fields: [originalInvoiceId], references: [id], onDelete: Cascade)
+  amountCents Int
+  reason      String
+
+  createdAt DateTime @default(now())
+
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  originalInvoice Invoice  @relation(fields: [originalInvoiceId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
   @@index([originalInvoiceId])
@@ -334,17 +346,17 @@ model CreditNote {
 }
 
 model InvoiceReminder {
-  id          String   @id @default(cuid())
-  businessId  String
-  invoiceId   String
-  
-  tone        String   // 'gentle', 'firm', 'final'
-  channel     String   @default("email")
-  
-  createdAt   DateTime @default(now())
+  id         String @id @default(cuid())
+  businessId String
+  invoiceId  String
 
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  tone    String // 'gentle', 'firm', 'final'
+  channel String @default("email")
+
+  createdAt DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invoice  Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
   @@index([invoiceId])
@@ -352,17 +364,17 @@ model InvoiceReminder {
 }
 
 model AuditLog {
-  id            String   @id @default(cuid())
-  businessId    String
-  entityType    String   // 'Invoice', 'Payment'
-  entityId      String
-  action        String   // 'CREATE', 'UPDATE', 'VOID', 'PAYMENT_RECORDED'
-  actorUserId   String?
-  metadataJson  String?  @db.Text
-  
-  createdAt     DateTime @default(now())
+  id           String  @id @default(cuid())
+  businessId   String
+  entityType   String // 'Invoice', 'Payment'
+  entityId     String
+  action       String // 'CREATE', 'UPDATE', 'VOID', 'PAYMENT_RECORDED'
+  actorUserId  String?
+  metadataJson String? @db.Text
 
-  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
   @@index([entityType, entityId])
@@ -376,30 +388,30 @@ model AuditLog {
 model Note {
   id        String   @id @default(cuid())
   projectId String
-  type      String   // 'shot', 'client', 'idea', 'todo'
+  type      String // 'shot', 'client', 'idea', 'todo'
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@map("notes")
 }
 
 model TimeEntry {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   projectId       String
   userId          String?
   startedAt       DateTime?
   endedAt         DateTime?
-  durationMinutes Int      @default(0)
-  isBillable      Boolean  @default(true)
-  source          String   @default("manual") // manual, stopwatch
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  durationMinutes Int       @default(0)
+  isBillable      Boolean   @default(true)
+  source          String    @default("manual") // manual, stopwatch
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@map("time_entries")
@@ -410,19 +422,19 @@ model TimeEntry {
 // -----------------------------------------------------------------------------
 
 model Asset {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   businessId  String
-  type        String   // 'Music', 'Font', 'LUT', 'Plugin', 'Stock Footage', 'SFX', 'Motion Graphics'
+  type        String // 'Music', 'Font', 'LUT', 'Plugin', 'Stock Footage', 'SFX', 'Motion Graphics'
   name        String
   vendor      String?
   licenseType String?
   expiresAt   DateTime?
-  cost        Int      @default(0) // stored in cents
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  cost        Int       @default(0) // stored in cents
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  projects    ProjectAsset[]
+  business Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  projects ProjectAsset[]
 
   @@index([businessId])
   @@map("assets")
@@ -434,8 +446,8 @@ model ProjectAsset {
   assetId   String
   createdAt DateTime @default(now())
 
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  asset   Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, assetId])
   @@index([projectId])
@@ -450,26 +462,127 @@ model ProjectLink {
   label     String
   createdAt DateTime @default(now())
 
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@map("project_links")
 }
 
 model Notification {
-  id          String   @id @default(cuid())
-  businessId  String
-  userId      String
-  title       String
-  message     String
-  type        String   @default("system") // e.g., 'invoice', 'project', 'client', 'system'
-  isRead      Boolean  @default(false)
-  actionUrl   String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  businessId String
+  userId     String
+  title      String
+  message    String
+  type       String   @default("system") // e.g., 'invoice', 'project', 'client', 'system'
+  isRead     Boolean  @default(false)
+  actionUrl  String?
+  createdAt  DateTime @default(now())
 
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([businessId, userId])
   @@map("notifications")
+}
+
+// -----------------------------------------------------------------------------
+// CLIENT FEEDBACK & TESTIMONIALS
+// -----------------------------------------------------------------------------
+
+model FeedbackRequest {
+  id               String    @id @default(cuid())
+  businessId       String
+  projectId        String
+  clientId         String
+  token            String    @unique
+  status           String    @default("PENDING") // PENDING, COMPLETED, EXPIRED
+  sentAt           DateTime  @default(now())
+  responseDeadline DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  business Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  project  Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  client   Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  response FeedbackResponse?
+
+  @@index([businessId])
+  @@index([projectId])
+  @@index([clientId])
+  @@index([token])
+  @@map("feedback_requests")
+}
+
+model FeedbackResponse {
+  id               String   @id @default(cuid())
+  businessId       String
+  requestId        String   @unique
+  overallScore     Int
+  dimensionScores  Json?
+  commentText      String?  @db.Text
+  videoUrl         String?
+  consentToPublish Boolean  @default(false)
+  submittedAt      DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  business    Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  request     FeedbackRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  testimonial Testimonial?
+
+  @@index([businessId])
+  @@map("feedback_responses")
+}
+
+model Testimonial {
+  id                 String    @id @default(cuid())
+  businessId         String
+  feedbackResponseId String    @unique
+  projectId          String
+  clientId           String
+  displayText        String    @db.Text
+  videoRef           String?
+  isPublished        Boolean   @default(false)
+  publishedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  business         Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  feedbackResponse FeedbackResponse @relation(fields: [feedbackResponseId], references: [id], onDelete: Cascade)
+  project          Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  client           Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([projectId])
+  @@index([clientId])
+  @@map("testimonials")
+}
+
+// -----------------------------------------------------------------------------
+// POST-PRODUCTION REVIEWS
+// -----------------------------------------------------------------------------
+
+model ReviewRequest {
+  id             String    @id @default(cuid())
+  businessId     String
+  projectId      String
+  clientId       String
+  token          String    @unique
+  draftLink      String?   
+  status         String    @default("PENDING") // PENDING, REPLIED
+  clientNotes    String?   @db.Text
+  clientLinks    String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([projectId])
+  @@index([clientId])
+  @@index([token])
+  @@map("review_requests")
 }

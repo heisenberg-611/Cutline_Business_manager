@@ -45,6 +45,8 @@ export async function updateInvoiceSettings(data: {
   emailSubjectTemplate: string
   emailBodyTemplate: string
   paymentInstructions: string
+  feedbackEmailSubjectTemplate: string
+  feedbackEmailBodyTemplate: string
 }) {
   const { orgId } = await auth()
   if (!orgId) throw new Error('Unauthorized')

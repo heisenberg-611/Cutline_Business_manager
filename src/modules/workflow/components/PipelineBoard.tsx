@@ -4,6 +4,7 @@ import React, { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@clerk/nextjs'
 import { updateProjectStage, updateProjectOrder } from '../actions'
+import { FeedbackPromptModal } from './FeedbackPromptModal'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { format } from 'date-fns'
@@ -90,6 +91,10 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
   
   // Need local state for optimistic UI updates with dnd
   const [projects, setProjects] = useState(initialProjects)
+  
+  // Feedback Modal State
+  const [feedbackPromptOpen, setFeedbackPromptOpen] = useState(false)
+  const [completedProject, setCompletedProject] = useState<Project | null>(null)
   
   // Sync if props change
   useEffect(() => {
@@ -182,6 +187,15 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
     startTransition(() => {
       updateProjectOrder(updates)
     })
+
+    // Check if moved to terminal stage to trigger feedback prompt
+    const destStage = stages.find(s => s.id === destStageId)
+    if (destStage && (destStage.name.toLowerCase().includes('final delivery') || destStage.name.toLowerCase().includes('deliver'))) {
+      if (draggedProject && draggedProject.client) {
+        setCompletedProject(draggedProject)
+        setFeedbackPromptOpen(true)
+      }
+    }
   }
 
   if (!isMounted) return null
@@ -277,6 +291,14 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                                 startTransition(() => {
                                   updateProjectStage(project.id, val)
                                 })
+                                
+                                const destStage = stages.find(s => s.id === val)
+                                if (destStage && (destStage.name.toLowerCase().includes('final delivery') || destStage.name.toLowerCase().includes('deliver'))) {
+                                  if (project.client) {
+                                    setCompletedProject(project)
+                                    setFeedbackPromptOpen(true)
+                                  }
+                                }
                               }}
                               disabled={isPending || orgRole === 'org:member'}
                             >
@@ -303,6 +325,17 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
         ))}
       </div>
       </DragDropContext>
+
+      {isMounted && completedProject && completedProject.client && (
+        <FeedbackPromptModal 
+          open={feedbackPromptOpen} 
+          onOpenChange={setFeedbackPromptOpen} 
+          projectId={completedProject.id}
+          clientId={(completedProject as any).clientId || completedProject.client?.displayName}
+          clientHasEmail={!!(completedProject as any).client?.email}
+          projectName={completedProject.title}
+        />
+      )}
     </div>
   )
 }

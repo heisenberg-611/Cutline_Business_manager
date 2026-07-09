@@ -5,6 +5,7 @@ import { render } from '@react-email/render'
 import { InvoiceEmail } from '@/emails/invoice-email'
 import prisma from '@/modules/core/db/prisma'
 import React from 'react'
+import { getAppUrl } from '@/lib/utils'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -23,7 +24,7 @@ export async function sendDynamicInvoiceEmail(invoiceId: string, businessId: str
 
   const business = invoice.business
   const client = invoice.client
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const appUrl = getAppUrl()
   const paymentLink = `${appUrl}/invoices/${invoice.id}/pay` // Example link
 
   // Formatter for currency

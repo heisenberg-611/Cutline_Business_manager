@@ -62,6 +62,21 @@ export async function markAllAsRead() {
   })
 }
 
+export async function clearAllNotifications() {
+  const { userId, orgId } = await auth()
+  
+  if (!userId || !orgId) {
+    throw new Error("Unauthorized")
+  }
+
+  await prisma.notification.deleteMany({
+    where: {
+      userId,
+      businessId: orgId
+    }
+  })
+}
+
 export async function createNotification(data: {
   userId: string
   businessId: string

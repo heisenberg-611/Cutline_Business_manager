@@ -15,7 +15,10 @@ export default async function DashboardPage() {
 
   // Fetch metrics data sequentially to avoid connection pool exhaustion
   const projects = await prisma.project.findMany({
-    where: { businessId: orgId },
+    where: { 
+      businessId: orgId,
+      isArchived: false 
+    },
     include: { statusStage: true, client: true },
     orderBy: { createdAt: 'desc' }
   })
