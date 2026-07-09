@@ -13,18 +13,18 @@ export default async function DashboardPage() {
     redirect('/dashboard/select-business')
   }
 
-  // Fetch metrics data
-  const [projects, invoices, studioHealth] = await Promise.all([
-    prisma.project.findMany({
-      where: { businessId: orgId },
-      include: { statusStage: true, client: true },
-      orderBy: { createdAt: 'desc' }
-    }),
-    prisma.invoice.findMany({
-      where: { businessId: orgId }
-    }),
-    getStudioHealth(orgId)
-  ])
+  // Fetch metrics data sequentially to avoid connection pool exhaustion
+  const projects = await prisma.project.findMany({
+    where: { businessId: orgId },
+    include: { statusStage: true, client: true },
+    orderBy: { createdAt: 'desc' }
+  })
+  
+  const invoices = await prisma.invoice.findMany({
+    where: { businessId: orgId }
+  })
+  
+  const studioHealth = await getStudioHealth(orgId)
 
   const activeProjectsCount = projects.filter(p => !p.statusStage?.name.toLowerCase().includes('final') && !p.statusStage?.name.toLowerCase().includes('archive')).length
 

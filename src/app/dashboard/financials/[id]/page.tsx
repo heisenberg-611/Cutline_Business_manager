@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import prisma from '@/modules/core/db/prisma'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Download, Mail, Ban, Edit } from 'lucide-react'
+import { ArrowLeft, Download, Mail, Ban, Edit, Check } from 'lucide-react'
 import { RecordPaymentDialog } from '@/modules/financials/components/RecordPaymentDialog'
 import { sendInvoice, deleteInvoice } from '@/modules/financials/actions'
 import { Badge } from '@/components/ui/badge'
@@ -47,7 +47,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-5">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/financials">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -75,7 +75,11 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               await sendInvoice(invoice.id)
             }}>
               <Button type="submit" variant="outline" className="text-zinc-500">
-                <Mail className="h-4 w-4 mr-2" /> Mark as Sent
+                {invoice.client.email ? (
+                  <><Mail className="h-4 w-4 mr-2" /> Mark as Sent</>
+                ) : (
+                  <><Check className="h-4 w-4 mr-2" /> Mark as Sent (No Email)</>
+                )}
               </Button>
             </form>
           )}

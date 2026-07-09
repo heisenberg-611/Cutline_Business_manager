@@ -45,7 +45,7 @@ export function NewProjectForm({ clients }: { clients: Client[] }) {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
         <Link href="/dashboard/projects">
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>

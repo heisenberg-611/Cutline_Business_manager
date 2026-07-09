@@ -32,7 +32,7 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
         <Link href={`/dashboard/financials/${id}`}>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>

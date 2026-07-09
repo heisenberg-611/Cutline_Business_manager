@@ -107,11 +107,16 @@ export async function getStudioHealth(businessId: string) {
 
   // Simple DSO calculation: (Accounts Receivable / Total Credit Sales) * Number of Days
   // For MVP, just returning basic metrics.
-  
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { defaultCurrency: true }
+  })
+
   return {
     revenueMTD: cashRevenue,
     outstanding: totalOutstanding,
     overdue: totalOverdue,
-    dso: 0 // Placeholder
+    dso: 0, // Placeholder
+    currency: business?.defaultCurrency || 'USD'
   }
 }

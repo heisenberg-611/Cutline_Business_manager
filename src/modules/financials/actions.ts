@@ -246,7 +246,7 @@ export async function sendInvoice(id: string) {
       data: { 
         status: 'SENT', 
         issuedAt: new Date(),
-        emailSentAt: new Date()
+        emailSentAt: existing.client.email ? new Date() : null
       }
     })
 
