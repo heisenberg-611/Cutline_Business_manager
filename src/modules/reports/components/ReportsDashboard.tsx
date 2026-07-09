@@ -23,7 +23,7 @@ type ReportData = {
   }
 }
 
-export function ReportsDashboard() {
+export function ReportsDashboard({ defaultCurrency = 'USD' }: { defaultCurrency?: string }) {
   // Default to the last 30 days
   const today = new Date()
   const thirtyDaysAgo = new Date()
@@ -35,7 +35,7 @@ export function ReportsDashboard() {
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<ReportData | null>(null)
 
-  const formatMoney = (cents: number, currency: string = 'USD') => {
+  const formatMoney = (cents: number, currency: string = defaultCurrency) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency,

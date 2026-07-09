@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { ReportsDashboard } from '@/modules/reports/components/ReportsDashboard'
+import prisma from '@/modules/core/db/prisma'
 
 export default async function ReportsPage() {
   const { orgId } = await auth()
@@ -8,6 +9,11 @@ export default async function ReportsPage() {
   if (!orgId) {
     redirect('/dashboard/select-business')
   }
+  const business = await prisma.business.findUnique({
+    where: { id: orgId },
+    select: { defaultCurrency: true }
+  })
+  const defaultCurrency = business?.defaultCurrency || 'USD'
 
   return (
     <div className="container py-8 max-w-6xl mx-auto h-[calc(100vh-4rem)] overflow-y-auto">
@@ -18,7 +24,7 @@ export default async function ReportsPage() {
         </p>
       </div>
 
-      <ReportsDashboard />
+      <ReportsDashboard defaultCurrency={defaultCurrency} />
     </div>
   )
 }

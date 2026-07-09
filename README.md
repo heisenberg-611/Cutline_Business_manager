@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/cutline-logo.png" alt="Cutline OS" width="600" style="border-radius: 12px; margin-bottom: 20px;" />
+  <img src="public/cutline-logo.JPG" alt="Cutline OS" width="600" style="border-radius: 12px; margin-bottom: 20px;" />
 </div>
 
 # Cutline OS
@@ -12,7 +12,14 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Aiven-336791?logo=postgresql&logoColor=white)](https://aiven.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/License-Proprietary-red)](#-license)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+
+<a href="https://www.cutlin.tech">
+  <img src="https://img.shields.io/badge/🚀_Visit_Cutline_OS-4F46E5?style=for-the-badge&logoColor=white" alt="Visit Cutline OS" />
+</a>
+
+---
 
 [View Demo](#-screenshots) • [Get Started](#-getting-started) • [📖 Cutline for Dummies](CUTLINE_FOR_DUMMIES.md) • [Features](#-features) • [Tech Stack](#-tech-stack)
 
@@ -24,17 +31,45 @@
 
 Experience the elegant, professional interface of Cutline OS:
 
-<div align="center">
-
-| Dashboard | Clients Management |
-|-----------|-------------------|
-| [![Dashboard View](https://imgur.com/WLuuGat.jpg)](https://imgur.com/WLuuGat) | [![Clients View](https://imgur.com/t5FmvqD.jpg)](https://imgur.com/t5FmvqD) |
-
-| Projects Pipeline | Invoicing System |
-|------------------|-----------------|
-| [![Pipeline View](https://imgur.com/lmOMILg.jpg)](https://imgur.com/lmOMILg) | [![Invoicing View](https://imgur.com/lBXfGzd.jpg)](https://imgur.com/lBXfGzd) |
-
-</div>
+<table width="100%">
+  <tr>
+    <td width="50%" align="center">
+      <img src="public/SS1.JPG" width="100%" />
+      <br><b>Dashboard</b>
+    </td>
+    <td width="50%" align="center">
+      <img src="public/SS2.JPG" width="100%" />
+      <br><b>Clients Management</b>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="public/SS3.JPG" width="100%" />
+      <br><b>Projects Pipeline</b>
+    </td>
+    <td width="50%" align="center">
+      <img src="public/SS4.JPG" width="100%" />
+      <br><b>Invoicing System</b>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="public/SS5.JPG" width="100%" />
+      <br><b>Invoice PDF</b>
+    </td>
+    <td width="50%" align="center">
+      <img src="public/SS6.JPG" width="100%" />
+      <br><b>Assets Management</b>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="public/SS7.JPG" width="100%" />
+      <br><b>Reports Dashboard</b>
+    </td>
+    <td width="50%"></td>
+  </tr>
+</table>
 
 ---
 
@@ -268,13 +303,13 @@ Building Cutline OS has been an incredible journey. Here are some of the key tec
 
 ## 🤝 Contributing
 
-This is a proprietary project. Internal contributions only.
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/heisenberg-611/Cutline_Business_manager/issues).
 
 ---
 
 ## 📄 License
 
-Proprietary Software. All rights reserved. © 2026 Dhrubojyoti
+This project is [MIT](LICENSE) licensed. © 2026 Dhrubojyoti
 
 ---
 
