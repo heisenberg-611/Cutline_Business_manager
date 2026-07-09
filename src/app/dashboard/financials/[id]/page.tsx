@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import prisma from '@/modules/core/db/prisma'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Download, Mail, Ban, Edit, Check } from 'lucide-react'
+import { ArrowLeft, Download, Mail, Ban, Edit, Check, ExternalLink } from 'lucide-react'
 import { RecordPaymentDialog } from '@/modules/financials/components/RecordPaymentDialog'
 import { sendInvoice, deleteInvoice } from '@/modules/financials/actions'
 import { Badge } from '@/components/ui/badge'
@@ -100,8 +100,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           
           {/* Fallback: server-side PDF (opens in new tab via API route) */}
           <a href={`/api/invoices/${invoice.id}/pdf`} target="_blank" rel="noreferrer">
-            <Button variant="ghost" size="sm" className="text-zinc-400 text-xs">
-              Open PDF
+            <Button variant="outline" className="text-zinc-500">
+              <ExternalLink className="h-4 w-4 mr-2" /> Open PDF
             </Button>
           </a>
           
