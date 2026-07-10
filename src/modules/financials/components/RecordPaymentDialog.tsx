@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
-export function RecordPaymentDialog({ invoiceId, amountDueCents }: { invoiceId: string, amountDueCents: number }) {
+export function RecordPaymentDialog({ invoiceId, amountDueCents, currency = 'USD' }: { invoiceId: string, amountDueCents: number, currency?: string }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [amount, setAmount] = useState((amountDueCents / 100).toFixed(2))
@@ -50,7 +50,7 @@ export function RecordPaymentDialog({ invoiceId, amountDueCents }: { invoiceId: 
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label>Amount ($)</Label>
+            <Label>Amount ({currency})</Label>
             <Input 
               type="number" 
               step="0.01" 

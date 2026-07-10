@@ -106,7 +106,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           </a>
           
           {['SENT', 'PARTIALLY_PAID', 'OVERDUE'].includes(invoice.status) && invoice.amountDueCents > 0 && (
-            <RecordPaymentDialog invoiceId={invoice.id} amountDueCents={invoice.amountDueCents} />
+            <RecordPaymentDialog invoiceId={invoice.id} amountDueCents={invoice.amountDueCents} currency={invoice.currency} />
           )}
         </div>
       </div>

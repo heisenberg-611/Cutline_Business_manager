@@ -145,4 +145,7 @@ async function handler(req: NextRequest) {
   }
 }
 
-export const POST = verifySignatureAppRouter(handler)
+export const POST = async (req: NextRequest) => {
+  const verifier = verifySignatureAppRouter(handler)
+  return verifier(req)
+}
