@@ -178,6 +178,14 @@ export async function getStudioHealth(businessId: string) {
     select: { defaultCurrency: true }
   })
 
+  // DSO Calculation (Days Sales Outstanding)
+  // Formula: (Accounts Receivable / Total Credit Sales) * Number of Days
+  // Using last 90 days of accrual revenue as credit sales
+  const ninetyDaysAgo = new Date()
+  ninetyDaysAgo.setDate(now.getDate() - 90)
+  const { accrualRevenue: revenue90d } = await getRevenueSummary(businessId, ninetyDaysAgo, now)
+  const dso = revenue90d > 0 ? (totalOutstanding / revenue90d) * 90 : 0
+
   return {
     revenueMTD: cashRevenue,
     revenueLastMonth: lastMonthRevenue,
@@ -187,6 +195,7 @@ export async function getStudioHealth(businessId: string) {
     utilization,
     atRiskCount,
     avgFeedback,
+    dso,
     currency: business?.defaultCurrency || 'USD'
   }
 }

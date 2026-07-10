@@ -35,12 +35,26 @@ export function RecentFeedback({ feedback }: { feedback: Feedback[] }) {
               </p>
             </div>
             <div className="flex items-center gap-0.5">
-              {[1, 2, 3, 4, 5].map(star => (
-                <Star
-                  key={star}
-                  className={`w-3.5 h-3.5 ${star <= item.overallScore ? 'fill-amber-400 text-amber-400' : 'fill-zinc-200 text-zinc-200 dark:fill-zinc-800 dark:text-zinc-800'}`}
-                />
-              ))}
+              {[1, 2, 3, 4, 5].map(star => {
+                const score = item.overallScore / 2
+                const isFull = score >= star
+                const isHalf = !isFull && score >= star - 0.5
+                
+                if (isFull) {
+                  return <Star key={star} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                } else if (isHalf) {
+                  return (
+                    <div key={star} className="relative w-3.5 h-3.5">
+                      <Star className="absolute inset-0 w-3.5 h-3.5 fill-zinc-200 text-zinc-200 dark:fill-zinc-800 dark:text-zinc-800" />
+                      <div className="absolute inset-0 overflow-hidden w-[50%]">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 max-w-none" />
+                      </div>
+                    </div>
+                  )
+                } else {
+                  return <Star key={star} className="w-3.5 h-3.5 fill-zinc-200 text-zinc-200 dark:fill-zinc-800 dark:text-zinc-800" />
+                }
+              })}
             </div>
           </div>
           {item.commentText && (
