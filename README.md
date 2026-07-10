@@ -81,12 +81,14 @@ Experience the elegant, professional interface of Cutline OS:
 
 ### 💼 **Professional Dashboard**
 - **Business Health Dashboard**: Real-time insights into MTD Revenue, Days Sales Outstanding (DSO), Overdue Invoices, and At-Risk Deadlines
+- **Data Export & Reporting**: 1-click comprehensive CSV exports for both Projects and Invoices
 - **Global Command Palette** (Cmd+K): Instantly search and navigate across projects, clients, invoices, and assets
 - **Calm, Professional UI**: Inspired by Linear and Stripe with a true-gray aesthetic
 
 ### 👥 **CRM & Client Management**
 - Comprehensive client directory with full contact information
 - Track preferred communication channels (Email, Slack, WhatsApp)
+- **Sequential IDs**: Clean, human-readable tracking IDs (`PRJ-XXX`, `CL-XXX`) automatically generated for precise record keeping
 - **5-Star Rating System**: Rate clients for lifetime value analysis, with smart sorting bringing your top-rated clients to the top of the list instantly.
 - Client performance insights and project history
 
@@ -322,9 +324,25 @@ Building Cutline OS has been an incredible journey. Here are some of the key tec
 
 ---
 
-## 🤝 Contributing
+## 🤝 Issues & Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/heisenberg-611/Cutline_Business_manager/issues).
+We welcome contributions from the community! Whether you want to fix a bug, improve documentation, or propose a new feature, your help is highly appreciated.
+
+### Reporting Issues
+If you encounter any bugs, have feature requests, or need help, please [open an issue](https://github.com/heisenberg-611/Cutline_Business_manager/issues). When reporting an issue, please include:
+- A clear, descriptive title
+- Steps to reproduce the bug
+- Expected vs. actual behavior
+- Relevant screenshots or console logs
+
+### How to Contribute
+1. **Fork the repository** and create your branch from `main`.
+2. **Install dependencies** (`npm install`) and ensure the local development environment works.
+3. **Make your changes** following the project's coding standards.
+4. **Test your changes** to ensure no existing functionality breaks.
+5. **Submit a Pull Request** with a clear description of the changes you've made.
+
+Please read our [DOCUMENTATION.md](DOCUMENTATION.md) before getting started to understand the architecture and conventions used in this project.
 
 ---
 

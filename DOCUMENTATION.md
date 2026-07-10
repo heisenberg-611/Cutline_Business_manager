@@ -78,6 +78,10 @@ Floating-point arithmetic introduces microscopic rounding errors that are entire
 * **Soft Deletes:** Financial records (Invoices, Payments) should rarely be hard-deleted. We rely on statuses (e.g., `VOID`, `DRAFT`) to filter records, ensuring historical financial ledgers remain intact.
 * **Cascading:** We use `onDelete: Cascade` carefully. Deleting a `Business` wipes all associated data for GDPR compliance, but deleting a `Client` might require re-assigning or voiding invoices rather than deleting them, depending on the strict business rules.
 
+#### Sequential Custom IDs
+* While all tables use standard `cuid()` for primary keys to ensure global uniqueness and prevent enumeration attacks, we generate human-readable sequential IDs (`displayId`) for client-facing entities like Projects (`PRJ-001`) and Clients (`CL-001`).
+* This requires counting existing records scoped to the `businessId` during creation to increment the ID properly, ensuring each tenant has their own clean sequence.
+
 ### Core Entities Overview
 
 | Entity | Description | Key Relationships |
@@ -132,6 +136,10 @@ We use webhooks to synchronize Clerk's user/organization state with our PostgreS
 *Rule of thumb: Never trust client input.*
 * **Zod Schemas:** We use **Zod** for all schema validation.
 * **Execution:** Every Server Action must validate the incoming payload against a Zod schema before executing database queries. This prevents malformed data, unexpected nulls, and malicious SQL injection attempts from reaching Prisma.
+
+### Data Export Architecture
+* To allow seamless data portability, we utilize client-side CSV generation for exporting table data (e.g., Projects, Invoices). 
+* This offloads the computational cost of generating large Blobs to the user's browser, preventing server memory spikes, and allows immediate downloads without needing temporary cloud storage or presigned URLs.
 
 ---
 
