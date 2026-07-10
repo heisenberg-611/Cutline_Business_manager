@@ -27,9 +27,13 @@ export async function createProject(data: FormData) {
 
   const deadline = deadlineStr ? new Date(deadlineStr) : null
 
+  const projectCount = await prisma.project.count({ where: { businessId: orgId } })
+  const displayId = `PRJ-${String(projectCount + 1).padStart(3, '0')}`
+
   const project = await prisma.project.create({
     data: {
       businessId: orgId,
+      displayId,
       clientId,
       title,
       type: type || null,
@@ -89,8 +93,23 @@ export async function getProjects(orgId: string) {
     },
     include: {
       client: true,
+      links: true,
       assets: {
         include: { asset: true }
+      },
+      statusStage: {
+        include: {
+          template: {
+            include: {
+              stages: {
+                orderBy: { orderIndex: 'asc' }
+              }
+            }
+          }
+        }
+      },
+      stageHistory: {
+        orderBy: { enteredAt: 'desc' }
       }
     },
     orderBy: {

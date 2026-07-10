@@ -90,8 +90,15 @@ export async function getAgingReport(businessId: string) {
 export async function getStudioHealth(businessId: string) {
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
   
   const { cashRevenue } = await getRevenueSummary(businessId, startOfMonth, now)
+  const { cashRevenue: lastMonthRevenue } = await getRevenueSummary(businessId, startOfLastMonth, endOfLastMonth)
+  
+  const revenueDelta = lastMonthRevenue > 0 
+    ? ((cashRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
+    : 0
   
   const outstandingInvoices = await prisma.invoice.findMany({
     where: {
@@ -105,8 +112,67 @@ export async function getStudioHealth(businessId: string) {
     .filter(inv => inv.status === 'OVERDUE' || (inv.dueDate && inv.dueDate < now))
     .reduce((sum, inv) => sum + inv.amountDueCents, 0)
 
-  // Simple DSO calculation: (Accounts Receivable / Total Credit Sales) * Number of Days
-  // For MVP, just returning basic metrics.
+  // Utilization calculation
+  const daysInPeriod = Math.max(1, (now.getTime() - startOfMonth.getTime()) / (1000 * 60 * 60 * 24))
+  const weeksInPeriod = daysInPeriod / 7
+  
+  const memberships = await prisma.businessMembership.findMany({
+    where: { businessId }
+  })
+  
+  const totalAvailableHours = memberships.reduce((sum, m) => sum + (m.weeklyCapacityHours * weeksInPeriod), 0)
+  
+  const timeEntries = await prisma.timeEntry.findMany({
+    where: {
+      project: { businessId },
+      isBillable: true,
+      createdAt: { gte: startOfMonth }
+    }
+  })
+  
+  const billableHours = timeEntries.reduce((sum, t) => sum + t.durationMinutes, 0) / 60
+  
+  const utilization = totalAvailableHours > 0 ? (billableHours / totalAvailableHours) * 100 : 0
+
+  // At-risk deadlines
+  const threeDaysFromNow = new Date()
+  threeDaysFromNow.setDate(now.getDate() + 3)
+
+  const activeProjects = await prisma.project.findMany({
+    where: { businessId, isArchived: false },
+    include: { 
+      statusStage: true,
+      stageHistory: { orderBy: { enteredAt: 'desc' }, take: 1 }
+    }
+  })
+
+  let atRiskCount = 0
+  activeProjects.forEach(p => {
+    if (p.statusStage?.name.toLowerCase().includes('final')) return
+
+    let isAtRisk = false
+    if (p.deadline && p.deadline <= threeDaysFromNow) {
+      isAtRisk = true
+    }
+
+    if (!isAtRisk && p.statusStage?.estimatedHours && p.stageHistory[0]) {
+      const hoursInStage = (now.getTime() - p.stageHistory[0].enteredAt.getTime()) / (1000 * 60 * 60)
+      if (hoursInStage > p.statusStage.estimatedHours) {
+        isAtRisk = true
+      }
+    }
+
+    if (isAtRisk) atRiskCount++
+  })
+
+  // Average client feedback
+  const feedback = await prisma.feedbackResponse.findMany({
+    where: { businessId }
+  })
+  const avgFeedback = feedback.length > 0 
+    ? feedback.reduce((sum, f) => sum + f.overallScore, 0) / feedback.length
+    : 0
+
   const business = await prisma.business.findUnique({
     where: { id: businessId },
     select: { defaultCurrency: true }
@@ -114,9 +180,32 @@ export async function getStudioHealth(businessId: string) {
 
   return {
     revenueMTD: cashRevenue,
+    revenueLastMonth: lastMonthRevenue,
+    revenueDelta,
     outstanding: totalOutstanding,
     overdue: totalOverdue,
-    dso: 0, // Placeholder
+    utilization,
+    atRiskCount,
+    avgFeedback,
     currency: business?.defaultCurrency || 'USD'
   }
+}
+
+export async function getRevenueTrend(businessId: string) {
+  const now = new Date()
+  const trend = []
+
+  for (let i = 5; i >= 0; i--) {
+    const start = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 0)
+    
+    const { cashRevenue } = await getRevenueSummary(businessId, start, end)
+    
+    trend.push({
+      month: start.toLocaleString('default', { month: 'short' }),
+      revenue: cashRevenue / 100 // Convert to dollars for chart
+    })
+  }
+
+  return trend
 }

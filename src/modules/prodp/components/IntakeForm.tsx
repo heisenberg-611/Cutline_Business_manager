@@ -27,6 +27,10 @@ export function IntakeForm({ businessId, businessName }: IntakeFormProps) {
   const [scriptText, setScriptText] = useState('')
   const [scriptLink, setScriptLink] = useState('')
   const [rawFootageLink, setRawFootageLink] = useState('')
+  const [companyName, setCompanyName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [industry, setIndustry] = useState('')
+  const [preferredChannel, setPreferredChannel] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,7 +45,11 @@ export function IntakeForm({ businessId, businessName }: IntakeFormProps) {
         projectType,
         scriptText,
         scriptLink,
-        rawFootageLink
+        rawFootageLink,
+        companyName,
+        phone,
+        industry,
+        preferredChannel
       })
       setIsSubmitted(true)
     } catch (err: any) {
@@ -103,6 +111,22 @@ export function IntakeForm({ businessId, businessName }: IntakeFormProps) {
                 <div className="space-y-2">
                   <Label htmlFor="clientEmail">Email Address <span className="text-red-500">*</span></Label>
                   <Input id="clientEmail" type="email" required value={clientEmail} onChange={e => setClientEmail(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyName">Company Name</Label>
+                  <Input id="companyName" placeholder="Acme Corporation (Optional)" value={companyName} onChange={e => setCompanyName(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Mobile Number</Label>
+                  <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" value={phone} onChange={e => setPhone(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="industry">Industry</Label>
+                  <Input id="industry" placeholder="e.g. YouTube, Tech, Real Estate" value={industry} onChange={e => setIndustry(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="preferredChannel">Preferred Channel</Label>
+                  <Input id="preferredChannel" placeholder="e.g. Slack, Email, WhatsApp" value={preferredChannel} onChange={e => setPreferredChannel(e.target.value)} />
                 </div>
               </div>
             </div>

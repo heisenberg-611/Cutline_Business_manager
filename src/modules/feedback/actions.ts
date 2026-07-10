@@ -207,15 +207,26 @@ export async function deleteFeedbackResponse(responseId: string) {
   })
 
   if (response) {
-    // Delete response
-    await prisma.feedbackResponse.delete({
-      where: { id: responseId }
+    await prisma.feedbackRequest.delete({
+      where: { id: response.requestId }
     })
-    // Optionally delete request if we want to fully clear it, 
-    // but just deleting response is enough to clear inbox.
   }
 
   revalidatePath('/dashboard/feedback')
+  revalidatePath('/dashboard')
+}
+
+export async function resolveFeedbackAction(requestId: string) {
+  const { orgId } = await auth()
+  if (!orgId) throw new Error('Unauthorized')
+
+  await prisma.feedbackRequest.update({
+    where: { id: requestId, businessId: orgId },
+    data: { status: 'RESOLVED' }
+  })
+  
+  revalidatePath('/dashboard/feedback')
+  revalidatePath('/dashboard')
 }
 
 // -----------------------------------------------------------------------------

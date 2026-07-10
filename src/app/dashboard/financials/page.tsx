@@ -9,6 +9,8 @@ import { StudioHealthFinanceStrip } from '@/modules/financials/components/Studio
 import { AgingBucketsCard } from '@/modules/financials/components/AgingBucketsCard'
 import { InvoiceTable } from '@/modules/financials/components/InvoiceTable'
 
+import { ExportInvoicesButton } from '@/modules/financials/components/ExportInvoicesButton'
+
 export const metadata = {
   title: 'Financials | Cutline OS',
 }
@@ -33,12 +35,15 @@ export default async function FinancialsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Financials</h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage your studio revenue, invoices, and outstanding payments.</p>
         </div>
-        <Link href="/dashboard/financials/new">
-          <Button className="bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90">
-            <Plus className="mr-2 h-4 w-4" />
-            New Invoice
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <ExportInvoicesButton invoices={invoices} />
+          <Link href="/dashboard/financials/new">
+            <Button className="bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90">
+              <Plus className="mr-2 h-4 w-4" />
+              New Invoice
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <StudioHealthFinanceStrip data={studioHealth} />

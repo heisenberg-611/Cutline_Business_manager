@@ -9,6 +9,10 @@ import { revalidatePath } from 'next/cache'
 export async function submitIntakeForm(businessId: string, data: {
   clientName: string,
   clientEmail: string,
+  companyName?: string,
+  phone?: string,
+  industry?: string,
+  preferredChannel?: string,
   projectTitle: string,
   projectType: string,
   scriptText: string,
@@ -21,11 +25,30 @@ export async function submitIntakeForm(businessId: string, data: {
   })
 
   if (!client) {
+    const clientCount = await prisma.client.count({ where: { businessId } })
+    const displayId = `CL-${String(clientCount + 1).padStart(3, '0')}`
+    
     client = await prisma.client.create({
       data: {
         businessId,
+        displayId,
         displayName: data.clientName,
         email: data.clientEmail.toLowerCase(),
+        companyName: data.companyName,
+        phone: data.phone,
+        industry: data.industry,
+        preferredChannel: data.preferredChannel,
+      }
+    })
+  } else {
+    client = await prisma.client.update({
+      where: { id: client.id },
+      data: {
+        displayName: data.clientName,
+        ...(data.companyName && { companyName: data.companyName }),
+        ...(data.phone && { phone: data.phone }),
+        ...(data.industry && { industry: data.industry }),
+        ...(data.preferredChannel && { preferredChannel: data.preferredChannel }),
       }
     })
   }
@@ -39,9 +62,13 @@ export async function submitIntakeForm(businessId: string, data: {
   const firstStage = template?.stages[0]
 
   // Create Project
+  const projectCount = await prisma.project.count({ where: { businessId } })
+  const projectDisplayId = `PRJ-${String(projectCount + 1).padStart(3, '0')}`
+  
   const project = await prisma.project.create({
     data: {
       businessId,
+      displayId: projectDisplayId,
       clientId: client.id,
       title: data.projectTitle,
       type: data.projectType || 'Standard',
@@ -204,4 +231,18 @@ export async function deleteReviewRequest(id: string) {
   })
   
   revalidatePath('/dashboard/prodp')
+  revalidatePath('/dashboard')
+}
+
+export async function resolveReviewRequest(id: string) {
+  const { orgId } = await auth()
+  if (!orgId) throw new Error('Unauthorized')
+
+  await prisma.reviewRequest.update({
+    where: { id, businessId: orgId },
+    data: { status: 'RESOLVED' }
+  })
+  
+  revalidatePath('/dashboard/prodp')
+  revalidatePath('/dashboard')
 }

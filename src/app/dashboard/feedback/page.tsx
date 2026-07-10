@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 import { DeleteFeedbackButton } from '@/modules/feedback/components/delete-feedback-button'
+import { ResolveFeedbackButton } from '@/modules/feedback/components/resolve-feedback-button'
 
 export default async function FeedbackInboxPage() {
   const responses = await getFeedbackResponses()
@@ -43,6 +44,12 @@ export default async function FeedbackInboxPage() {
                   )}
                   {response.testimonial && (
                     <Badge variant="secondary">Converted</Badge>
+                  )}
+                  {response.request.status === 'COMPLETED' && (
+                    <ResolveFeedbackButton requestId={response.request.id} />
+                  )}
+                  {response.request.status === 'RESOLVED' && (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800">Resolved</Badge>
                   )}
                   <DeleteFeedbackButton responseId={response.id} />
                 </div>

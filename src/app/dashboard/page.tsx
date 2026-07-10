@@ -1,10 +1,13 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import prisma from '@/modules/core/db/prisma'
-import { format } from 'date-fns'
-import { getStudioHealth } from '@/modules/financials/dashboard-queries'
+import { getStudioHealth, getRevenueTrend } from '@/modules/financials/dashboard-queries'
 import { StudioHealthFinanceStrip } from '@/modules/financials/components/StudioHealthFinanceStrip'
+import { StageProgressPipeline } from '@/modules/projects/components/StageProgressPipeline'
+import { RevenueTrendChart } from '@/modules/financials/components/RevenueTrendChart'
+import { UpcomingDeadlines } from '@/modules/projects/components/UpcomingDeadlines'
+import { RecentFeedback } from '@/modules/feedback/components/RecentFeedback'
 
 export default async function DashboardPage() {
   const { orgId } = await auth()
@@ -13,107 +16,180 @@ export default async function DashboardPage() {
     redirect('/dashboard/select-business')
   }
 
-  // Fetch metrics data sequentially to avoid connection pool exhaustion
-  const projects = await prisma.project.findMany({
+  // Fetch metrics data
+  const studioHealth = await getStudioHealth(orgId)
+  const revenueTrend = await getRevenueTrend(orgId)
+
+  const activeProjects = await prisma.project.findMany({
     where: { 
       businessId: orgId,
-      isArchived: false 
+      isArchived: false,
+      NOT: {
+        statusStage: {
+          name: { contains: 'final', mode: 'insensitive' }
+        }
+      }
     },
-    include: { statusStage: true, client: true },
+    include: { 
+      statusStage: {
+        include: {
+          template: {
+            include: {
+              stages: {
+                orderBy: { orderIndex: 'asc' }
+              }
+            }
+          }
+        }
+      }, 
+      stageHistory: {
+        orderBy: { enteredAt: 'desc' }
+      },
+      client: true 
+    },
     orderBy: { createdAt: 'desc' }
   })
   
-  const invoices = await prisma.invoice.findMany({
-    where: { businessId: orgId }
+  const recentFeedback = await prisma.feedbackResponse.findMany({
+    where: { businessId: orgId },
+    include: {
+      request: {
+        include: {
+          project: true,
+          client: true
+        }
+      }
+    },
+    orderBy: { submittedAt: 'desc' },
+    take: 3
   })
+
+  const pendingFeedbackCount = await prisma.feedbackRequest.count({
+    where: { 
+      businessId: orgId, 
+      status: 'COMPLETED',
+      response: { isNot: null }
+    }
+  })
+
+  const pendingReviewCount = await prisma.reviewRequest.count({
+    where: { businessId: orgId, status: 'REPLIED' }
+  })
+
+  const user = await currentUser()
+  const firstName = user?.firstName || 'there'
   
-  const studioHealth = await getStudioHealth(orgId)
+  const today = new Date()
+  const hour = today.getHours()
+  let greeting = 'Good evening'
+  if (hour < 12) greeting = 'Good morning'
+  else if (hour < 18) greeting = 'Good afternoon'
 
-  const activeProjectsCount = projects.filter(p => !p.statusStage?.name.toLowerCase().includes('final') && !p.statusStage?.name.toLowerCase().includes('archive')).length
-
-  const formatCurrency = (cents: number, currency: string = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-      currencyDisplay: 'narrowSymbol'
-    }).format(cents / 100)
-  }
-
-  // Check for at-risk deadlines (due within 3 days or already past due, and not in final stage)
-  const now = new Date()
-  const threeDaysFromNow = new Date()
-  threeDaysFromNow.setDate(now.getDate() + 3)
-
-  const atRiskProjectsCount = projects.filter(p => {
-    if (!p.deadline) return false
-    const isFinal = p.statusStage?.name.toLowerCase().includes('final') || p.statusStage?.name.toLowerCase().includes('archive')
-    if (isFinal) return false
-    
-    return p.deadline <= threeDaysFromNow
-  }).length
-
-  const recentProjects = projects.slice(0, 5)
+  const dateString = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric'
+  }).format(today)
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-zinc-200 dark:border-white/10 pb-5">
-        <h3 className="text-xl font-semibold leading-6 text-zinc-900 dark:text-zinc-100">
-          Studio Dashboard
-        </h3>
-        <p className="mt-2 max-w-4xl text-sm text-zinc-500">
-          Welcome to your Cutline OS dashboard. Here is a high-level overview of your business health.
-        </p>
+      <div className="border-b border-zinc-200 dark:border-white/10 pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h3 className="text-2xl font-semibold leading-7 text-zinc-900 dark:text-zinc-100">
+            {greeting}, {firstName}
+          </h3>
+          <p className="mt-2 text-sm text-zinc-500 flex items-center flex-wrap gap-2">
+            <span>{dateString}</span>
+            <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">·</span>
+            <span>{activeProjects.length} active project{activeProjects.length === 1 ? '' : 's'}</span>
+            <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">·</span>
+            <span>{pendingFeedbackCount} pending feedback{pendingFeedbackCount === 1 ? '' : 's'}</span>
+            <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">·</span>
+            <span>{pendingReviewCount} pending revision note{pendingReviewCount === 1 ? '' : 's'}</span>
+          </p>
+        </div>
       </div>
       
-      {/* Finance Strip */}
-      <h4 className="font-medium text-sm text-zinc-500 uppercase tracking-wider mb-4">Financial Health</h4>
+      {/* Studio Health Summary Strip */}
       <StudioHealthFinanceStrip data={studioHealth} />
 
-      {/* Project Metrics */}
-      <h4 className="font-medium text-sm text-zinc-500 uppercase tracking-wider mb-4 mt-8">Project Health</h4>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
-        <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 p-6">
-          <div className="text-sm font-medium text-zinc-500">Active Projects</div>
-          <div className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{activeProjectsCount}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 overflow-hidden rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 p-6">
-          <div className="text-sm font-medium text-zinc-500">At-Risk Deadlines</div>
-          <div className={`mt-2 text-3xl font-bold tracking-tight ${atRiskProjectsCount > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
-            {atRiskProjectsCount}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Projects */}
-      <div className="mt-8 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden">
-        <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
-          <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
-            Recent Projects
-          </h3>
-        </div>
-        {recentProjects.length === 0 ? (
-          <div className="p-12 text-center text-zinc-500 text-sm">
-            No projects yet.
-          </div>
-        ) : (
-          <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {recentProjects.map(project => (
-              <li key={project.id} className="p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                <Link href={`/dashboard/projects/${project.id}`} className="flex justify-between items-center w-full">
-                  <div>
-                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.title}</p>
-                    <p className="text-xs text-zinc-500 mt-1">{project.client.displayName}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-full">
-                      {project.statusStage?.name || 'Unassigned'}
-                    </p>
-                  </div>
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        
+        {/* Left Column (2/3 width on large screens) */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Active Pipeline */}
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden">
+            <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
+              <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
+                Active Pipeline
+              </h3>
+            </div>
+            {activeProjects.length === 0 ? (
+              <div className="p-8 text-center text-zinc-500 text-sm">
+                No active projects.
+              </div>
+            ) : (
+              <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {activeProjects.slice(0, 5).map(project => (
+                  <li key={project.id} className="p-5">
+                    <Link href={`/dashboard/projects/${project.id}`} className="block group">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors">{project.title}</p>
+                          <p className="text-xs text-zinc-500 mt-0.5">{project.client.displayName}</p>
+                        </div>
+                      </div>
+                      <StageProgressPipeline project={project} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {activeProjects.length > 5 && (
+              <div className="px-6 py-3 border-t border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50 text-center">
+                <Link href="/dashboard/projects" className="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                  View all {activeProjects.length} active projects
                 </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+              </div>
+            )}
+          </div>
+
+          {/* Revenue Trend Widget */}
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden p-6">
+            <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100 mb-4">
+              Revenue Trend (6 Months)
+            </h3>
+            <RevenueTrendChart data={revenueTrend} currency={studioHealth.currency} />
+          </div>
+
+        </div>
+
+        {/* Right Column (1/3 width on large screens) */}
+        <div className="space-y-6">
+          
+          {/* Upcoming Deadlines Widget */}
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden">
+            <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
+              <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
+                Upcoming Deadlines
+              </h3>
+            </div>
+            <UpcomingDeadlines projects={activeProjects} />
+          </div>
+
+          {/* Recent Client Feedback Widget */}
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden">
+            <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
+              <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
+                Recent Feedback
+              </h3>
+            </div>
+            <RecentFeedback feedback={recentFeedback} />
+          </div>
+
+        </div>
       </div>
     </div>
   )

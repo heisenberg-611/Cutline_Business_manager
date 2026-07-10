@@ -28,21 +28,29 @@ export function NotificationCenter() {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioContext) return;
       const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
       
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.15);
+      const playChime = (freq: number, startTime: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'triangle'; // Clearer tone than sine
+        osc.frequency.setValueAtTime(freq, startTime);
+        
+        // Louder (0.3) and longer fade-out for a clearer ring
+        gain.gain.setValueAtTime(0.3, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start(startTime);
+        osc.stop(startTime + 0.5);
+      }
       
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      // Pleasant double ascending chime
+      playChime(1046.50, ctx.currentTime);        // C6
+      playChime(1318.51, ctx.currentTime + 0.15); // E6
       
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      
-      osc.start();
-      osc.stop(ctx.currentTime + 0.15);
     } catch (e) {
       console.log("Audio playback failed or blocked", e);
     }

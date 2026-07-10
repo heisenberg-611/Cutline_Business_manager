@@ -22,9 +22,13 @@ export async function createClient(data: FormData) {
     throw new Error('Display Name is required')
   }
 
+  const clientCount = await prisma.client.count({ where: { businessId: orgId } })
+  const displayId = `CL-${String(clientCount + 1).padStart(3, '0')}`
+
   await prisma.client.create({
     data: {
       businessId: orgId,
+      displayId,
       displayName: displayName.toString(),
       companyName: companyName ? companyName.toString() : null,
       email: email ? email.toString() : null,

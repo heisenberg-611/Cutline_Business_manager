@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createReviewRequest, deleteReviewRequest } from '../actions'
+import { createReviewRequest, deleteReviewRequest, resolveReviewRequest } from '../actions'
 import { getAppUrl } from '@/lib/utils'
 import { Copy, ExternalLink, Check, Trash2 } from 'lucide-react'
 
@@ -56,6 +56,22 @@ export function ProdPTabs({ businessId, activeProjects, reviewRequests }: { busi
       console.error(err)
       alert('Failed to delete review request')
     }
+  }
+
+  const handleResolveReviewRequest = async (id: string) => {
+    try {
+      await resolveReviewRequest(id)
+    } catch (err) {
+      console.error(err)
+      alert('Failed to resolve review request')
+    }
+  }
+
+  const [copiedRequestId, setCopiedRequestId] = useState<string | null>(null)
+  const handleCopyRequestLink = (token: string, id: string) => {
+    navigator.clipboard.writeText(`${getAppUrl()}/review/${token}`)
+    setCopiedRequestId(id)
+    setTimeout(() => setCopiedRequestId(null), 2000)
   }
 
   const [activeTab, setActiveTab] = useState(() => {
@@ -180,18 +196,45 @@ export function ProdPTabs({ businessId, activeProjects, reviewRequests }: { busi
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <h4 className="font-semibold text-sm">{req.project.title}</h4>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-medium ${req.status === 'REPLIED' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-medium ${
+                            req.status === 'REPLIED' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 
+                            req.status === 'RESOLVED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          }`}>
                             {req.status}
                           </span>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 -mr-1"
-                          onClick={() => handleDeleteReviewRequest(req.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          {req.status === 'REPLIED' && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-500 dark:hover:bg-green-950/30"
+                              onClick={() => handleResolveReviewRequest(req.id)}
+                              title="Mark as resolved"
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                            onClick={() => handleCopyRequestLink(req.token, req.id)}
+                            title="Copy Review Link"
+                          >
+                            {copiedRequestId === req.id ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 -mr-1"
+                            onClick={() => handleDeleteReviewRequest(req.id)}
+                            title="Delete Request"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       <p className="text-xs text-zinc-500">Client: {req.client.displayName}</p>
                       {req.status === 'REPLIED' && (

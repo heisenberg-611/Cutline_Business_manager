@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import { getProjects } from '@/modules/projects/actions'
 import { getClients } from '@/modules/clients/actions'
 import { ProjectForm } from '@/modules/projects/components/ProjectForm'
+import { ExportProjectsButton } from '@/modules/projects/components/ExportProjectsButton'
+import { StageProgressPipeline } from '@/modules/projects/components/StageProgressPipeline'
 import {
   Table,
   TableBody,
@@ -38,7 +40,10 @@ export default async function ProjectsPage() {
             Manage your active editing projects, track deadlines, and priorities.
           </p>
         </div>
-        <ProjectForm clients={clients.map(c => ({ id: c.id, displayName: c.displayName }))} />
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <ExportProjectsButton projects={projects} />
+          <ProjectForm clients={clients.map(c => ({ id: c.id, displayName: c.displayName }))} />
+        </div>
       </div>
       
       <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
@@ -61,6 +66,7 @@ export default async function ProjectsPage() {
                 <TableHead>Client</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Priority</TableHead>
+                <TableHead className="w-[300px]">Pipeline Progress</TableHead>
                 <TableHead>Deadline</TableHead>
               </TableRow>
             </TableHeader>
@@ -68,8 +74,11 @@ export default async function ProjectsPage() {
               {projects.map((project) => (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
-                    <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
-                      {project.title}
+                    <Link href={`/dashboard/projects/${project.id}`} className="hover:underline flex flex-col">
+                      <span>{project.title}</span>
+                      {project.displayId && (
+                        <span className="text-xs text-zinc-500 font-normal">{project.displayId}</span>
+                      )}
                     </Link>
                   </TableCell>
                   <TableCell>
@@ -90,6 +99,9 @@ export default async function ProjectsPage() {
                         {project.priority}
                       </Badge>
                     ) : '-'}
+                  </TableCell>
+                  <TableCell className="min-w-[250px]">
+                    <StageProgressPipeline project={project as any} />
                   </TableCell>
                   <TableCell>
                     {project.deadline ? format(new Date(project.deadline), 'MMM d, yyyy') : '-'}

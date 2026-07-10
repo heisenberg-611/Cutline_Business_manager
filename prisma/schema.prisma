@@ -65,12 +65,13 @@ model User {
 }
 
 model BusinessMembership {
-  id         String   @id @default(cuid())
-  businessId String
-  userId     String
-  role       String // e.g., "org:admin", "org:member"
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  businessId          String
+  userId              String
+  role                String // e.g., "org:admin", "org:member"
+  weeklyCapacityHours Int      @default(40)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -87,6 +88,7 @@ model BusinessMembership {
 model Client {
   id                      String   @id @default(cuid())
   businessId              String
+  displayId               String?
   displayName             String
   companyName             String?
   email                   String?
@@ -106,12 +108,14 @@ model Client {
   reviewRequests   ReviewRequest[]
 
   @@index([businessId]) // Critical for tenant data isolation performance
+  @@unique([businessId, displayId])
   @@map("clients")
 }
 
 model Project {
   id            String    @id @default(cuid())
   businessId    String
+  displayId     String?
   clientId      String
   title         String
   type          String? // e.g., "YouTube Long-Form", "Corporate Ad"
@@ -140,6 +144,7 @@ model Project {
   @@index([businessId])
   @@index([clientId])
   @@index([statusStageId])
+  @@unique([businessId, displayId])
   @@map("projects")
 }
 

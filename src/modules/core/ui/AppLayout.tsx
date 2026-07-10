@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { OrganizationSwitcher, UserButton, useAuth } from '@clerk/nextjs'
+import { OrganizationSwitcher, UserButton, useAuth, useOrganization } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 
@@ -51,6 +51,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isCurrencyConverterOpen, setIsCurrencyConverterOpen] = useState(false)
   const pathname = usePathname()
   const { orgRole } = useAuth()
+  const { organization } = useOrganization()
 
   React.useEffect(() => {
     const saved = localStorage.getItem('cutline_sidebar_pinned')
@@ -128,7 +129,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           {isCollapsed && (
             <div className="w-full flex justify-center text-zinc-900 dark:text-white font-bold">
-              C
+              {organization?.imageUrl ? (
+                <img src={organization.imageUrl} alt={organization.name} className="w-8 h-8 rounded-md object-cover" />
+              ) : (
+                "C"
+              )}
             </div>
           )}
         </div>
