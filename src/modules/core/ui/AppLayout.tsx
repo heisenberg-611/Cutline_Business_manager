@@ -20,6 +20,7 @@ const NotificationCenter = dynamic(
   { ssr: false }
 )
 import { ThemeToggle } from '@/components/theme-toggle'
+import DashboardLoading from '@/app/dashboard/loading'
 
 import { 
   Briefcase, 
@@ -49,6 +50,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isHovered, setIsHovered] = useState(false)
   const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false)
   const [isCurrencyConverterOpen, setIsCurrencyConverterOpen] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
+  const [optimisticPathname, setOptimisticPathname] = useState<string | null>(null)
   const pathname = usePathname()
   const { orgRole } = useAuth()
   const { organization } = useOrganization()
@@ -57,6 +60,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     const saved = localStorage.getItem('cutline_sidebar_pinned')
     if (saved) setIsPinned(JSON.parse(saved))
   }, [])
+
+  // Clear navigating state immediately when the route actually changes
+  React.useEffect(() => {
+    setIsNavigating(false)
+    setOptimisticPathname(null)
+  }, [pathname])
 
   const togglePin = () => {
     const next = !isPinned
@@ -141,7 +150,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+            const currentPath = optimisticPathname || pathname
+            const isActive = currentPath === item.href || (item.href !== '/dashboard' && currentPath.startsWith(item.href))
             return (
               <motion.div 
                 key={item.href}
@@ -151,6 +161,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               >
                 <Link 
                   href={item.href}
+                  onClick={() => {
+                    // Only trigger the instant skeleton if navigating to a different route
+                    if (pathname !== item.href) {
+                      setIsNavigating(true)
+                      setOptimisticPathname(item.href)
+                    }
+                  }}
                   className={`group relative z-0 flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     isActive 
                     ? 'text-zinc-900 dark:text-white' 
@@ -306,7 +323,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Page Content Scrollable Area */}
         <div className="flex-1 overflow-auto p-6 md:p-10 relative">
           <div className="mx-auto max-w-6xl">
-            {children}
+            {isNavigating ? <DashboardLoading /> : children}
           </div>
         </div>
 

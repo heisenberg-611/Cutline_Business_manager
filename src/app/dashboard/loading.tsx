@@ -5,15 +5,8 @@ import React from 'react'
 function SkeletonBlock({ className, delay = 0 }: { className: string; delay?: number }) {
   return (
     <div
-      className={`animate-shimmer rounded ${className} dark:[--shimmer-from:var(--color-zinc-900)] dark:[--shimmer-to:var(--color-zinc-800)]`}
-      style={{
-        animationDelay: `${delay}s`,
-        // Tailwind v4 dark mode via CSS vars:
-        '--shimmer-from': 'var(--color-zinc-100)',
-        '--shimmer-to': 'var(--color-zinc-200)',
-      } as React.CSSProperties}
-      // Override for dark mode (Tailwind v4 dark: variant):
-      data-theme="dark"
+      className={`animate-shimmer rounded ${className} [--shimmer-from:var(--color-zinc-200)] [--shimmer-to:var(--color-zinc-100)] dark:[--shimmer-from:var(--color-zinc-800)] dark:[--shimmer-to:var(--color-zinc-700)]`}
+      style={{ animationDelay: `${delay}s` }}
     />
   );
 }
