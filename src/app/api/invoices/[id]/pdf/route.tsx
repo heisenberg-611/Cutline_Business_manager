@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { renderToStream } from '@react-pdf/renderer'
 import { InvoiceTemplate } from '@/lib/pdf/invoice-template'
 import { getInvoiceDataForPdf } from '@/lib/invoices/pdf-data'
+import prisma from '@/modules/core/db/prisma'
 
 /**
  * GET /api/invoices/[id]/pdf
@@ -27,6 +28,20 @@ export async function GET(
   }
 
   const { id } = await params
+
+  const invoice = await prisma.invoice.findFirst({
+    where: { id, businessId: orgId },
+    select: { pdfUrl: true }
+  })
+
+  if (!invoice) {
+    return new NextResponse('Not Found', { status: 404 })
+  }
+
+  // If a cached PDF exists in blob storage, redirect to it immediately
+  if (invoice.pdfUrl) {
+    return NextResponse.redirect(invoice.pdfUrl)
+  }
 
   // Data mapper enforces businessId filter — no IDOR possible
   const invoiceData = await getInvoiceDataForPdf(id, orgId)

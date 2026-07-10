@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // -----------------------------------------------------------------------------
@@ -42,9 +43,10 @@ model Business {
   auditLogs         AuditLog[]
   notifications     Notification[]
   feedbackRequests  FeedbackRequest[]
-  feedbackResponses FeedbackResponse[]
-  testimonials      Testimonial[]
-  reviewRequests    ReviewRequest[]
+  feedbackResponses     FeedbackResponse[]
+  testimonials          Testimonial[]
+  reviewRequests        ReviewRequest[]
+  analyticsSnapshots    AnalyticsSnapshot[]
 
   @@map("businesses")
 }
@@ -590,4 +592,34 @@ model ReviewRequest {
   @@index([clientId])
   @@index([token])
   @@map("review_requests")
+}
+
+// -----------------------------------------------------------------------------
+// ANALYTICS & REPORTING
+// -----------------------------------------------------------------------------
+
+model AnalyticsSnapshot {
+  id                    String   @id @default(cuid())
+  businessId            String
+  date                  DateTime @db.Date // The date this snapshot represents
+  
+  revenueMTDCents       Int
+  revenueLastMonthCents Int
+  revenueDelta          Float
+  outstandingCents      Int
+  overdueCents          Int
+  utilization           Float
+  atRiskCount           Int
+  avgFeedback           Float
+  dso                   Float
+  
+  historicalTrendJson   Json? 
+
+  createdAt             DateTime @default(now())
+
+  business              Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, date])
+  @@index([businessId, date(sort: Desc)])
+  @@map("analytics_snapshots")
 }

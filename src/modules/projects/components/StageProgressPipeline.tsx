@@ -33,6 +33,7 @@ export function StageProgressPipeline({ project }: { project: ProjectData }) {
 
   const stages = project.statusStage.template.stages
   const currentStageIndex = stages.findIndex(s => s.id === project.statusStage!.id)
+  const isFinalStage = currentStageIndex === stages.length - 1
 
   // Calculate if at risk in current stage
   const currentHistory = project.stageHistory.find(h => h.stageId === project.statusStage!.id)
@@ -51,10 +52,15 @@ export function StageProgressPipeline({ project }: { project: ProjectData }) {
         <span className="font-medium text-zinc-700 dark:text-zinc-300">
           Stage: {project.statusStage.name}
         </span>
-        {currentHistory && (
+        {currentHistory && !isFinalStage && (
           <span className={`${isAtRisk ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-zinc-500 dark:text-zinc-400'}`}>
             {hoursInStage.toFixed(1)}h
             {project.statusStage.estimatedHours ? ` / ${project.statusStage.estimatedHours}h est.` : ''}
+          </span>
+        )}
+        {isFinalStage && (
+          <span className="text-emerald-600 dark:text-emerald-500 font-medium">
+            Completed
           </span>
         )}
       </div>

@@ -8,7 +8,14 @@ interface Project {
   title: string
   deadline: Date | null
   client: { displayName: string }
-  statusStage: { estimatedHours: number | null } | null
+  statusStage: { 
+    id: string
+    name: string
+    estimatedHours: number | null
+    template: {
+      stages: { id: string }[]
+    }
+  } | null
   stageHistory: { enteredAt: Date }[]
 }
 
@@ -41,9 +48,16 @@ export function UpcomingDeadlines({ projects }: { projects: Project[] }) {
         }
 
         if (project.statusStage?.estimatedHours && project.stageHistory[0]) {
-          hoursInStage = (now.getTime() - new Date(project.stageHistory[0].enteredAt).getTime()) / (1000 * 60 * 60)
-          if (hoursInStage > project.statusStage.estimatedHours) {
-            status = 'at-risk'
+          // Check if this is the final stage
+          const stages = project.statusStage.template.stages
+          const currentIndex = stages.findIndex(s => s.id === project.statusStage!.id)
+          const isFinal = currentIndex === stages.length - 1
+          
+          if (!isFinal) {
+            hoursInStage = (now.getTime() - new Date(project.stageHistory[0].enteredAt).getTime()) / (1000 * 60 * 60)
+            if (hoursInStage > project.statusStage.estimatedHours) {
+              status = 'at-risk'
+            }
           }
         }
 

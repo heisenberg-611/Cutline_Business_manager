@@ -1,7 +1,7 @@
 "use server"
 
 import { auth } from "@clerk/nextjs/server"
-import { prisma } from "@/modules/core/db/prisma"
+import prisma from "@/modules/core/db/prisma"
 
 export async function getNotifications() {
   const { userId, orgId } = await auth()

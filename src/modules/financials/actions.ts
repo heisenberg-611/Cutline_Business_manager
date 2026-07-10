@@ -7,6 +7,7 @@ import { generateInvoiceNumber } from '@/lib/invoices/number-generator'
 import { sendDynamicInvoiceEmail } from '@/lib/emails/send-invoice'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { triggerPdfGeneration } from '@/lib/qstash/client'
 
 // -----------------------------------------------------------------------------
 // HELPERS
@@ -137,6 +138,9 @@ export async function createInvoice(input: InvoiceInput) {
     }
   })
 
+  // Trigger background PDF generation
+  await triggerPdfGeneration(invoice.id, orgId)
+
   revalidatePath('/dashboard/financials')
   return invoice
 }
@@ -181,6 +185,9 @@ export async function updateInvoice(id: string, input: InvoiceInput) {
         }
       }
     })
+
+    // Trigger background PDF generation
+    await triggerPdfGeneration(id, orgId)
 
     return updated
   })

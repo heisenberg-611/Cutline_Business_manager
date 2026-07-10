@@ -73,7 +73,7 @@ export function GlobalSearch({ open, onOpenChange }: { open: boolean, onOpenChan
         
         {Object.entries(groupedResults).map(([type, items]) => (
           <CommandGroup key={type} heading={type}>
-            {items.map((item) => (
+            {(items as any[]).map((item: any) => (
               <CommandItem
                 key={`${item.type}-${item.id}`}
                 value={`${item.type}-${item.id}`}
