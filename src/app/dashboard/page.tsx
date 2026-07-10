@@ -9,6 +9,10 @@ import { RevenueTrendChart } from '@/modules/financials/components/RevenueTrendC
 import { UpcomingDeadlines } from '@/modules/projects/components/UpcomingDeadlines'
 import { RecentFeedback } from '@/modules/feedback/components/RecentFeedback'
 
+export const metadata = {
+  title: 'Dashboard',
+}
+
 export default async function DashboardPage() {
   const { orgId } = await auth()
 

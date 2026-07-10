@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation'
 import { ReportsDashboard } from '@/modules/reports/components/ReportsDashboard'
 import prisma from '@/modules/core/db/prisma'
 
+export const metadata = {
+  title: 'Reports',
+}
+
 export default async function ReportsPage() {
   const { orgId } = await auth()
   

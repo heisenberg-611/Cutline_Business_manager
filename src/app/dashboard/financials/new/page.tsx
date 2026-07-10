@@ -8,6 +8,10 @@ import InvoiceBuilder from '@/modules/financials/components/InvoiceBuilder'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 
+export const metadata = {
+  title: 'New Invoice',
+}
+
 export default async function NewInvoicePage() {
   const { orgId } = await auth()
   

@@ -4,6 +4,10 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 
+export const metadata = {
+  title: 'Testimonials',
+}
+
 export default async function TestimonialsPage() {
   const testimonials = await getTestimonials()
 

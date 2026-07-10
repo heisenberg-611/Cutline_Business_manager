@@ -6,6 +6,10 @@ import Link from 'next/link'
 import { DeleteFeedbackButton } from '@/modules/feedback/components/delete-feedback-button'
 import { ResolveFeedbackButton } from '@/modules/feedback/components/resolve-feedback-button'
 
+export const metadata = {
+  title: 'Feedback',
+}
+
 export default async function FeedbackInboxPage() {
   const responses = await getFeedbackResponses()
 

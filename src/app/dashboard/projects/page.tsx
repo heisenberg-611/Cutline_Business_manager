@@ -17,6 +17,10 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { format } from 'date-fns'
 
+export const metadata = {
+  title: 'Projects',
+}
+
 export default async function ProjectsPage() {
   const { orgId } = await auth()
   

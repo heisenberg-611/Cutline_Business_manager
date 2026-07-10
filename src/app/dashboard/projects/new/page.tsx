@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation'
 import { getClients } from '@/modules/clients/actions'
 import { NewProjectForm } from '@/modules/projects/components/NewProjectForm'
 
+export const metadata = {
+  title: 'New Project',
+}
+
 export default async function NewProjectPage() {
   const { orgId } = await auth()
   

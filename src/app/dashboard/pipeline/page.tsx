@@ -7,6 +7,10 @@ import { PipelineTable } from '@/modules/workflow/components/PipelineTable'
 import { PipelineTimeline } from '@/modules/workflow/components/PipelineTimeline'
 import { PipelineViewToggle } from '@/modules/workflow/components/PipelineViewToggle'
 
+export const metadata = {
+  title: 'Pipeline',
+}
+
 export default async function PipelinePage({
   searchParams,
 }: {

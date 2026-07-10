@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation'
 import prisma from '@/modules/core/db/prisma'
 import { InvoiceSettingsForm } from '@/modules/settings/components/InvoiceSettingsForm'
 
+export const metadata = {
+  title: 'Invoice Settings',
+}
+
 export default async function InvoiceSettingsPage() {
   const { orgId } = await auth()
   

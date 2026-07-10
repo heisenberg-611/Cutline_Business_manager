@@ -9,6 +9,10 @@ import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import prisma from '@/modules/core/db/prisma'
 
+export const metadata = {
+  title: 'Assets',
+}
+
 export default async function AssetsPage() {
   const { orgId } = await auth()
   

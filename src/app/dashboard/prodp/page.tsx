@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation'
 import { ProdPTabsWrapper as ProdPTabs } from '@/modules/prodp/components/ProdPTabsWrapper'
 import prisma from '@/modules/core/db/prisma'
 
+export const metadata = {
+  title: 'Production',
+}
+
 export default async function ProdPPage() {
   const { orgId } = await auth()
   

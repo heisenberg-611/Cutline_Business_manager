@@ -7,6 +7,10 @@ import { Building2, Workflow, DollarSign, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { BusinessNameEditor } from '@/modules/settings/components/BusinessNameEditor'
 
+export const metadata = {
+  title: 'Settings',
+}
+
 export default async function SettingsPage() {
   const { orgId } = await auth()
   if (!orgId) redirect('/dashboard/select-business')

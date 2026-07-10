@@ -12,7 +12,7 @@ import { InvoiceTable } from '@/modules/financials/components/InvoiceTable'
 import { ExportInvoicesButton } from '@/modules/financials/components/ExportInvoicesButton'
 
 export const metadata = {
-  title: 'Financials | Cutline OS',
+  title: 'Finance',
 }
 
 export default async function FinancialsPage() {

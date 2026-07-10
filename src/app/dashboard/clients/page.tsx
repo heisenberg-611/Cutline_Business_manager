@@ -14,6 +14,10 @@ import {
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 
+export const metadata = {
+  title: 'Clients',
+}
+
 export default async function ClientsPage() {
   const { orgId } = await auth()
   

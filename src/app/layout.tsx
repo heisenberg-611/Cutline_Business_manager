@@ -16,7 +16,10 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cutline OS",
+  title: {
+    template: '%s | Cutline OS',
+    default: 'Cutline OS',
+  },
   description: "Business Operating System for Creative Professionals",
 };
 

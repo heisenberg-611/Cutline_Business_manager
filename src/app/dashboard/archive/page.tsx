@@ -13,6 +13,10 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { format } from 'date-fns'
 
+export const metadata = {
+  title: 'Archive',
+}
+
 export default async function ArchivePage() {
   const { orgId } = await auth()
   
