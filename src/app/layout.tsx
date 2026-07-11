@@ -40,6 +40,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
+    icon: "/icon.svg",
     apple: "/cutline-logo.JPG",
   }
 };
