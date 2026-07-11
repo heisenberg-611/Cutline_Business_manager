@@ -12,7 +12,6 @@ import { useRouter } from 'next/navigation'
 export function NavPreferencesEditor({ initialPreferences }: { initialPreferences?: NavPreference[] }) {
   const [preferences, setPreferences] = useState<NavPreference[]>(() => {
     if (initialPreferences && initialPreferences.length > 0) {
-      // Ensure all items are present in case new ones were added
       const prefMap = new Map(initialPreferences.map(p => [p.href, p]))
       const fullList = [...initialPreferences]
       ALL_NAV_ITEMS.forEach(item => {
@@ -24,6 +23,21 @@ export function NavPreferencesEditor({ initialPreferences }: { initialPreference
     }
     return ALL_NAV_ITEMS.map(item => ({ href: item.href, visible: true }))
   })
+
+  React.useEffect(() => {
+    if (initialPreferences && initialPreferences.length > 0) {
+      const prefMap = new Map(initialPreferences.map(p => [p.href, p]))
+      const fullList = [...initialPreferences]
+      ALL_NAV_ITEMS.forEach(item => {
+        if (!prefMap.has(item.href)) {
+          fullList.push({ href: item.href, visible: true })
+        }
+      })
+      setPreferences(fullList)
+    } else {
+      setPreferences(ALL_NAV_ITEMS.map(item => ({ href: item.href, visible: true })))
+    }
+  }, [initialPreferences])
 
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
