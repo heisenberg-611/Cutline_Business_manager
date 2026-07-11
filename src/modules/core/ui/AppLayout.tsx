@@ -104,12 +104,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { label: 'Assets', icon: Box, href: '/dashboard/assets' },
     { label: 'Feedback', icon: MessageSquare, href: '/dashboard/feedback' },
     { label: 'Archive', icon: Archive, href: '/dashboard/archive' },
-  ].filter(item => {
-    if (orgRole === 'org:member') {
-      return item.label === 'Pipeline'
-    }
-    return true
-  })
+  ]
 
   // Contextual Topbar Logic
   const getContextualTitle = () => {
@@ -250,27 +245,25 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </button>
           </motion.div>
           
-          {orgRole !== 'org:member' && (
-            <motion.div initial="initial" whileHover="hover" whileTap="tap">
-              <Link 
-                href="/dashboard/settings"
-                className={`group flex items-center gap-3 px-3 py-2 text-sm text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors ${isCollapsed ? 'justify-center' : ''}`}
-                title={isCollapsed ? 'Settings' : undefined}
+          <motion.div initial="initial" whileHover="hover" whileTap="tap">
+            <Link 
+              href="/dashboard/settings"
+              className={`group flex items-center gap-3 px-3 py-2 text-sm text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+              title={isCollapsed ? 'Settings' : undefined}
+            >
+              <motion.div
+                variants={{
+                  initial: { scale: 1 },
+                  hover: { scale: 1.1 },
+                  tap: { scale: 0.95 }
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                <motion.div
-                  variants={{
-                    initial: { scale: 1 },
-                    hover: { scale: 1.1 },
-                    tap: { scale: 0.95 }
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
-                  <Settings className="h-4 w-4 shrink-0 transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-400" />
-                </motion.div>
-                {!isCollapsed && <span>Settings</span>}
-              </Link>
-            </motion.div>
-          )}
+                <Settings className="h-4 w-4 shrink-0 transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-400" />
+              </motion.div>
+              {!isCollapsed && <span>Settings</span>}
+            </Link>
+          </motion.div>
 
           <ThemeToggle isCollapsed={isCollapsed} />
 
@@ -322,15 +315,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="md:hidden">
               <ThemeToggle isCollapsed={true} />
             </div>
-            {orgRole !== 'org:member' && (
-              <button 
-                onClick={() => setIsQuickActionsOpen(true)}
-                className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm hover:opacity-90 transition-opacity"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                New
-              </button>
-            )}
+            <button 
+              onClick={() => setIsQuickActionsOpen(true)}
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm hover:opacity-90 transition-opacity"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New
+            </button>
             <NotificationCenter />
             <UserButton />
           </div>
@@ -411,15 +402,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <span className="text-[10px] font-medium">Calculator</span>
         </button>
 
-        {orgRole !== 'org:member' && (
-          <Link 
-            href="/dashboard/settings" 
-            className="flex flex-col items-center justify-center min-w-[72px] h-12 gap-1 rounded-lg shrink-0 snap-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-          >
-            <Settings className="w-5 h-5 shrink-0" />
-            <span className="text-[10px] font-medium">Settings</span>
-          </Link>
-        )}
+        <Link 
+          href="/dashboard/settings" 
+          className="flex flex-col items-center justify-center min-w-[72px] h-12 gap-1 rounded-lg shrink-0 snap-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+        >
+          <Settings className="w-5 h-5 shrink-0" />
+          <span className="text-[10px] font-medium">Settings</span>
+        </Link>
       </nav>
     </div>
   )

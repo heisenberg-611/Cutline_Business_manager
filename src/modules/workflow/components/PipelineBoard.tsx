@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
-import { useAuth } from '@clerk/nextjs'
+
 import { updateProjectStage, updateProjectOrder } from '../actions'
 import { FeedbackPromptModal } from './FeedbackPromptModal'
 import { Badge } from '@/components/ui/badge'
@@ -87,7 +87,7 @@ type Project = {
 type SortMode = 'custom' | 'deadline' | 'priority'
 
 export default function PipelineBoard({ stages, projects: initialProjects }: { stages: Stage[], projects: Project[] }) {
-  const { orgRole } = useAuth()
+
   const [isPending, startTransition] = useTransition()
 
   // Need local state for optimistic UI updates with dnd
@@ -347,7 +347,7 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
 
                     <div className="flex-1 p-3 space-y-3 overflow-y-auto min-h-[150px]">
                       {projectsByStage[stage.id]?.map((project, index) => (
-                        <Draggable key={project.id} draggableId={project.id} index={index} isDragDisabled={sortMode !== 'custom' || orgRole === 'org:member'}>
+                        <Draggable key={project.id} draggableId={project.id} index={index} isDragDisabled={sortMode !== 'custom'}>
                           {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
@@ -409,7 +409,7 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                                       }
                                     }
                                   }}
-                                  disabled={isPending || orgRole === 'org:member'}
+                                  disabled={isPending}
                                 >
                                   <SelectTrigger className="h-7 text-xs bg-transparent border-dashed">
                                     <SelectValue>{stage.name}</SelectValue>

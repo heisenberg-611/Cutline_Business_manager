@@ -24,16 +24,7 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.redirect(new URL('/dashboard/select-business', req.url));
     }
 
-    // 3. Enforce RBAC: Members can only access the Pipeline
-    if (orgId && orgRole === 'org:member') {
-      const allowedMemberPaths = ['/dashboard/pipeline', '/dashboard/select-business']
-      // We allow API calls through the middleware (they should have server action/api route protection if modifying data)
-      const isAllowed = allowedMemberPaths.some(path => req.nextUrl.pathname.startsWith(path)) || req.nextUrl.pathname.startsWith('/api')
-      
-      if (!isAllowed) {
-        return NextResponse.redirect(new URL('/dashboard/pipeline', req.url))
-      }
-    }
+    // Enforce RBAC removed: All members can see everything
   }
 })
 

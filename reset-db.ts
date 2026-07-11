@@ -23,6 +23,34 @@ async function main() {
     const assetCount = await prisma.asset.deleteMany();
     console.log(`  ✓ Deleted ${assetCount.count} assets`);
 
+    console.log("Deleting testimonials...");
+    const testimonialCount = await prisma.testimonial.deleteMany();
+    console.log(`  ✓ Deleted ${testimonialCount.count} testimonials`);
+
+    console.log("Deleting feedback responses...");
+    const frResCount = await prisma.feedbackResponse.deleteMany();
+    console.log(`  ✓ Deleted ${frResCount.count} feedback responses`);
+
+    console.log("Deleting feedback requests...");
+    const frReqCount = await prisma.feedbackRequest.deleteMany();
+    console.log(`  ✓ Deleted ${frReqCount.count} feedback requests`);
+
+    console.log("Deleting review requests...");
+    const rrCount = await prisma.reviewRequest.deleteMany();
+    console.log(`  ✓ Deleted ${rrCount.count} review requests`);
+
+    console.log("Deleting analytics snapshots...");
+    const asCount = await prisma.analyticsSnapshot.deleteMany();
+    console.log(`  ✓ Deleted ${asCount.count} analytics snapshots`);
+
+    console.log("Deleting notifications...");
+    const notifCount = await prisma.notification.deleteMany();
+    console.log(`  ✓ Deleted ${notifCount.count} notifications`);
+
+    console.log("Deleting project links...");
+    const plCount = await prisma.projectLink.deleteMany();
+    console.log(`  ✓ Deleted ${plCount.count} project links`);
+
     console.log("Deleting time entries...");
     const teCount = await prisma.timeEntry.deleteMany();
     console.log(`  ✓ Deleted ${teCount.count} time entries`);
