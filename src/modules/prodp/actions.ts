@@ -20,23 +20,76 @@ export async function submitIntakeForm(businessId: string, data: {
   scriptLink: string,
   rawFootageLink: string
 }) {
-  // Find default workflow stage (read-only, safe outside transaction)
+  // Create a ProjectRequest instead of directly creating a Client/Project
+  const request = await prisma.projectRequest.create({
+    data: {
+      businessId,
+      clientName: data.clientName,
+      clientEmail: data.clientEmail.toLowerCase(),
+      companyName: data.companyName || null,
+      phone: data.phone || null,
+      industry: data.industry || null,
+      preferredChannel: data.preferredChannel || null,
+      projectTitle: data.projectTitle,
+      projectType: data.projectType || null,
+      scriptText: data.scriptText || null,
+      scriptLink: data.scriptLink || null,
+      rawFootageLink: data.rawFootageLink || null,
+    }
+  })
+
+  // Notify business members about the new request
+  try {
+    await broadcastNotification({
+      businessId,
+      title: "New Project Request",
+      message: `${data.clientName} submitted a new project request: "${data.projectTitle}". Awaiting your approval.`,
+      type: "project",
+      actionUrl: `/dashboard/pipeline?view=board`
+    })
+  } catch (err) {
+    console.error("Notification failed", err)
+  }
+
+  return { success: true, requestId: request.id }
+}
+
+export async function getPendingProjectRequests() {
+  const { orgId } = await auth()
+  if (!orgId) return []
+
+  return await prisma.projectRequest.findMany({
+    where: { businessId: orgId, status: 'PENDING' },
+    orderBy: { createdAt: 'desc' }
+  })
+}
+
+export async function approveProjectRequest(requestId: string) {
+  const { orgId } = await auth()
+  if (!orgId) throw new Error('Unauthorized')
+
+  const request = await prisma.projectRequest.findFirst({
+    where: { id: requestId, businessId: orgId, status: 'PENDING' }
+  })
+  if (!request) throw new Error('Request not found or already resolved')
+
+  // Find default workflow stage
   const template = await prisma.workflowTemplate.findFirst({
-    where: { businessId },
+    where: { businessId: orgId },
     include: { stages: { orderBy: { orderIndex: 'asc' } } }
   })
   const firstStage = template?.stages[0]
 
-  // All writes in a single transaction — partial failure rolls back everything
+  // All writes in a single transaction
   const { client, project } = await prisma.$transaction(async (tx) => {
     // Find or create client
     let client = await tx.client.findFirst({
-      where: { businessId, email: data.clientEmail.toLowerCase() }
+      where: { businessId: orgId, email: request.clientEmail }
     })
 
     if (!client) {
       const business = await tx.business.update({
-        where: { id: businessId },
+        where: { id: orgId },
         data: { clientSequence: { increment: 1 } },
         select: { clientSequence: true }
       })
@@ -44,32 +97,21 @@ export async function submitIntakeForm(businessId: string, data: {
 
       client = await tx.client.create({
         data: {
-          businessId,
+          businessId: orgId,
           displayId,
-          displayName: data.clientName,
-          email: data.clientEmail.toLowerCase(),
-          companyName: data.companyName,
-          phone: data.phone,
-          industry: data.industry,
-          preferredChannel: data.preferredChannel,
-        }
-      })
-    } else {
-      client = await tx.client.update({
-        where: { id: client.id },
-        data: {
-          displayName: data.clientName,
-          ...(data.companyName && { companyName: data.companyName }),
-          ...(data.phone && { phone: data.phone }),
-          ...(data.industry && { industry: data.industry }),
-          ...(data.preferredChannel && { preferredChannel: data.preferredChannel }),
+          displayName: request.clientName,
+          email: request.clientEmail,
+          companyName: request.companyName,
+          phone: request.phone,
+          industry: request.industry,
+          preferredChannel: request.preferredChannel,
         }
       })
     }
 
     // Create Project with atomic sequence
     const projBusiness = await tx.business.update({
-      where: { id: businessId },
+      where: { id: orgId },
       data: { projectSequence: { increment: 1 } },
       select: { projectSequence: true }
     })
@@ -77,64 +119,73 @@ export async function submitIntakeForm(businessId: string, data: {
 
     const project = await tx.project.create({
       data: {
-        businessId,
+        businessId: orgId,
         displayId: projectDisplayId,
         clientId: client.id,
-        title: data.projectTitle,
-        type: data.projectType || 'Standard',
+        title: request.projectTitle,
+        type: request.projectType || 'Standard',
         statusStageId: firstStage?.id || null,
       }
     })
 
     // Add Script as Note if text provided
-    if (data.scriptText) {
+    if (request.scriptText) {
       await tx.note.create({
         data: {
           projectId: project.id,
           type: 'client',
-          content: `**Initial Script/Brief:**\n\n${data.scriptText}`
+          content: `**Initial Script/Brief:**\n\n${request.scriptText}`
         }
       })
     }
 
     // Add Links
-    if (data.scriptLink) {
+    if (request.scriptLink) {
       await tx.projectLink.create({
         data: {
           projectId: project.id,
           label: 'Script Document',
-          url: data.scriptLink
+          url: request.scriptLink
         }
       })
     }
 
-    if (data.rawFootageLink) {
+    if (request.rawFootageLink) {
       await tx.projectLink.create({
         data: {
           projectId: project.id,
           label: 'Raw Footage',
-          url: data.rawFootageLink
+          url: request.rawFootageLink
         }
       })
     }
 
+    // Mark request as approved
+    await tx.projectRequest.update({
+      where: { id: requestId },
+      data: { status: 'APPROVED', resolvedAt: new Date() }
+    })
+
     return { client, project }
   })
 
-  // Notification broadcast OUTSIDE the transaction (Prisma Accelerate constraint)
-  try {
-    await broadcastNotification({
-      businessId,
-      title: "New Project Request",
-      message: `${client.displayName} submitted a new project: "${project.title}".`,
-      type: "project",
-      actionUrl: `/dashboard/pipeline`
-    })
-  } catch (err) {
-    console.error("Notification failed", err)
-  }
+  revalidatePath('/dashboard/pipeline')
+  revalidatePath('/dashboard')
+  return { success: true, projectId: project.id, clientId: client.id }
+}
 
-  return { success: true, projectId: project.id }
+export async function rejectProjectRequest(requestId: string) {
+  const { orgId } = await auth()
+  if (!orgId) throw new Error('Unauthorized')
+
+  await prisma.projectRequest.updateMany({
+    where: { id: requestId, businessId: orgId, status: 'PENDING' },
+    data: { status: 'REJECTED', resolvedAt: new Date() }
+  })
+
+  revalidatePath('/dashboard/pipeline')
+  revalidatePath('/dashboard')
+  return { success: true }
 }
 
 

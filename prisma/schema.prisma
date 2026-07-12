@@ -49,6 +49,7 @@ model Business {
   testimonials          Testimonial[]
   reviewRequests        ReviewRequest[]
   analyticsSnapshots    AnalyticsSnapshot[]
+  projectRequests       ProjectRequest[]
 
   @@map("businesses")
 }
@@ -153,6 +154,49 @@ model Project {
   @@index([statusStageId])
   @@unique([businessId, displayId])
   @@map("projects")
+}
+
+// -----------------------------------------------------------------------------
+// PRE-PRODUCTION: PROJECT REQUESTS
+// -----------------------------------------------------------------------------
+
+enum ProjectRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ProjectRequest {
+  id         String               @id @default(cuid())
+  businessId String
+  status     ProjectRequestStatus @default(PENDING)
+
+  // Client info (stored as-is from the intake form)
+  clientName       String
+  clientEmail      String
+  companyName      String?
+  phone            String?
+  industry         String?
+  preferredChannel String?
+
+  // Project info
+  projectTitle   String
+  projectType    String?
+  scriptText     String?  @db.Text
+  scriptLink     String?
+  rawFootageLink String?
+
+  // Resolution
+  resolvedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([status])
+  @@map("project_requests")
 }
 
 // -----------------------------------------------------------------------------
