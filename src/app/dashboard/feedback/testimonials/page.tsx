@@ -15,9 +15,14 @@ export default async function TestimonialsPage() {
     <div className="p-8 w-full mx-auto space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Testimonials</h1>
-        <Link href="/dashboard/feedback" className="text-sm font-medium hover:underline">
-          &larr; Back to Inbox
-        </Link>
+        <div className="flex items-center space-x-4">
+          <Link href="/dashboard/feedback" className="text-sm font-medium hover:underline">
+            &larr; Back to Inbox
+          </Link>
+          <Link href="/dashboard/feedback/requests" className="text-sm font-medium hover:underline">
+            View Requests &rarr;
+          </Link>
+        </div>
       </div>
       
       {testimonials.length === 0 ? (

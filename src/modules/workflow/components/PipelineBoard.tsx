@@ -31,6 +31,36 @@ type Project = {
 
 type SortMode = 'custom' | 'deadline' | 'priority'
 
+const isDeliveryStage = (stageName: string) => {
+  if (!stageName) return false
+  const name = stageName.toLowerCase()
+  return (
+    name.includes('deliver') ||
+    name.includes('done') ||
+    name.includes('complet') ||
+    name.includes('close') ||
+    name.includes('finish') ||
+    name.includes('final') ||
+    name.includes('launch') ||
+    name.includes('live') ||
+    name.includes('ship') ||
+    name.includes('release') ||
+    name.includes('handoff') ||
+    name.includes('handover') ||
+    name.includes('deploy') ||
+    name.includes('accept') ||
+    name.includes('approv') ||
+    name.includes('sign-off') ||
+    name.includes('signoff') ||
+    name.includes('archive') ||
+    name.includes('fulfill') ||
+    name.includes('wrap') ||
+    name.includes('conclude') ||
+    name.includes('resolve') ||
+    name.includes('settle')
+  )
+}
+
 export default function PipelineBoard({ stages, projects: initialProjects }: { stages: Stage[], projects: Project[] }) {
 
   const [isPending, startTransition] = useTransition()
@@ -134,9 +164,13 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
       updateProjectOrder(updates)
     })
 
-    // Check if moved to terminal stage to trigger feedback prompt
+    // Check if moved to terminal delivery stage to trigger feedback prompt
     const destStage = stages.find(s => s.id === destStageId)
-    if (destStage && (destStage.name.toLowerCase().includes('final delivery') || destStage.name.toLowerCase().includes('deliver'))) {
+    const isTerminal = destStage && destStage.orderIndex === Math.max(...stages.map(s => s.orderIndex))
+    const isDelivery = destStage && isDeliveryStage(destStage.name)
+    
+    // Trigger if it's BOTH the final stage AND it has a delivery keyword
+    if (destStage && (isTerminal && isDelivery)) {
       if (draggedProject && draggedProject.client) {
         setCompletedProject(draggedProject)
         setFeedbackPromptOpen(true)
@@ -285,11 +319,11 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                             const CustomIcon = getIconByName(stage.icon);
                             const FallbackIcon = getDefaultStageIcon(stage.name);
                             const ActiveIcon = CustomIcon || FallbackIcon;
-                            
+
                             // For backward compatibility with the old getStageIcon return structure, 
                             // we ensure color-coding for final/delivery stages by applying the class
-                            const isDelivery = stage.name.toLowerCase().includes('deliver') || stage.name.toLowerCase().includes('final');
-                            
+                            const isDelivery = isDeliveryStage(stage.name);
+
                             return <ActiveIcon className={`w-4 h-4 ${!CustomIcon && isDelivery ? 'text-green-500' : 'text-zinc-500 dark:text-zinc-400'}`} />
                           })()}
                         </div>
@@ -357,7 +391,11 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                                     })
 
                                     const destStage = stages.find(s => s.id === val)
-                                    if (destStage && (destStage.name.toLowerCase().includes('final delivery') || destStage.name.toLowerCase().includes('deliver'))) {
+                                    const isTerminal = destStage && destStage.orderIndex === Math.max(...stages.map(stage => stage.orderIndex))
+                                    const isDelivery = destStage && isDeliveryStage(destStage.name)
+                                    
+                                    // Trigger if it's BOTH the final stage AND it has a delivery keyword
+                                    if (destStage && (isTerminal && isDelivery)) {
                                       if (project.client) {
                                         setCompletedProject(project)
                                         setFeedbackPromptOpen(true)

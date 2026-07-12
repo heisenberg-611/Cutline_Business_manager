@@ -229,6 +229,24 @@ export async function resolveFeedbackAction(requestId: string) {
   revalidatePath('/dashboard')
 }
 
+export async function deleteFeedbackRequest(requestId: string) {
+  const { orgId } = await auth()
+  if (!orgId) throw new Error('Unauthorized')
+
+  const request = await prisma.feedbackRequest.findUnique({
+    where: { id: requestId, businessId: orgId }
+  })
+
+  if (request) {
+    await prisma.feedbackRequest.delete({
+      where: { id: requestId }
+    })
+  }
+
+  revalidatePath('/dashboard/feedback/requests')
+  revalidatePath('/dashboard/feedback')
+}
+
 // -----------------------------------------------------------------------------
 // PUBLIC ACTIONS (No Auth Required)
 // -----------------------------------------------------------------------------

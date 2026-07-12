@@ -17,9 +17,14 @@ export default async function FeedbackInboxPage() {
     <div className="p-8 w-full mx-auto space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Feedback Inbox</h1>
-        <Link href="/dashboard/feedback/testimonials" className="text-sm font-medium hover:underline">
-          View Testimonials &rarr;
-        </Link>
+        <div className="flex items-center space-x-4">
+          <Link href="/dashboard/feedback/requests" className="text-sm font-medium hover:underline">
+            View Requests &rarr;
+          </Link>
+          <Link href="/dashboard/feedback/testimonials" className="text-sm font-medium hover:underline">
+            View Testimonials &rarr;
+          </Link>
+        </div>
       </div>
       
       {responses.length === 0 ? (
