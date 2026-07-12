@@ -43,7 +43,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   const invoiceDataForPdf = await getInvoiceDataForPdf(id, orgId)
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full mx-auto space-y-6">
       <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-5">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/financials">
@@ -111,8 +111,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="md:col-span-2 xl:col-span-3 space-y-6">
           <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
             <h4 className="font-semibold mb-4">Line Items</h4>
             <div className="space-y-4">
@@ -148,7 +148,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 md:col-span-1 xl:col-span-1">
           <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
             <h4 className="font-semibold mb-4">Payment Summary</h4>
             <div className="space-y-3">

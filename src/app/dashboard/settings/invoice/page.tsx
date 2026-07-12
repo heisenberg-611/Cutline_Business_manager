@@ -23,7 +23,7 @@ export default async function InvoiceSettingsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="w-full space-y-6">
       <div>
         <h3 className="text-xl font-semibold leading-6 text-zinc-900 dark:text-zinc-100">
           Invoice & Email Settings
