@@ -21,8 +21,14 @@ export const metadata = {
   title: 'Projects',
 }
 
-export default async function ProjectsPage() {
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const { orgId } = await auth()
+  const resolvedSearchParams = await searchParams
+  const shouldOpenNewProject = resolvedSearchParams.newProject === '1'
   
   if (!orgId) {
     redirect('/dashboard/select-business')
@@ -46,7 +52,10 @@ export default async function ProjectsPage() {
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <ExportProjectsButton projects={projects} />
-          <ProjectForm clients={clients.map(c => ({ id: c.id, displayName: c.displayName }))} />
+          <ProjectForm
+            clients={clients.map(c => ({ id: c.id, displayName: c.displayName }))}
+            defaultOpen={shouldOpenNewProject}
+          />
         </div>
       </div>
       

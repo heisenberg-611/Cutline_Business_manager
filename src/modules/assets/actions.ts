@@ -146,7 +146,7 @@ export async function unlinkAssetFromProject(projectId: string, assetId: string)
   const project = await prisma.project.findFirst({ where: { id: projectId, businessId: orgId } })
   if (!project) throw new Error('Project not found')
 
-  await prisma.projectAsset.deleteMany({
+  await prisma.projectAsset.delete({
     where: {
       projectId_assetId: { projectId, assetId }
     }

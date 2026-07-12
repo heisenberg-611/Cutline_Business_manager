@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { createClient, checkClientEmailExists } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,12 +15,16 @@ import {
 } from '@/components/ui/dialog'
 import { Plus, AlertTriangle } from 'lucide-react'
 
-export function ClientForm() {
-  const [open, setOpen] = useState(false)
+export function ClientForm({ defaultOpen = false }: { defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [emailWarning, setEmailWarning] = useState<string | null>(null)
   const [checkingEmail, setCheckingEmail] = useState(false)
+
+  useEffect(() => {
+    if (defaultOpen) setOpen(true)
+  }, [defaultOpen])
 
   const handleEmailBlur = useCallback(async (e: React.FocusEvent<HTMLInputElement>) => {
     const email = e.target.value.trim()

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { createProject, checkProjectDuplicate } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,8 +21,8 @@ type Client = {
   displayName: string
 }
 
-export function ProjectForm({ clients }: { clients: Client[] }) {
-  const [open, setOpen] = useState(false)
+export function ProjectForm({ clients, defaultOpen = false }: { clients: Client[], defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null)
@@ -31,6 +31,10 @@ export function ProjectForm({ clients }: { clients: Client[] }) {
   const [clientId, setClientId] = useState('')
   const [priority, setPriority] = useState('')
   const [title, setTitle] = useState('')
+
+  useEffect(() => {
+    if (defaultOpen) setOpen(true)
+  }, [defaultOpen])
 
   const checkForDuplicate = useCallback(async (newTitle: string, newClientId: string) => {
     setDuplicateWarning(null)

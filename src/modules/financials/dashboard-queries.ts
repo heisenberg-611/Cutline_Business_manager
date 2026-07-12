@@ -94,6 +94,7 @@ export async function getAgingReport(businessId: string) {
 
 export async function getStudioHealth(businessId: string) {
   const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
   // 1. Fetch latest snapshot (cached via Prisma Accelerate for 1 hour)
   const snapshot = await prisma.analyticsSnapshot.findFirst({
@@ -104,19 +105,30 @@ export async function getStudioHealth(businessId: string) {
   })
 
   // 2. Live merge for intra-day sensitive data (Outstanding and Overdue)
-  const outstandingInvoices = await prisma.invoice.findMany({
-    where: {
-      businessId,
-      status: { in: ['SENT', 'PARTIALLY_PAID', 'OVERDUE'] }
-    },
-    select: { amountDueCents: true, status: true, dueDate: true },
-    cacheStrategy: { ttl: 60, swr: 60 }
-  })
+  const [outstandingInvoices, expenseTotal] = await Promise.all([
+    prisma.invoice.findMany({
+      where: {
+        businessId,
+        status: { in: ['SENT', 'PARTIALLY_PAID', 'OVERDUE'] }
+      },
+      select: { amountDueCents: true, status: true, dueDate: true },
+      cacheStrategy: { ttl: 60, swr: 60 }
+    }),
+    prisma.expense.aggregate({
+      where: {
+        businessId,
+        dateIncurred: { gte: startOfMonth, lte: now }
+      },
+      _sum: { amountCents: true },
+      cacheStrategy: { ttl: 60, swr: 60 }
+    })
+  ])
 
   const liveOutstanding = outstandingInvoices.reduce((sum, inv) => sum + inv.amountDueCents, 0)
   const liveOverdue = outstandingInvoices
     .filter(inv => inv.status === 'OVERDUE' || (inv.dueDate && inv.dueDate < now))
     .reduce((sum, inv) => sum + inv.amountDueCents, 0)
+  const expenseMTD = expenseTotal._sum.amountCents ?? 0
 
   const business = await prisma.business.findUnique({
     where: { id: businessId },
@@ -125,7 +137,6 @@ export async function getStudioHealth(businessId: string) {
 
   if (!snapshot) {
     // Fallback if no snapshot exists yet (e.g. cron hasn't run)
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
     const ninetyDaysAgo = new Date()
@@ -188,6 +199,7 @@ export async function getStudioHealth(businessId: string) {
       revenueMTD,
       revenueLastMonth: lastMonthRevenue,
       revenueDelta,
+      expenseMTD,
       outstanding: liveOutstanding,
       overdue: liveOverdue,
       utilization,
@@ -202,6 +214,7 @@ export async function getStudioHealth(businessId: string) {
     revenueMTD: snapshot.revenueMTDCents,
     revenueLastMonth: snapshot.revenueLastMonthCents,
     revenueDelta: snapshot.revenueDelta,
+    expenseMTD,
     outstanding: liveOutstanding, // Live merged
     overdue: liveOverdue,         // Live merged
     utilization: snapshot.utilization,

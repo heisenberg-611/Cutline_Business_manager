@@ -13,8 +13,14 @@ export const metadata = {
   title: 'Assets',
 }
 
-export default async function AssetsPage() {
+export default async function AssetsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const { orgId } = await auth()
+  const resolvedSearchParams = await searchParams
+  const shouldOpenNewAsset = resolvedSearchParams.newAsset === '1'
   
   if (!orgId) {
     redirect('/dashboard/select-business')
@@ -54,7 +60,7 @@ export default async function AssetsPage() {
             Track your music licenses, fonts, plugins, and stock footage across all projects.
           </p>
         </div>
-        <Dialog>
+        <Dialog key={shouldOpenNewAsset ? 'new-asset' : 'add-asset'} defaultOpen={shouldOpenNewAsset}>
           <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:pointer-events-none disabled:opacity-50 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 h-9 px-4 py-2">
             Add Asset
           </DialogTrigger>

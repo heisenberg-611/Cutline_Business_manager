@@ -87,7 +87,7 @@ export function AnalyticsDashboard() {
       ) : (
         <>
           {/* KPI Cards */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium text-zinc-500">Collected Revenue</CardTitle>
@@ -98,6 +98,21 @@ export function AnalyticsDashboard() {
               <CardContent>
                 <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                   {formatCurrency(data.metrics.totalRevenue, data.metrics.currency)}
+                </div>
+                <p className="text-xs text-zinc-500 mt-1">In the last {days} days</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium text-zinc-500">Total Expenses</CardTitle>
+                <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-red-600 dark:text-red-400 rotate-180" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                  {formatCurrency(data.metrics.totalExpenses, data.metrics.currency)}
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">In the last {days} days</p>
               </CardContent>
@@ -167,7 +182,36 @@ export function AnalyticsDashboard() {
                 </div>
               </CardContent>
             </Card>
-
+            {/* Expense Trend */}
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm col-span-1 md:col-span-2 lg:col-span-1">
+              <CardHeader>
+                <CardTitle className="text-lg">Expenses Trend</CardTitle>
+                <CardDescription>Daily expenses incurred over the selected period.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={data.expenseData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} dy={10} minTickGap={30} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => `$${val}`} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
+                        itemStyle={{ color: '#ef4444' }}
+                        formatter={(value: any) => [formatCurrency(value, data.metrics.currency), 'Expenses']}
+                      />
+                      <Area type="monotone" dataKey="amount" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
             {/* Project Volume */}
             <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm col-span-1 md:col-span-2 lg:col-span-1">
               <CardHeader>

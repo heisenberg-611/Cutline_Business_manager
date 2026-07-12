@@ -100,13 +100,39 @@ export async function getAnalyticsData(days: number = 30) {
     select: { defaultCurrency: true }
   })
 
+  // 4. Expenses Trend
+  const expenses = await prisma.expense.findMany({
+    where: {
+      businessId: orgId,
+      dateIncurred: { gte: startDate, lte: endDate }
+    },
+    select: { dateIncurred: true, amountCents: true }
+  })
+
+  const expenseMap: Record<string, number> = {}
+  daysInterval.forEach(day => {
+    expenseMap[format(day, 'MMM dd')] = 0
+  })
+
+  expenses.forEach(exp => {
+    const dateStr = format(exp.dateIncurred, 'MMM dd')
+    if (expenseMap[dateStr] !== undefined) {
+      expenseMap[dateStr] += (exp.amountCents / 100)
+    }
+  })
+
+  const expenseData = Object.entries(expenseMap).map(([date, amount]) => ({ date, amount }))
+  const totalExpenses = Object.values(expenseMap).reduce((a, b) => a + b, 0)
+
   return {
     volumeData,
     stageData,
     revenueData,
+    expenseData,
     metrics: {
       totalProjects,
       totalRevenue,
+      totalExpenses,
       activeProjectsCount,
       currency: business?.defaultCurrency || 'USD'
     }

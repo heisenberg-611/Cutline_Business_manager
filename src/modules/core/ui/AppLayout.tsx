@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { OrganizationSwitcher, UserButton, useAuth, useOrganization } from '@clerk/nextjs'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 
 const GlobalSearch = dynamic(
@@ -386,16 +386,39 @@ export function AppLayout({
         </div>
 
         {/* QUICK ACTIONS SLIDE-OUT PANEL */}
-        {isQuickActionsOpen && (
-          <>
-            <div
-              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity"
+        <AnimatePresence>
+          {isQuickActionsOpen && (
+            <motion.div
+              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               onClick={() => setIsQuickActionsOpen(false)}
             />
-            <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-white/10 shadow-2xl animate-in slide-in-from-right duration-200 ease-out-smooth">
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {isQuickActionsOpen && (
+            <motion.aside
+              aria-label="Quick Actions"
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-sm border-l border-zinc-200 bg-white shadow-2xl dark:border-white/10 dark:bg-zinc-950"
+              initial={{ x: '100%', opacity: 0.98 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0.98 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            >
               <div className="p-6">
-                <div className="flex items-center justify-between mb-8">
+                <div className="mb-8 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Quick Actions</h2>
+                  <button
+                    type="button"
+                    onClick={() => setIsQuickActionsOpen(false)}
+                    className="rounded-md p-2 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close Quick Actions</span>
+                  </button>
                 </div>
                 <div className="space-y-2">
                   {quickActions.length > 0 ? (
@@ -415,9 +438,9 @@ export function AppLayout({
                   )}
                 </div>
               </div>
-            </div>
-          </>
-        )}
+            </motion.aside>
+          )}
+        </AnimatePresence>
       </main>
 
       <GlobalSearch open={isCommandOpen} onOpenChange={setIsCommandOpen} />

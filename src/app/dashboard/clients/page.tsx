@@ -18,8 +18,14 @@ export const metadata = {
   title: 'Clients',
 }
 
-export default async function ClientsPage() {
+export default async function ClientsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const { orgId } = await auth()
+  const resolvedSearchParams = await searchParams
+  const shouldOpenNewClient = resolvedSearchParams.newClient === '1'
   
   if (!orgId) {
     redirect('/dashboard/select-business')
@@ -38,7 +44,7 @@ export default async function ClientsPage() {
             Manage your repeat clients, view their ratings, and track their lifetime value.
           </p>
         </div>
-        <ClientForm />
+        <ClientForm defaultOpen={shouldOpenNewClient} />
       </div>
       
       <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
