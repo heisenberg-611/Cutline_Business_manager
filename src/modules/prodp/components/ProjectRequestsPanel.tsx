@@ -23,6 +23,7 @@ interface ProjectRequest {
   scriptLink: string | null
   rawFootageLink: string | null
   createdAt: string
+  existingClient?: { id: string; displayName: string } | null
 }
 
 interface ProjectRequestsPanelProps {
@@ -150,7 +151,18 @@ export function ProjectRequestsPanel({ requests }: ProjectRequestsPanelProps) {
                       <div className="px-4 pb-4 space-y-4 border-t border-zinc-100 dark:border-zinc-800/50 pt-4">
                         {/* Client Info */}
                         <div className="space-y-2">
-                          <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Client Details</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Client Details</h4>
+                            {req.existingClient ? (
+                              <Badge variant="secondary" className="text-[10px] h-5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-none">
+                                Existing Client
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary" className="text-[10px] h-5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-none">
+                                New Client
+                              </Badge>
+                            )}
+                          </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                             <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
                               <User className="w-3.5 h-3.5 flex-shrink-0" />

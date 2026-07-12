@@ -58,10 +58,23 @@ export async function getPendingProjectRequests() {
   const { orgId } = await auth()
   if (!orgId) return []
 
-  return await prisma.projectRequest.findMany({
+  const requests = await prisma.projectRequest.findMany({
     where: { businessId: orgId, status: 'PENDING' },
     orderBy: { createdAt: 'desc' }
   })
+
+  // Check if client exists for each request
+  const enrichedRequests = await Promise.all(requests.map(async (req) => {
+    const existingClient = await prisma.client.findFirst({
+      where: { businessId: orgId, email: req.clientEmail }
+    })
+    return {
+      ...req,
+      existingClient: existingClient ? { id: existingClient.id, displayName: existingClient.displayName } : null
+    }
+  }))
+
+  return enrichedRequests
 }
 
 export async function approveProjectRequest(requestId: string) {

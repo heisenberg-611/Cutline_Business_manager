@@ -187,9 +187,9 @@ export function FinancialsTimeframeOverview() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
                     itemStyle={{ color: '#fff' }}
-                    formatter={(value: any, name: string) => [
+                    formatter={(value: any, name: any) => [
                       formatCurrency(value, data.metrics.currency), 
-                      name.charAt(0).toUpperCase() + name.slice(1)
+                      name ? String(name).charAt(0).toUpperCase() + String(name).slice(1) : ''
                     ]}
                   />
                   <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
