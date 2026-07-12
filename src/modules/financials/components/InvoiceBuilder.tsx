@@ -128,7 +128,7 @@ export default function InvoiceBuilder({
                 {clientId ? clients.find(c => c.id === clientId)?.displayName : ""}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent align="end" alignItemWithTrigger={false}>
+            <SelectContent align="start" alignItemWithTrigger={false}>
               {clients.map(c => (
                 <SelectItem key={c.id} value={c.id} className="whitespace-normal break-words [&_[data-slot=select-item]]:whitespace-normal">
                   <span className="whitespace-normal break-words text-left block w-full">{c.displayName}</span>
@@ -166,7 +166,7 @@ export default function InvoiceBuilder({
                  {projectId ? projects.find(p => p.id === projectId)?.title : ""}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent align="end" alignItemWithTrigger={false}>
+            <SelectContent align="start" alignItemWithTrigger={false}>
               {availableProjects.map(p => (
                 <SelectItem key={p.id} value={p.id} className="whitespace-normal break-words [&_[data-slot=select-item]]:whitespace-normal">
                   <span className="whitespace-normal break-words text-left block w-full">{p.title}</span>

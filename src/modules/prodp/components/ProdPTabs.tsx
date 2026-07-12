@@ -146,7 +146,7 @@ export function ProdPTabs({ businessId, activeProjects, reviewRequests }: { busi
                         })() : undefined}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent align="end" alignItemWithTrigger={false}>
+                    <SelectContent align="start" alignItemWithTrigger={false}>
                       {activeProjects.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.title} ({p.client?.displayName})</SelectItem>
                       ))}

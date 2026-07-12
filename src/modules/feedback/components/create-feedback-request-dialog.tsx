@@ -69,7 +69,7 @@ export function CreateFeedbackRequestDialog({
                   : undefined}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent align="end" alignItemWithTrigger={false}>
+            <SelectContent align="start" alignItemWithTrigger={false}>
               {projects.length === 0 && (
                 <div className="p-2 text-sm text-muted-foreground text-center">No projects available</div>
               )}

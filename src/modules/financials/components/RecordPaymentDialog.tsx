@@ -76,7 +76,7 @@ export function RecordPaymentDialog({ invoiceId, amountDueCents, currency = 'USD
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent align="end" alignItemWithTrigger={false}>
+              <SelectContent align="start" alignItemWithTrigger={false}>
                 <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
                 <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
                 <SelectItem value="CASH">Cash</SelectItem>
