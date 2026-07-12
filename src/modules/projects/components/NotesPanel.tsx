@@ -70,7 +70,7 @@ export function NotesPanel({ projectId, notes }: { projectId: string, notes: Not
                  type === 'todo' ? 'To-Do' : 'Select'}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent align="end" alignItemWithTrigger={false}>
               <SelectItem value="idea">Idea</SelectItem>
               <SelectItem value="client">Client Note</SelectItem>
               <SelectItem value="shot">Shot Note</SelectItem>

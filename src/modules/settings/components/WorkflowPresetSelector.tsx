@@ -83,7 +83,7 @@ export function WorkflowPresetSelector() {
               <div className="flex flex-wrap gap-1.5">
                 {preset.pipelineStages.slice(0, 3).map((stage, i) => (
                   <span key={i} className="text-[10px] font-medium px-2 py-1 bg-zinc-100 dark:bg-zinc-900/50 rounded-md text-zinc-600 dark:text-zinc-400 border border-transparent group-hover:border-indigo-100 dark:group-hover:border-indigo-900/50 group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/20 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-all duration-300">
-                    {stage}
+                    {stage.name}
                   </span>
                 ))}
                 {preset.pipelineStages.length > 3 && (
@@ -120,12 +120,12 @@ export function WorkflowPresetSelector() {
               <div className="flex flex-wrap gap-2">
                 {selectedPreset?.pipelineStages.map((stage, i) => (
                   <span key={i} className="text-xs px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-md text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10">
-                    {stage}
+                    {stage.name}
                   </span>
                 ))}
               </div>
               <p className="text-amber-600 dark:text-amber-500 font-medium text-sm mt-2">
-                ⚠️ Warning: All existing projects will be automatically moved to the first stage ("{selectedPreset?.pipelineStages[0]}") to prevent data loss.
+                ⚠️ Warning: All existing projects will be automatically moved to the first stage ("{selectedPreset?.pipelineStages[0].name}") to prevent data loss.
               </p>
             </div>
           </DialogHeader>

@@ -75,9 +75,14 @@ export function AssetPanel({ projectId, currentAssets, availableAssets }: { proj
               <div className="space-y-2">
                 <Select value={selectedAssetId} onValueChange={val => setSelectedAssetId(val || '')}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select an asset from library" />
+                    <SelectValue placeholder="Select an asset from library">
+                      {selectedAssetId ? (() => {
+                        const a = unlinkedAssets.find(x => x.id === selectedAssetId);
+                        return a ? `${a.name} (${a.type})` : undefined;
+                      })() : undefined}
+                    </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent align="end" alignItemWithTrigger={false}>
                     {unlinkedAssets.map(asset => (
                       <SelectItem key={asset.id} value={asset.id}>
                         {asset.name} ({asset.type})

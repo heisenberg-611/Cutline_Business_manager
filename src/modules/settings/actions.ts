@@ -76,7 +76,7 @@ export async function updateInvoiceSettings(data: {
 /**
  * Add a new workflow stage to the business's pipeline template.
  */
-export async function addWorkflowStage(name: string) {
+export async function addWorkflowStage(name: string, icon?: string | null) {
   const { orgId } = await auth()
   if (!orgId) throw new Error('Unauthorized')
 
@@ -94,6 +94,7 @@ export async function addWorkflowStage(name: string) {
       templateId: template.id,
       name,
       orderIndex: nextIndex,
+      icon,
     },
   })
 
@@ -102,9 +103,9 @@ export async function addWorkflowStage(name: string) {
 }
 
 /**
- * Rename an existing workflow stage.
+ * Update an existing workflow stage.
  */
-export async function renameWorkflowStage(stageId: string, newName: string) {
+export async function updateWorkflowStage(stageId: string, updates: { name?: string, icon?: string | null }) {
   const { orgId } = await auth()
   if (!orgId) throw new Error('Unauthorized')
 
@@ -116,7 +117,7 @@ export async function renameWorkflowStage(stageId: string, newName: string) {
 
   await prisma.workflowStage.update({
     where: { id: stageId },
-    data: { name: newName },
+    data: updates,
   })
 
   revalidatePath('/dashboard/settings')
@@ -231,11 +232,12 @@ export async function applyWorkflowPreset(presetId: string) {
 
   // 3. Create new stages
   const newStages = await Promise.all(
-    preset.pipelineStages.map((name, index) =>
+    preset.pipelineStages.map((stage, index) =>
       prisma.workflowStage.create({
         data: {
           templateId: template.id,
-          name,
+          name: stage.name,
+          icon: stage.icon,
           orderIndex: index,
         },
       })

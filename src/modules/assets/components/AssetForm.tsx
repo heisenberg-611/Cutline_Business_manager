@@ -84,7 +84,7 @@ export function AssetForm({ asset, onSuccess, currency = 'USD' }: { asset?: Asse
             <SelectTrigger>
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent >
               {ASSET_TYPES.map(type => (
                 <SelectItem key={type} value={type}>{type}</SelectItem>
               ))}

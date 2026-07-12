@@ -1,4 +1,5 @@
 import { NavPreference } from '@/modules/core/ui/navigation'
+import { PipelineIconName } from '@/lib/icons'
 
 export type WorkflowPreset = {
   id: string
@@ -6,7 +7,7 @@ export type WorkflowPreset = {
   description: string
   icon: string
   navPreferences: NavPreference[]
-  pipelineStages: string[]
+  pipelineStages: { name: string; icon: PipelineIconName }[]
 }
 
 export const WORKFLOW_PRESETS: WorkflowPreset[] = [
@@ -23,12 +24,18 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
       { href: '/dashboard/financials', visible: true },
       { href: '/dashboard/feedback', visible: true },
       { href: '/dashboard/archive', visible: true },
-      // Hidden items
       { href: '/dashboard/prodp', visible: false },
       { href: '/dashboard/analytics', visible: true },
       { href: '/dashboard/assets', visible: false },
     ],
-    pipelineStages: ['Backlog', 'To Do', 'In Progress', 'Code Review', 'Testing', 'Deployed'],
+    pipelineStages: [
+      { name: 'Backlog', icon: 'Library' },
+      { name: 'To Do', icon: 'CheckCircle' },
+      { name: 'In Progress', icon: 'Zap' },
+      { name: 'Code Review', icon: 'GitBranch' },
+      { name: 'Testing', icon: 'Bug' },
+      { name: 'Deployed', icon: 'Rocket' }
+    ],
   },
   {
     id: 'video-editor',
@@ -45,10 +52,17 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
       { href: '/dashboard/financials', visible: true },
       { href: '/dashboard/feedback', visible: true },
       { href: '/dashboard/archive', visible: true },
-      // Hidden items
       { href: '/dashboard/analytics', visible: true },
     ],
-    pipelineStages: ['Ingestion', 'Assembly', 'Rough Cut', 'VFX & Color', 'Sound Design', 'Client Review', 'Final Render'],
+    pipelineStages: [
+      { name: 'Ingestion', icon: 'Database' },
+      { name: 'Assembly', icon: 'Layers' },
+      { name: 'Rough Cut', icon: 'Scissors' },
+      { name: 'VFX & Color', icon: 'Sparkles' },
+      { name: 'Sound Design', icon: 'AudioWaveform' },
+      { name: 'Client Review', icon: 'MonitorPlay' },
+      { name: 'Final Render', icon: 'PackageCheck' }
+    ],
   },
   {
     id: 'writer',
@@ -63,12 +77,19 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
       { href: '/dashboard/financials', visible: true },
       { href: '/dashboard/feedback', visible: true },
       { href: '/dashboard/archive', visible: true },
-      // Hidden items
       { href: '/dashboard/prodp', visible: false },
       { href: '/dashboard/analytics', visible: true },
       { href: '/dashboard/assets', visible: false },
     ],
-    pipelineStages: ['Ideation', 'Outline', 'First Draft', 'Self-Edit', 'Client Review', 'Final Revisions', 'Published'],
+    pipelineStages: [
+      { name: 'Ideation', icon: 'Star' },
+      { name: 'Outline', icon: 'Layout' },
+      { name: 'First Draft', icon: 'PenLine' },
+      { name: 'Self-Edit', icon: 'Edit3' },
+      { name: 'Client Review', icon: 'MessageSquare' },
+      { name: 'Final Revisions', icon: 'CheckCircle' },
+      { name: 'Published', icon: 'BookOpen' }
+    ],
   },
   {
     id: 'production-manager',
@@ -83,12 +104,17 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
       { href: '/dashboard/financials', visible: true },
       { href: '/dashboard/analytics', visible: true },
       { href: '/dashboard/archive', visible: true },
-      // Hidden items
       { href: '/dashboard/prodp', visible: false },
       { href: '/dashboard/assets', visible: false },
       { href: '/dashboard/feedback', visible: false },
     ],
-    pipelineStages: ['Pre-Production', 'Casting/Scouting', 'Production', 'Post-Production', 'Final Delivery'],
+    pipelineStages: [
+      { name: 'Pre-Production', icon: 'ClipboardList' },
+      { name: 'Casting/Scouting', icon: 'Users' },
+      { name: 'Production', icon: 'Film' },
+      { name: 'Post-Production', icon: 'Scissors' },
+      { name: 'Final Delivery', icon: 'PackageCheck' }
+    ],
   },
   {
     id: 'business-owner',
@@ -103,12 +129,18 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/archive', visible: true },
-      // Hidden items
       { href: '/dashboard/prodp', visible: false },
       { href: '/dashboard/assets', visible: false },
       { href: '/dashboard/feedback', visible: false },
     ],
-    pipelineStages: ['Lead', 'Negotiation', 'Contract Sent', 'Active', 'Invoiced', 'Paid'],
+    pipelineStages: [
+      { name: 'Lead', icon: 'Users' },
+      { name: 'Negotiation', icon: 'MessageSquare' },
+      { name: 'Contract Sent', icon: 'FileText' },
+      { name: 'Active', icon: 'Activity' },
+      { name: 'Invoiced', icon: 'DollarSign' },
+      { name: 'Paid', icon: 'CheckCircle' }
+    ],
   },
   {
     id: 'graphic-designer',
@@ -124,11 +156,17 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
       { href: '/dashboard/clients', visible: true },
       { href: '/dashboard/financials', visible: true },
       { href: '/dashboard/archive', visible: true },
-      // Hidden items
       { href: '/dashboard/prodp', visible: false },
       { href: '/dashboard/analytics', visible: true },
     ],
-    pipelineStages: ['Moodboard', 'Sketch / Concept', 'Vectoring / Rendering', 'Color & Polish', 'Client Review', 'Final Delivery'],
+    pipelineStages: [
+      { name: 'Moodboard', icon: 'Layout' },
+      { name: 'Sketch / Concept', icon: 'PenTool' },
+      { name: 'Vectoring / Rendering', icon: 'Hexagon' },
+      { name: 'Color & Polish', icon: 'Palette' },
+      { name: 'Client Review', icon: 'MonitorPlay' },
+      { name: 'Final Delivery', icon: 'PackageCheck' }
+    ],
   },
   {
     id: 'audio-engineer',
@@ -143,12 +181,18 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
       { href: '/dashboard/clients', visible: true },
       { href: '/dashboard/financials', visible: true },
       { href: '/dashboard/archive', visible: true },
-      // Hidden items
       { href: '/dashboard/prodp', visible: false },
       { href: '/dashboard/analytics', visible: true },
       { href: '/dashboard/feedback', visible: false },
     ],
-    pipelineStages: ['Composition / Prep', 'Tracking / Recording', 'Editing', 'Mixing', 'Client Feedback', 'Mastering'],
+    pipelineStages: [
+      { name: 'Composition / Prep', icon: 'Music' },
+      { name: 'Tracking / Recording', icon: 'Mic' },
+      { name: 'Editing', icon: 'Scissors' },
+      { name: 'Mixing', icon: 'SlidersHorizontal' },
+      { name: 'Client Feedback', icon: 'MessageSquare' },
+      { name: 'Mastering', icon: 'Speaker' }
+    ],
   },
   {
     id: 'uiux-designer',
@@ -163,12 +207,18 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
       { href: '/dashboard/clients', visible: true },
       { href: '/dashboard/financials', visible: true },
       { href: '/dashboard/archive', visible: true },
-      // Hidden items
       { href: '/dashboard/prodp', visible: false },
       { href: '/dashboard/analytics', visible: true },
       { href: '/dashboard/assets', visible: false },
     ],
-    pipelineStages: ['Discovery / Research', 'Wireframes', 'High-Fidelity', 'Prototyping', 'Usability Testing', 'Dev Handoff'],
+    pipelineStages: [
+      { name: 'Discovery / Research', icon: 'Search' },
+      { name: 'Wireframes', icon: 'Layout' },
+      { name: 'High-Fidelity', icon: 'Image' },
+      { name: 'Prototyping', icon: 'Component' },
+      { name: 'Usability Testing', icon: 'Users' },
+      { name: 'Dev Handoff', icon: 'Code' }
+    ],
   },
   {
     id: 'photographer',
@@ -183,11 +233,95 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
       { href: '/dashboard/clients', visible: true },
       { href: '/dashboard/financials', visible: true },
       { href: '/dashboard/archive', visible: true },
-      // Hidden items
       { href: '/dashboard/prodp', visible: false },
       { href: '/dashboard/analytics', visible: true },
       { href: '/dashboard/feedback', visible: false },
     ],
-    pipelineStages: ['Pre-Shoot Planning', 'Shoot Day', 'Culling', 'Color Correction', 'Retouching', 'Gallery Delivery'],
+    pipelineStages: [
+      { name: 'Pre-Shoot Planning', icon: 'ClipboardList' },
+      { name: 'Shoot Day', icon: 'Film' },
+      { name: 'Culling', icon: 'Layers' },
+      { name: 'Color Correction', icon: 'Palette' },
+      { name: 'Retouching', icon: 'Sparkles' },
+      { name: 'Gallery Delivery', icon: 'PackageCheck' }
+    ],
+  },
+  {
+    id: 'teacher',
+    name: 'Teacher / Educator',
+    description: 'Designed for educators managing classes, assignments, and student feedback.',
+    icon: '🧑‍🏫',
+    navPreferences: [
+      { href: '/dashboard', visible: true },
+      { href: '/dashboard/projects', visible: true },
+      { href: '/dashboard/pipeline', visible: true },
+      { href: '/dashboard/clients', visible: true },
+      { href: '/dashboard/financials', visible: true },
+      { href: '/dashboard/analytics', visible: true },
+      { href: '/dashboard/archive', visible: true },
+      { href: '/dashboard/prodp', visible: false },
+      { href: '/dashboard/assets', visible: false },
+      { href: '/dashboard/feedback', visible: false },
+    ],
+    pipelineStages: [
+      { name: 'Planning', icon: 'Book' },
+      { name: 'Material Prep', icon: 'Library' },
+      { name: 'In Progress', icon: 'Activity' },
+      { name: 'Grading', icon: 'CheckCircle' },
+      { name: 'Review', icon: 'MessageSquare' },
+      { name: 'Completed', icon: 'GraduationCap' }
+    ],
+  },
+  {
+    id: 'student',
+    name: 'Student / Learner',
+    description: 'Optimized for tracking coursework, assignments, and personal study projects.',
+    icon: '🎓',
+    navPreferences: [
+      { href: '/dashboard', visible: true },
+      { href: '/dashboard/projects', visible: true },
+      { href: '/dashboard/pipeline', visible: true },
+      { href: '/dashboard/analytics', visible: true },
+      { href: '/dashboard/archive', visible: true },
+      { href: '/dashboard/clients', visible: false },
+      { href: '/dashboard/financials', visible: false },
+      { href: '/dashboard/prodp', visible: false },
+      { href: '/dashboard/assets', visible: false },
+      { href: '/dashboard/feedback', visible: false },
+    ],
+    pipelineStages: [
+      { name: 'Not Started', icon: 'CircleDashed' },
+      { name: 'Research / Study', icon: 'Search' },
+      { name: 'In Progress', icon: 'Zap' },
+      { name: 'Review', icon: 'MessageSquare' },
+      { name: 'Submitted', icon: 'FileText' },
+      { name: 'Graded', icon: 'GraduationCap' }
+    ],
+  },
+  {
+    id: 'researcher',
+    name: 'Researcher / Analyst',
+    description: 'Ideal for managing research projects, data collection, literature reviews, and publications.',
+    icon: '🔬',
+    navPreferences: [
+      { href: '/dashboard', visible: true },
+      { href: '/dashboard/projects', visible: true },
+      { href: '/dashboard/pipeline', visible: true },
+      { href: '/dashboard/assets', visible: true },
+      { href: '/dashboard/analytics', visible: true },
+      { href: '/dashboard/archive', visible: true },
+      { href: '/dashboard/clients', visible: false },
+      { href: '/dashboard/financials', visible: false },
+      { href: '/dashboard/prodp', visible: false },
+      { href: '/dashboard/feedback', visible: false },
+    ],
+    pipelineStages: [
+      { name: 'Literature Review', icon: 'Library' },
+      { name: 'Data Collection', icon: 'Database' },
+      { name: 'Data Analysis', icon: 'Activity' },
+      { name: 'Drafting', icon: 'PenLine' },
+      { name: 'Peer Review', icon: 'MessageSquare' },
+      { name: 'Published', icon: 'BookOpen' }
+    ],
   },
 ]

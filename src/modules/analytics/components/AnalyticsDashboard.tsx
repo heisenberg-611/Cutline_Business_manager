@@ -53,20 +53,20 @@ export function AnalyticsDashboard() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      
+
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Analytics Overview</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">Track your workflow performance and financial growth.</p>
         </div>
-        
-        <div className="w-full sm:w-48">
+
+        <div className="self-end sm:self-auto ml-auto">
           <Select value={days} onValueChange={(val) => { if (val) setDays(val) }}>
-            <SelectTrigger className="bg-white dark:bg-zinc-950">
+            <SelectTrigger className="w-[120px] bg-white dark:bg-zinc-950">
               <SelectValue placeholder="Select timeframe" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent align="end" alignItemWithTrigger={false}>
               <SelectItem value="7">Last 7 Days</SelectItem>
               <SelectItem value="30">Last 30 Days</SelectItem>
               <SelectItem value="90">Last 90 Days</SelectItem>
@@ -136,7 +136,7 @@ export function AnalyticsDashboard() {
 
           {/* Charts Grid */}
           <div className="grid gap-6 md:grid-cols-2">
-            
+
             {/* Revenue Trend */}
             <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm col-span-1 md:col-span-2 lg:col-span-1">
               <CardHeader>
@@ -149,14 +149,14 @@ export function AnalyticsDashboard() {
                     <AreaChart data={data.revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
                       <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} dy={10} minTickGap={30} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => `$${val}`} />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
                         itemStyle={{ color: '#10b981' }}
                         formatter={(value: any) => [formatCurrency(value, data.metrics.currency), 'Revenue']}
@@ -181,7 +181,7 @@ export function AnalyticsDashboard() {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
                       <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} dy={10} minTickGap={30} />
                       <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
                         itemStyle={{ color: '#6366f1' }}
                         cursor={{ fill: '#3f3f46', opacity: 0.1 }}
@@ -204,7 +204,7 @@ export function AnalyticsDashboard() {
                   {data.stageData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Tooltip 
+                        <Tooltip
                           contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
                           itemStyle={{ color: '#fff' }}
                         />

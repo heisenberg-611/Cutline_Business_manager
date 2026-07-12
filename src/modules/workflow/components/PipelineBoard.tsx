@@ -9,69 +9,14 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { format } from 'date-fns'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import {
-  Film,
-  RotateCcw,
-  Clapperboard,
-  Scissors,
-  SlidersHorizontal,
-  Palette,
-  AudioWaveform,
-  MonitorPlay,
-  MessageSquare,
-  PackageCheck,
-  CircleDashed,
-  Layers,
-  Hexagon,
-  Triangle,
-  Square,
-  Component,
-  Workflow,
-  Zap,
-  Activity,
-  Star,
-  Sparkles,
-  Target,
-  Rocket
-} from 'lucide-react'
-
-const DYNAMIC_ICONS = [
-  Layers, Hexagon, Triangle, Square, Component, Workflow,
-  Zap, Activity, Star, Sparkles, Target, Rocket, CircleDashed
-]
-
-/**
- * Maps stage names → Lucide icons for the pipeline columns.
- * Covers all 8 default stages:
- *   Raw Footage, Sync & Prep, Rough Cut, Fine Cut,
- *   Color & Sound, Client Review, Revisions, Final Delivery
- */
-const getStageIcon = (name: string) => {
-  const lower = name.toLowerCase()
-  if (lower.includes('raw') || lower.includes('footage')) return <Film className="w-4 h-4" />
-  if (lower.includes('sync') || lower.includes('prep')) return <Clapperboard className="w-4 h-4" />
-  if (lower.includes('rough')) return <Scissors className="w-4 h-4" />
-  if (lower.includes('fine')) return <SlidersHorizontal className="w-4 h-4" />
-  if (lower.includes('color') || lower.includes('sound')) return <Palette className="w-4 h-4" />
-  if (lower.includes('review')) return <MonitorPlay className="w-4 h-4" />
-  if (lower.includes('revision')) return <MessageSquare className="w-4 h-4" />
-  if (lower.includes('deliver') || lower.includes('final')) return <PackageCheck className="w-4 h-4 text-green-500" />
-
-  // Dynamic system: Hash the stage name to deterministically pick a cool icon
-  let hash = 0
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  const index = Math.abs(hash) % DYNAMIC_ICONS.length
-  const IconComponent = DYNAMIC_ICONS[index]
-
-  return <IconComponent className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-}
+import { RotateCcw } from 'lucide-react'
+import { getIconByName, getDefaultStageIcon } from '@/lib/icons'
 
 type Stage = {
   id: string
   name: string
   orderIndex: number
+  icon?: string | null
 }
 
 type Project = {
@@ -290,7 +235,7 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
           <SelectTrigger className="w-[140px] h-9 text-sm bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800">
             <SelectValue placeholder="Height" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent align="end" alignItemWithTrigger={false}>
             <SelectItem value="50vh" className="text-sm">Height: 50%</SelectItem>
             <SelectItem value="65vh" className="text-sm">Height: 65%</SelectItem>
             <SelectItem value="80vh" className="text-sm">Height: 80%</SelectItem>
@@ -302,7 +247,7 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
           <SelectTrigger className="w-[180px] h-9 text-sm bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800">
             <SelectValue placeholder="Sort by..." />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent align="end" alignItemWithTrigger={false}>
             <SelectItem value="custom" className="text-sm">Custom Order</SelectItem>
             <SelectItem value="deadline" className="text-sm">Due Date</SelectItem>
             <SelectItem value="priority" className="text-sm">Priority</SelectItem>
@@ -336,7 +281,17 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                     <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950/50 rounded-t-xl">
                       <div className="flex items-center gap-2">
                         <div className="text-zinc-500 dark:text-zinc-400">
-                          {getStageIcon(stage.name)}
+                          {(() => {
+                            const CustomIcon = getIconByName(stage.icon);
+                            const FallbackIcon = getDefaultStageIcon(stage.name);
+                            const ActiveIcon = CustomIcon || FallbackIcon;
+                            
+                            // For backward compatibility with the old getStageIcon return structure, 
+                            // we ensure color-coding for final/delivery stages by applying the class
+                            const isDelivery = stage.name.toLowerCase().includes('deliver') || stage.name.toLowerCase().includes('final');
+                            
+                            return <ActiveIcon className={`w-4 h-4 ${!CustomIcon && isDelivery ? 'text-green-500' : 'text-zinc-500 dark:text-zinc-400'}`} />
+                          })()}
                         </div>
                         <h4 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">{stage.name}</h4>
                       </div>
@@ -414,7 +369,7 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                                   <SelectTrigger className="h-7 text-xs bg-transparent border-dashed">
                                     <SelectValue>{stage.name}</SelectValue>
                                   </SelectTrigger>
-                                  <SelectContent>
+                                  <SelectContent align="end" alignItemWithTrigger={false}>
                                     {stages.map(s => (
                                       <SelectItem key={s.id} value={s.id} className="text-xs">{s.name}</SelectItem>
                                     ))}

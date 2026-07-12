@@ -177,6 +177,7 @@ model WorkflowStage {
   orderIndex     Int
   estimatedHours Int?
   billingTrigger Boolean @default(false)
+  icon           String?
 
   template WorkflowTemplate      @relation(fields: [templateId], references: [id], onDelete: Cascade)
   projects Project[]

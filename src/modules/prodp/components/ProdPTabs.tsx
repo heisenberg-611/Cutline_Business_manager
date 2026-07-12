@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createReviewRequest, deleteReviewRequest, resolveReviewRequest } from '../actions'
 import { getAppUrl } from '@/lib/utils'
 import { Copy, ExternalLink, Check, Trash2 } from 'lucide-react'
@@ -136,17 +137,21 @@ export function ProdPTabs({ businessId, activeProjects, reviewRequests }: { busi
               <form onSubmit={handleGenerateReview} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Select Active Project</Label>
-                  <select 
-                    className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:ring-zinc-300"
-                    value={selectedProjectId}
-                    onChange={(e) => setSelectedProjectId(e.target.value)}
-                    required
-                  >
-                    <option value="" disabled>Select a project...</option>
-                    {activeProjects.map(p => (
-                      <option key={p.id} value={p.id}>{p.title} ({p.client?.displayName})</option>
-                    ))}
-                  </select>
+                  <Select value={selectedProjectId} onValueChange={(val) => { if (val) setSelectedProjectId(val) }} required>
+                    <SelectTrigger className="w-full bg-white dark:bg-zinc-950">
+                      <SelectValue placeholder="Select a project...">
+                        {selectedProjectId ? (() => {
+                          const p = activeProjects.find(x => x.id === selectedProjectId);
+                          return p ? `${p.title} (${p.client?.displayName})` : undefined;
+                        })() : undefined}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent align="end" alignItemWithTrigger={false}>
+                      {activeProjects.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.title} ({p.client?.displayName})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Draft Link (Optional)</Label>

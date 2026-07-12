@@ -79,7 +79,7 @@ export function ProjectForm({ clients }: { clients: Client[] }) {
                   {clients.find(c => c.id === clientId)?.displayName}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="end" alignItemWithTrigger={false}>
                 {clients.map(c => (
                   <SelectItem key={c.id} value={c.id}>{c.displayName}</SelectItem>
                 ))}
@@ -100,7 +100,7 @@ export function ProjectForm({ clients }: { clients: Client[] }) {
                   {priority}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="end" alignItemWithTrigger={false}>
                 <SelectItem value="High">High</SelectItem>
                 <SelectItem value="Medium">Medium</SelectItem>
                 <SelectItem value="Low">Low</SelectItem>
