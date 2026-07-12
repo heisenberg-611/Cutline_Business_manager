@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { DeleteFeedbackRequestButton } from '@/modules/feedback/components/delete-feedback-request-button'
 import { ResendFeedbackEmailButton } from '@/modules/feedback/components/resend-feedback-email-button'
 import { CreateFeedbackRequestDialog } from '@/modules/feedback/components/create-feedback-request-dialog'
+import { CopyableLink } from '@/modules/feedback/components/copyable-link'
 import { getAppUrl } from '@/lib/utils'
 
 export const metadata = {
@@ -68,9 +69,8 @@ export default async function FeedbackRequestsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-sm text-muted-foreground break-all bg-muted p-2 rounded-md">
-                  <strong>Link:</strong> {`${appUrl}/feedback/${request.token}`}
-                </div>
+                <div className="text-sm font-medium mb-1">Feedback Link</div>
+                <CopyableLink url={`${appUrl}/feedback/${request.token}`} />
               </CardContent>
             </Card>
           ))}
