@@ -275,6 +275,12 @@ export async function recordPayment(invoiceId: string, input: z.infer<typeof Pay
     const invoice = await tx.invoice.findFirst({ where: { id: invoiceId, businessId: orgId } })
     if (!invoice) throw new Error('Invoice not found')
     if (invoice.status === 'VOID') throw new Error('Cannot pay a voided invoice')
+    if (invoice.status === 'PAID') throw new Error('Invoice is already fully paid')
+
+    // Guard against overpayment
+    if (data.amountCents > invoice.amountDueCents) {
+      throw new Error(`Payment amount (${data.amountCents}) exceeds remaining balance (${invoice.amountDueCents}). Please enter an amount up to ${invoice.amountDueCents} cents.`)
+    }
 
     const paymentDate = data.paidAt ? new Date(data.paidAt) : new Date()
 

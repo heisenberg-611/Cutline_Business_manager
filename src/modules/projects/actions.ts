@@ -53,8 +53,12 @@ export async function createProject(data: FormData) {
 
   const deadline = deadlineStr ? new Date(deadlineStr) : null
 
-  const projectCount = await prisma.project.count({ where: { businessId: orgId } })
-  const displayId = `PRJ-${String(projectCount + 1).padStart(3, '0')}`
+  const business = await prisma.business.update({
+    where: { id: orgId },
+    data: { projectSequence: { increment: 1 } },
+    select: { projectSequence: true }
+  })
+  const displayId = `PRJ-${String(business.projectSequence).padStart(3, '0')}`
 
   const template = await ensureDefaultTemplate(orgId)
   const firstStageId = template?.stages[0]?.id || null

@@ -2,6 +2,7 @@
 
 import prisma from '@/modules/core/db/prisma'
 import { randomBytes } from 'crypto'
+import { withUniqueToken } from '@/lib/utils/unique-token'
 import { createNotification, broadcastNotification } from '@/modules/notifications/actions'
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
@@ -19,96 +20,108 @@ export async function submitIntakeForm(businessId: string, data: {
   scriptLink: string,
   rawFootageLink: string
 }) {
-  // Find or create client
-  let client = await prisma.client.findFirst({
-    where: { businessId, email: data.clientEmail.toLowerCase() }
-  })
-
-  if (!client) {
-    const clientCount = await prisma.client.count({ where: { businessId } })
-    const displayId = `CL-${String(clientCount + 1).padStart(3, '0')}`
-    
-    client = await prisma.client.create({
-      data: {
-        businessId,
-        displayId,
-        displayName: data.clientName,
-        email: data.clientEmail.toLowerCase(),
-        companyName: data.companyName,
-        phone: data.phone,
-        industry: data.industry,
-        preferredChannel: data.preferredChannel,
-      }
-    })
-  } else {
-    client = await prisma.client.update({
-      where: { id: client.id },
-      data: {
-        displayName: data.clientName,
-        ...(data.companyName && { companyName: data.companyName }),
-        ...(data.phone && { phone: data.phone }),
-        ...(data.industry && { industry: data.industry }),
-        ...(data.preferredChannel && { preferredChannel: data.preferredChannel }),
-      }
-    })
-  }
-
-  // Find default workflow stage (Pre-production usually)
+  // Find default workflow stage (read-only, safe outside transaction)
   const template = await prisma.workflowTemplate.findFirst({
     where: { businessId },
     include: { stages: { orderBy: { orderIndex: 'asc' } } }
   })
-  
   const firstStage = template?.stages[0]
 
-  // Create Project
-  const projectCount = await prisma.project.count({ where: { businessId } })
-  const projectDisplayId = `PRJ-${String(projectCount + 1).padStart(3, '0')}`
-  
-  const project = await prisma.project.create({
-    data: {
-      businessId,
-      displayId: projectDisplayId,
-      clientId: client.id,
-      title: data.projectTitle,
-      type: data.projectType || 'Standard',
-      statusStageId: firstStage?.id || null,
+  // All writes in a single transaction — partial failure rolls back everything
+  const { client, project } = await prisma.$transaction(async (tx) => {
+    // Find or create client
+    let client = await tx.client.findFirst({
+      where: { businessId, email: data.clientEmail.toLowerCase() }
+    })
+
+    if (!client) {
+      const business = await tx.business.update({
+        where: { id: businessId },
+        data: { clientSequence: { increment: 1 } },
+        select: { clientSequence: true }
+      })
+      const displayId = `CL-${String(business.clientSequence).padStart(3, '0')}`
+
+      client = await tx.client.create({
+        data: {
+          businessId,
+          displayId,
+          displayName: data.clientName,
+          email: data.clientEmail.toLowerCase(),
+          companyName: data.companyName,
+          phone: data.phone,
+          industry: data.industry,
+          preferredChannel: data.preferredChannel,
+        }
+      })
+    } else {
+      client = await tx.client.update({
+        where: { id: client.id },
+        data: {
+          displayName: data.clientName,
+          ...(data.companyName && { companyName: data.companyName }),
+          ...(data.phone && { phone: data.phone }),
+          ...(data.industry && { industry: data.industry }),
+          ...(data.preferredChannel && { preferredChannel: data.preferredChannel }),
+        }
+      })
     }
+
+    // Create Project with atomic sequence
+    const projBusiness = await tx.business.update({
+      where: { id: businessId },
+      data: { projectSequence: { increment: 1 } },
+      select: { projectSequence: true }
+    })
+    const projectDisplayId = `PRJ-${String(projBusiness.projectSequence).padStart(3, '0')}`
+
+    const project = await tx.project.create({
+      data: {
+        businessId,
+        displayId: projectDisplayId,
+        clientId: client.id,
+        title: data.projectTitle,
+        type: data.projectType || 'Standard',
+        statusStageId: firstStage?.id || null,
+      }
+    })
+
+    // Add Script as Note if text provided
+    if (data.scriptText) {
+      await tx.note.create({
+        data: {
+          projectId: project.id,
+          type: 'client',
+          content: `**Initial Script/Brief:**\n\n${data.scriptText}`
+        }
+      })
+    }
+
+    // Add Links
+    if (data.scriptLink) {
+      await tx.projectLink.create({
+        data: {
+          projectId: project.id,
+          label: 'Script Document',
+          url: data.scriptLink
+        }
+      })
+    }
+
+    if (data.rawFootageLink) {
+      await tx.projectLink.create({
+        data: {
+          projectId: project.id,
+          label: 'Raw Footage',
+          url: data.rawFootageLink
+        }
+      })
+    }
+
+    return { client, project }
   })
 
-  // Add Script as Note if text provided
-  if (data.scriptText) {
-    await prisma.note.create({
-      data: {
-        projectId: project.id,
-        type: 'client',
-        content: `**Initial Script/Brief:**\n\n${data.scriptText}`
-      }
-    })
-  }
-
-  // Add Links
-  if (data.scriptLink) {
-    await prisma.projectLink.create({
-      data: {
-        projectId: project.id,
-        label: 'Script Document',
-        url: data.scriptLink
-      }
-    })
-  }
-  
-  if (data.rawFootageLink) {
-    await prisma.projectLink.create({
-      data: {
-        projectId: project.id,
-        label: 'Raw Footage',
-        url: data.rawFootageLink
-      }
-    })
-  }
-
-  // Notify Business Members
+  // Notification broadcast OUTSIDE the transaction (Prisma Accelerate constraint)
   try {
     await broadcastNotification({
       businessId,
@@ -136,17 +149,17 @@ export async function createReviewRequest(projectId: string, draftLink: string) 
 
   if (!project) throw new Error('Project not found')
 
-  const token = randomBytes(24).toString('hex')
-
-  const request = await prisma.reviewRequest.create({
-    data: {
-      businessId: orgId,
-      projectId,
-      clientId: project.clientId,
-      token,
-      draftLink
-    }
-  })
+  const request = await withUniqueToken(async (token) =>
+    prisma.reviewRequest.create({
+      data: {
+        businessId: orgId,
+        projectId,
+        clientId: project.clientId,
+        token,
+        draftLink
+      }
+    })
+  )
 
   revalidatePath('/dashboard/prodp')
   return request

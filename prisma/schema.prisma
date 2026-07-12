@@ -21,6 +21,8 @@ model Business {
   invoicePrefix                String @default("INV")
   invoiceSeparator             String @default("-")
   invoiceSequence              Int    @default(0)
+  clientSequence               Int    @default(0)
+  projectSequence              Int    @default(0)
   emailSubjectTemplate         String @default("Invoice {{invoice_number}} from {{business_name}}")
   emailBodyTemplate            String @default("Hi {{client_name}},\n\nHere is your invoice for {{total_amount}}.\n\nDue Date: {{due_date}}\n\nThank you!")
   paymentInstructions          String @default("Please send payment via bank transfer to:\nBank: \nAccount Number: \nRouting Number: ")
@@ -378,9 +380,9 @@ model AuditLog {
   id           String  @id @default(cuid())
   businessId   String
   entityType   String // 'Invoice', 'Payment'
-  entityId     String
+  entityId     String  // Polymorphic reference — intentionally no FK (can reference Invoice, Payment, etc.)
   action       String // 'CREATE', 'UPDATE', 'VOID', 'PAYMENT_RECORDED'
-  actorUserId  String?
+  actorUserId  String? // Intentionally not FK-constrained: audit logs must survive user deletion
   metadataJson String? @db.Text
 
   createdAt DateTime @default(now())
@@ -413,7 +415,7 @@ model Note {
 model TimeEntry {
   id              String    @id @default(cuid())
   projectId       String
-  userId          String?
+  userId          String?   // TODO: Add @relation to User with onDelete: SetNull in a future migration
   startedAt       DateTime?
   endedAt         DateTime?
   durationMinutes Int       @default(0)

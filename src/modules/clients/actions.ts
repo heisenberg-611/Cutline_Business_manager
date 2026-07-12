@@ -55,8 +55,12 @@ export async function createClient(data: FormData) {
     }
   }
 
-  const clientCount = await prisma.client.count({ where: { businessId: orgId } })
-  const displayId = `CL-${String(clientCount + 1).padStart(3, '0')}`
+  const business = await prisma.business.update({
+    where: { id: orgId },
+    data: { clientSequence: { increment: 1 } },
+    select: { clientSequence: true }
+  })
+  const displayId = `CL-${String(business.clientSequence).padStart(3, '0')}`
 
   await prisma.client.create({
     data: {
@@ -85,10 +89,27 @@ export async function updateClient(clientId: string, data: { displayName: string
   })
   if (!client) throw new Error('Client not found')
 
-  await prisma.client.update({
-    where: { id: clientId },
-    data
-  })
+  // Duplicate email pre-check (if email changed)
+  const emailStr = data.email ? data.email.trim() : ''
+  if (emailStr && emailStr !== client.email) {
+    const { exists, clientName } = await checkClientEmailExists(emailStr, clientId)
+    if (exists) {
+      throw new Error(`A client with email "${emailStr}" already exists (${clientName}). Please use a different email.`)
+    }
+  }
+
+  try {
+    await prisma.client.update({
+      where: { id: clientId },
+      data
+    })
+  } catch (err: any) {
+    // Fallback: catch TOCTOU race on @@unique([businessId, email])
+    if (err.code === 'P2002') {
+      throw new Error(`A client with this email already exists. Please use a different email.`)
+    }
+    throw err
+  }
 
   revalidatePath('/dashboard/clients')
 }

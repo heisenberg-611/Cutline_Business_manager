@@ -95,6 +95,28 @@ export async function POST(req: Request) {
       const { organization, public_user_data, role } = evt.data
       
       if (public_user_data && public_user_data.user_id) {
+        // Defensively ensure parent rows exist — Clerk doesn't guarantee webhook ordering
+        await prisma.business.upsert({
+          where: { id: organization.id },
+          update: {},
+          create: {
+            id: organization.id,
+            name: organization.name || `Business ${organization.id}`,
+            defaultCurrency: 'USD'
+          }
+        })
+
+        await prisma.user.upsert({
+          where: { id: public_user_data.user_id },
+          update: {},
+          create: {
+            id: public_user_data.user_id,
+            email: public_user_data.identifier || '',
+            firstName: public_user_data.first_name || '',
+            lastName: public_user_data.last_name || ''
+          }
+        })
+
         await prisma.businessMembership.upsert({
           where: {
             businessId_userId: {

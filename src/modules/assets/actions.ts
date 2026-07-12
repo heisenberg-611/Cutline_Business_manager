@@ -58,10 +58,26 @@ export async function updateAsset(assetId: string, data: { type: string, name: s
   })
   if (!asset) throw new Error('Asset not found')
 
-  await prisma.asset.update({
-    where: { id: assetId },
-    data
-  })
+  // Duplicate name+type pre-check (if name or type changed)
+  if (data.name !== asset.name || data.type !== asset.type) {
+    const { exists } = await checkAssetDuplicate(data.name, data.type, assetId)
+    if (exists) {
+      throw new Error(`An asset named "${data.name}" of type "${data.type}" already exists. Please use a different name.`)
+    }
+  }
+
+  try {
+    await prisma.asset.update({
+      where: { id: assetId },
+      data
+    })
+  } catch (err: any) {
+    // Fallback: catch TOCTOU race on @@unique([businessId, name, type])
+    if (err.code === 'P2002') {
+      throw new Error(`An asset with this name and type already exists. Please use a different name.`)
+    }
+    throw err
+  }
 
   revalidatePath('/dashboard/assets')
 }
@@ -110,8 +126,13 @@ export async function linkAssetToProject(projectId: string, assetId: string) {
   
   if (!project || !asset) throw new Error('Not found')
 
-  await prisma.projectAsset.create({
-    data: { projectId, assetId }
+  // Upsert on composite key — double-linking is a no-op, not a crash
+  await prisma.projectAsset.upsert({
+    where: {
+      projectId_assetId: { projectId, assetId }
+    },
+    update: {},
+    create: { projectId, assetId }
   })
 
   revalidatePath(`/dashboard/projects/${projectId}`)

@@ -261,28 +261,28 @@ export async function applyWorkflowPreset(presetId: string) {
 
   const firstNewStage = newStages[0]
 
-  // 4. Update existing projects to the first new stage
+  // 4. Migrate projects and delete old stages atomically
   const oldStageIds = template.stages.map(s => s.id)
   
   if (oldStageIds.length > 0) {
-    await prisma.project.updateMany({
-      where: {
-        statusStageId: { in: oldStageIds },
-      },
-      data: {
-        statusStageId: firstNewStage.id,
-      },
-    })
-
-    // 5. Delete old stages
-    await prisma.workflowStage.deleteMany({
-      where: {
-        id: { in: oldStageIds },
-      },
-    })
+    await prisma.$transaction([
+      prisma.project.updateMany({
+        where: {
+          statusStageId: { in: oldStageIds },
+        },
+        data: {
+          statusStageId: firstNewStage.id,
+        },
+      }),
+      prisma.workflowStage.deleteMany({
+        where: {
+          id: { in: oldStageIds },
+        },
+      })
+    ])
   }
 
-  // 6. Revalidate UI
+  // 5. Revalidate UI
   revalidatePath('/dashboard', 'layout')
 }
 
@@ -323,18 +323,19 @@ export async function restoreDefaults() {
 
   const firstNewStage = newStages[0]
 
-  // 4. Migrate projects and delete old stages
+  // 4. Migrate projects and delete old stages atomically
   const oldStageIds = template.stages.map(s => s.id)
   
   if (oldStageIds.length > 0) {
-    await prisma.project.updateMany({
-      where: { statusStageId: { in: oldStageIds } },
-      data: { statusStageId: firstNewStage.id },
-    })
-
-    await prisma.workflowStage.deleteMany({
-      where: { id: { in: oldStageIds } },
-    })
+    await prisma.$transaction([
+      prisma.project.updateMany({
+        where: { statusStageId: { in: oldStageIds } },
+        data: { statusStageId: firstNewStage.id },
+      }),
+      prisma.workflowStage.deleteMany({
+        where: { id: { in: oldStageIds } },
+      })
+    ])
   }
 
   revalidatePath('/dashboard', 'layout')

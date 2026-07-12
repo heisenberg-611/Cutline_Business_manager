@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import prisma from '@/modules/core/db/prisma'
 import { randomBytes } from 'crypto'
 import { sendFeedbackEmail } from '@/lib/email/resend'
+import { withUniqueToken } from '@/lib/utils/unique-token'
 import { createNotification, broadcastNotification } from '@/modules/notifications/actions'
 import { getAppUrl } from '@/lib/utils'
 
@@ -35,17 +36,17 @@ export async function createFeedbackRequest(projectId: string, clientId: string)
     return existing
   }
 
-  const token = randomBytes(24).toString('hex')
-
-  const request = await prisma.feedbackRequest.create({
-    data: {
-      businessId: orgId,
-      projectId,
-      clientId,
-      token,
-      status: 'PENDING'
-    }
-  })
+  const request = await withUniqueToken(async (token) =>
+    prisma.feedbackRequest.create({
+      data: {
+        businessId: orgId,
+        projectId,
+        clientId,
+        token,
+        status: 'PENDING'
+      }
+    })
+  )
 
   revalidatePath('/dashboard/feedback')
   return request
@@ -138,14 +139,19 @@ export async function convertToTestimonial(responseId: string, displayText: stri
   if (!response) throw new Error('Response not found')
   if (!response.consentToPublish) throw new Error('Client did not consent to publish')
 
-  const testimonial = await prisma.testimonial.create({
-    data: {
+  const testimonial = await prisma.testimonial.upsert({
+    where: { feedbackResponseId: response.id },
+    update: {
+      displayText,
+      videoRef: response.videoUrl,
+    },
+    create: {
       businessId: orgId,
       feedbackResponseId: response.id,
       projectId: response.request.projectId,
       clientId: response.request.clientId,
       displayText,
-      videoRef: response.videoUrl, // Use the provided video link if any
+      videoRef: response.videoUrl,
       isPublished: true,
       publishedAt: new Date()
     }
@@ -282,26 +288,35 @@ export async function submitFeedbackResponse(
   if (!request) throw new Error('Invalid feedback token')
   if (request.status !== 'PENDING') throw new Error('Feedback request is no longer pending')
 
-  const response = await prisma.$transaction(async (tx) => {
-    const newResponse = await tx.feedbackResponse.create({
-      data: {
-        businessId: request.businessId,
-        requestId: request.id,
-        overallScore: data.overallScore,
-        dimensionScores: data.dimensionScores,
-        commentText: data.commentText,
-        videoUrl: data.videoUrl,
-        consentToPublish: data.consentToPublish
-      }
-    })
+  let response
+  try {
+    response = await prisma.$transaction(async (tx) => {
+      const newResponse = await tx.feedbackResponse.create({
+        data: {
+          businessId: request.businessId,
+          requestId: request.id,
+          overallScore: data.overallScore,
+          dimensionScores: data.dimensionScores,
+          commentText: data.commentText,
+          videoUrl: data.videoUrl,
+          consentToPublish: data.consentToPublish
+        }
+      })
 
-    await tx.feedbackRequest.update({
-      where: { id: request.id },
-      data: { status: 'COMPLETED' }
-    })
+      await tx.feedbackRequest.update({
+        where: { id: request.id },
+        data: { status: 'COMPLETED' }
+      })
 
-    return newResponse
-  })
+      return newResponse
+    })
+  } catch (err: any) {
+    // Handle race condition: concurrent submission hit @@unique(requestId)
+    if (err.code === 'P2002') {
+      throw new Error('Feedback has already been submitted for this request')
+    }
+    throw err
+  }
 
   // Notify all business members
   try {
