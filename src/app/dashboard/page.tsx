@@ -2,8 +2,9 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import prisma from '@/modules/core/db/prisma'
-import { getStudioHealth, getRevenueTrend } from '@/modules/financials/dashboard-queries'
+import { getStudioHealth, getRevenueTrend, getOutstandingInvoices } from '@/modules/financials/dashboard-queries'
 import { StudioHealthFinanceStrip } from '@/modules/financials/components/StudioHealthFinanceStrip'
+import { AgingBucketsCard } from '@/modules/financials/components/AgingBucketsCard'
 import { StageProgressPipeline } from '@/modules/projects/components/StageProgressPipeline'
 import { RevenueTrendChart } from '@/modules/financials/components/RevenueTrendChart'
 import { UpcomingDeadlines } from '@/modules/projects/components/UpcomingDeadlines'
@@ -28,7 +29,9 @@ export default async function DashboardPage() {
     activeProjects,
     recentFeedback,
     pendingFeedbackCount,
-    pendingReviewCount
+    pendingReviewCount,
+    pendingProjectRequests,
+    agingBuckets
   ] = await Promise.all([
     getStudioHealth(orgId),
     getRevenueTrend(orgId),
@@ -88,7 +91,12 @@ export default async function DashboardPage() {
     prisma.reviewRequest.count({
       where: { businessId: orgId, status: 'REPLIED' },
       cacheStrategy: { ttl: 30, swr: 30 }
-    })
+    }),
+    prisma.projectRequest.findMany({
+      where: { businessId: orgId, status: 'PENDING' },
+      orderBy: { createdAt: 'desc' }
+    }),
+    getOutstandingInvoices(orgId)
   ])
   
   const today = new Date()
@@ -121,13 +129,45 @@ export default async function DashboardPage() {
       <StudioHealthFinanceStrip data={studioHealth} />
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+      {/* Main Grid */}
+      <div className="flex flex-col lg:flex-row gap-6 mt-8 items-start">
         
         {/* Left Column (2/3 width on large screens) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="w-full lg:w-2/3 flex flex-col gap-6">
           
+          {/* Pending Project Requests */}
+          {pendingProjectRequests.length > 0 && (
+            <div className="bg-amber-50/50 dark:bg-amber-900/10 rounded-xl shadow-sm border border-amber-200 dark:border-amber-900/50 overflow-hidden w-full">
+              <div className="px-6 py-5 border-b border-amber-200 dark:border-amber-900/50 bg-amber-100/50 dark:bg-amber-900/20 flex justify-between items-center">
+                <h3 className="text-sm font-medium leading-6 text-amber-900 dark:text-amber-500">
+                  New Project Requests ({pendingProjectRequests.length})
+                </h3>
+                <Link href="/dashboard/projects" className="text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 transition-colors">
+                  Review All
+                </Link>
+              </div>
+              <ul className="divide-y divide-amber-200 dark:divide-amber-900/50">
+                {pendingProjectRequests.slice(0, 5).map(request => (
+                  <li key={request.id} className="p-5">
+                    <Link href={`/dashboard/projects`} className="block group">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm font-medium text-amber-900 dark:text-amber-100 group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">{request.projectTitle}</p>
+                          <p className="text-xs text-amber-700/70 dark:text-amber-500/70 mt-0.5">{request.clientName}</p>
+                        </div>
+                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 text-[10px] font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-400">
+                          {request.projectType || 'Standard'}
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Active Pipeline */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden w-full">
             <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
               <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
                 Active Pipeline
@@ -164,20 +204,22 @@ export default async function DashboardPage() {
           </div>
 
           {/* Revenue Trend Widget */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden p-6">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden p-6 w-full flex flex-col">
             <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100 mb-4">
               Revenue Trend (6 Months)
             </h3>
-            <RevenueTrendChart data={revenueTrend} currency={studioHealth.currency} />
+            <div className="flex-1 w-full overflow-hidden">
+              <RevenueTrendChart data={revenueTrend} currency={studioHealth.currency} />
+            </div>
           </div>
-
+          
         </div>
 
         {/* Right Column (1/3 width on large screens) */}
-        <div className="space-y-6">
+        <div className="w-full lg:w-1/3 flex flex-col gap-6">
           
           {/* Upcoming Deadlines Widget */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden w-full">
             <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
               <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
                 Upcoming Deadlines
@@ -186,17 +228,23 @@ export default async function DashboardPage() {
             <UpcomingDeadlines projects={activeProjects} />
           </div>
 
+          {/* Aging Outstanding Invoices */}
+          <AgingBucketsCard buckets={agingBuckets} />
+
           {/* Recent Client Feedback Widget */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden w-full flex flex-col">
             <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
               <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
                 Recent Feedback
               </h3>
             </div>
-            <RecentFeedback feedback={recentFeedback} />
+            <div className="flex-1 w-full overflow-hidden">
+              <RecentFeedback feedback={recentFeedback} />
+            </div>
           </div>
 
         </div>
+
       </div>
     </div>
   )

@@ -45,9 +45,18 @@ export function UpcomingDeadlines({ projects }: { projects: Project[] }) {
         
         // 1. Check if this is the final stage (safely)
         const stages = project.statusStage?.template?.stages
-        const isFinal = stages 
+        const stageName = project.statusStage?.name?.toLowerCase() || ''
+        const isFinalByName = 
+          stageName.includes('deliver') ||
+          stageName.includes('done') ||
+          stageName.includes('complet') ||
+          stageName.includes('close') ||
+          stageName.includes('finish') ||
+          stageName.includes('final')
+          
+        const isFinal = isFinalByName || (stages 
           ? stages.findIndex(s => s.id === project.statusStage!.id) === stages.length - 1
-          : false
+          : false)
 
         // 2. Determine status
         if (isFinal) {

@@ -39,7 +39,7 @@ export function StudioHealthFinanceStrip({ data, variant = 'main' }: Props) {
           <h3 className="text-xs font-medium uppercase tracking-wider">Revenue (MTD)</h3>
         </div>
         <div className="flex items-baseline gap-2">
-          <p className="text-3xl font-mono text-zinc-900 dark:text-white tracking-tight">
+          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {formatMoney(data.revenueMTD)}
           </p>
           {data.revenueLastMonth > 0 && (
@@ -56,7 +56,7 @@ export function StudioHealthFinanceStrip({ data, variant = 'main' }: Props) {
             <TrendingDown className="w-4 h-4" />
             <h3 className="text-xs font-medium uppercase tracking-wider">Total Expenses</h3>
           </div>
-          <p className="text-3xl font-mono text-zinc-900 dark:text-white tracking-tight">
+          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {formatMoney(data.expenseTotal)}
           </p>
         </div>
@@ -69,7 +69,7 @@ export function StudioHealthFinanceStrip({ data, variant = 'main' }: Props) {
             <Activity className="w-4 h-4" />
             <h3 className="text-xs font-medium uppercase tracking-wider">Outstanding</h3>
           </div>
-          <p className="text-3xl font-mono text-zinc-900 dark:text-white tracking-tight">
+          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {formatMoney(data.outstanding)}
           </p>
         </div>
@@ -82,7 +82,7 @@ export function StudioHealthFinanceStrip({ data, variant = 'main' }: Props) {
             <Activity className="w-4 h-4" />
             <h3 className="text-xs font-medium uppercase tracking-wider">Utilization</h3>
           </div>
-          <p className="text-3xl font-mono text-zinc-900 dark:text-white tracking-tight">
+          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {data.utilization.toFixed(1)}%
           </p>
         </div>
@@ -95,7 +95,7 @@ export function StudioHealthFinanceStrip({ data, variant = 'main' }: Props) {
             <Calendar className="w-4 h-4" />
             <h3 className="text-xs font-medium uppercase tracking-wider">At-Risk Deadlines</h3>
           </div>
-          <p className="text-3xl font-mono text-zinc-900 dark:text-white tracking-tight">
+          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {data.atRiskCount}
           </p>
         </div>
@@ -108,7 +108,7 @@ export function StudioHealthFinanceStrip({ data, variant = 'main' }: Props) {
             <AlertTriangle className="w-4 h-4" />
             <h3 className="text-xs font-medium uppercase tracking-wider">Overdue Invoices</h3>
           </div>
-          <p className="text-3xl font-mono text-zinc-900 dark:text-white tracking-tight">
+          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {formatMoney(data.overdue)}
           </p>
         </div>
@@ -121,7 +121,7 @@ export function StudioHealthFinanceStrip({ data, variant = 'main' }: Props) {
             <Star className="w-4 h-4" />
             <h3 className="text-xs font-medium uppercase tracking-wider">Avg Feedback</h3>
           </div>
-          <p className="text-3xl font-mono text-zinc-900 dark:text-white tracking-tight flex items-center gap-1">
+          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1">
             {data.avgFeedback > 0 ? data.avgFeedback.toFixed(1) : 'N/A'}
           </p>
         </div>
@@ -134,7 +134,7 @@ export function StudioHealthFinanceStrip({ data, variant = 'main' }: Props) {
             <Clock className="w-4 h-4" />
             <h3 className="text-xs font-medium uppercase tracking-wider">DSO</h3>
           </div>
-          <p className="text-3xl font-mono text-zinc-900 dark:text-white tracking-tight flex items-center gap-1">
+          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1">
             {data.dso !== undefined ? data.dso.toFixed(0) : '0'} <span className="text-sm font-medium text-zinc-500">days</span>
           </p>
         </div>
