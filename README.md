@@ -1,363 +1,204 @@
 <div align="center">
-  <img src="public/cutline-logo.JPG" alt="Cutline OS" width="600" style="border-radius: 12px; margin-bottom: 20px;" />
+  <img src="public/cutline-logo.JPG" alt="Cutline OS Logo" width="600" style="border-radius: 8px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);" />
+
+  <h1>Cutline OS</h1>
+
+  <p><strong>A highly optimized, multi-tenant B2B SaaS platform for creative agencies.</strong></p>
+
+  <p>
+    <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16.2-black?style=flat-square&logo=next.js&logoColor=white" alt="Next.js" /></a>
+    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
+    <a href="https://neon.tech/"><img src="https://img.shields.io/badge/PostgreSQL-Neon-336791?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
+    <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" /></a>
+    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="License: MIT" /></a>
+  </p>
+
+  <p>
+    <a href="https://www.cutlin.tech"><b>View Live Demo</b></a> &nbsp;·&nbsp;
+    <a href="https://github.com/heisenberg-611/Cutline_Business_manager/wiki"><b>Documentation</b></a> &nbsp;·&nbsp;
+    <a href="CUTLINE_FOR_DUMMIES.md"><b>User Guide</b></a>
+  </p>
 </div>
 
-# Cutline OS
+<hr />
 
-> A premium, full-stack SaaS application built for **all creative professionals**—designers, photographers, video editors, copywriters, and creative agencies. Manage your projects, clients, invoicing, and assets in one beautiful, intuitive platform that lets you focus on what you do best: being creative.
+## 📖 Overview
+
+Cutline OS is an enterprise-grade business management system designed specifically for creative professionals—designers, photographers, video editors, and agencies. It bridges the gap between creative workflows and business administration by providing a unified platform for project pipelining, client CRM, financial management, and asset tracking.
+
+The architecture emphasizes strict data isolation (multi-tenancy), rigorous performance optimizations, and a premium, accessible user interface inspired by industry leaders like Linear and Stripe.
+
+## 🏗 Architecture & Tech Stack
+
+The application is built as a Modular Monolith, leveraging Server Components and Edge Middleware for security and performance.
+
+| Domain | Technology | Description |
+|---|---|---|
+| **Framework** | [Next.js 16](https://nextjs.org/) | App Router architecture utilizing React Server Components (RSC) and Server Actions. |
+| **Language** | [TypeScript 5](https://www.typescriptlang.org/) | Strict type safety across the entire stack, from database schema to UI components. |
+| **Database** | [PostgreSQL](https://www.postgresql.org/) | Hosted on [Neon](https://neon.tech/) (with [Aiven](https://aiven.io/) as a redundancy fallback). |
+| **ORM** | [Prisma](https://www.prisma.io/) | Schema management, migrations, and direct database querying (with Prisma Accelerate as an edge-caching backup). |
+| **Auth & Identity** | [Clerk](https://clerk.com/) | B2B multi-tenant organization management and secure Role-Based Access Control (RBAC). |
+| **Styling & UI** | [Tailwind CSS v4](https://tailwindcss.com/) | Utility-first styling paired with unstyled [shadcn/ui](https://ui.shadcn.com/) primitives. |
+| **Email Delivery** | [Resend](https://resend.com/) | Transactional email delivery via React-based email templates (`@react-email`). |
+
+### Core Architectural Decisions
+
+- **Strict Multi-Tenancy:** Data is rigidly partitioned using `businessId` at the database level. Server-side data access layers actively assert the active tenant ID before executing queries.
+- **Financial Precision:** All monetary values are strictly stored as `Int` (cents/minor units) to eliminate floating-point arithmetic errors.
+- **Webhook Synchronization:** Real-time data synchronization between the authentication provider (Clerk) and the PostgreSQL database using Svix webhooks.
+- **Edge Routing Security:** Next.js Middleware acts as the first line of defense, validating authentication states and RBAC claims before rendering layouts.
+
+## 🚀 Key Capabilities
+
+### 1. Multi-Tenant CRM & Access Control
+- Isolated business environments utilizing Clerk Organizations.
+- Granular Role-Based Access Control (RBAC) separating `org:admin` (Full access) from `org:member` (Pipeline-only read access).
+- Smart client directory with sequential ID generation (`CL-XXX`) and dynamic 5-star rating algorithms for sorting high-value accounts.
+
+### 2. Intelligent Financial Engine
+- End-to-end invoice lifecycle management (Draft, Sent, Partially Paid, Paid, Void).
+- Automatic cost-allocation for business assets linked to projects.
+- Client-side and server-side PDF generation featuring multi-currency support and exact payment timestamps.
+- Public, client-facing payment portals (`/invoices/[id]/pay`) to streamline receivables.
+
+### 3. Project & Pipeline Workflow
+- Interactive Drag-and-Drop Kanban boards with customizable stage progression.
+- Built-in time tracking, deadline indicators, and client feedback integration.
+- Automated creation of pipeline projects via external Client Intake Forms.
+
+### 4. Advanced Analytics & Dashboarding
+- Real-time aggregation of MTD Revenue, Days Sales Outstanding (DSO), and Overdue ledgers.
+- Interactive data visualizations utilizing Recharts.
+- Unified notification hub for tracking unread alerts and workflow updates.
+- Instantly exportable CSV reporting for external accounting integrations.
+
+## ⚡ Performance & Benchmarks
+
+Performance is treated as a core feature. We rely on React Server Components to offload computational weight from the client, ensuring near-instant page transitions even with dense data tables. 
 
 <div align="center">
-
-[![Next.js](https://img.shields.io/badge/Next.js-16.2-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Aiven-336791?logo=postgresql&logoColor=white)](https://aiven.io/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-
-<a href="https://www.cutlin.tech">
-  <img src="https://img.shields.io/badge/🚀_Visit_Cutline_OS-4F46E5?style=for-the-badge&logoColor=white" alt="Visit Cutline OS" />
-</a>
-
----
-
-[View Demo](#-screenshots) • [Get Started](#-getting-started) • [📖 Cutline for Dummies](CUTLINE_FOR_DUMMIES.md) • [Features](#-features) • [Tech Stack](#-tech-stack)
-
+  <img src="public/LighthouseScore.JPG" alt="Lighthouse Performance Score" width="800" style="border-radius: 8px; margin: 20px 0;" />
+  <p><i>Achieving near-perfect Lighthouse scores across Performance, Accessibility, Best Practices, and SEO.</i></p>
 </div>
 
----
+**Optimizations Include:**
+- Direct database connection polling (with Prisma Accelerate maintained as an optional backup caching layer).
+- Optimistic UI updates during drag-and-drop operations.
+- Server-side JWT decryption to prevent blocking network requests to the Auth provider.
 
-## 📸 Screenshots
+## 🖥 Application Interface
 
-Experience the elegant, professional interface of Cutline OS:
+<details>
+<summary><b>Click to expand screenshots</b></summary>
 
-<table width="100%">
-  <tr>
-    <td width="50%" align="center">
-      <img src="public/SS1.JPG" width="100%" />
-      <br><b>Dashboard</b>
-    </td>
-    <td width="50%" align="center">
-      <img src="public/SS2.JPG" width="100%" />
-      <br><b>Project Pipeline</b>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="public/SS3.JPG" width="100%" />
-      <br><b>Projects Management</b>
-    </td>
-    <td width="50%" align="center">
-      <img src="public/SS4.JPG" width="100%" />
-      <br><b>Clients Management</b>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="public/SS5.JPG" width="100%" />
-      <br><b>Financials Management</b>
-    </td>
-    <td width="50%" align="center">
-      <img src="public/SS6.JPG" width="100%" />
-      <br><b>Visual Analytics Dashboard</b>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="public/SS7.JPG" width="100%" />
-      <br><b>Assets Management</b>
-    </td>
-    <td width="50%"></td>
-  </tr>
-</table>
+| Dashboard | Project Pipeline |
+|:---:|:---:|
+| <img src="public/SS1.JPG" width="100%" alt="Dashboard" /> | <img src="public/SS2.JPG" width="100%" alt="Pipeline" /> |
 
----
+| Projects Management | Clients Management |
+|:---:|:---:|
+| <img src="public/SS3.JPG" width="100%" alt="Projects" /> | <img src="public/SS4.JPG" width="100%" alt="Clients" /> |
 
-## ✨ Features
+| Financials Management | Analytics |
+|:---:|:---:|
+| <img src="public/SS5.JPG" width="100%" alt="Financials" /> | <img src="public/SS6.JPG" width="100%" alt="Analytics" /> |
 
-### 🏢 **Multi-Tenant Architecture & RBAC**
-- **Business Isolation**: Complete business isolation with Clerk-powered multi-organization support. Each organization's data is completely partitioned using `businessId`.
-- **Role-Based Access Control (RBAC)**: Secure routing and layout logic for `org:admin` vs `org:member`. Admins have full control, while members are securely restricted to a read-only view of the project pipeline.
+</details>
 
-### 💼 **Professional Dashboard**
-- **Business Health Dashboard**: Real-time insights into MTD Revenue, Days Sales Outstanding (DSO), Overdue Invoices, and At-Risk Deadlines
-- **Visual Analytics Dashboard**: Recharts-powered interactive charts tracking Revenue Over Time, Project Volume by Stage, and Pipeline Distribution
-- **Data Export**: 1-click comprehensive CSV exports for both Projects and Invoices
-- **Global Command Palette** (Cmd+K): Instantly search and navigate across projects, clients, invoices, and assets
-- **Calm, Professional UI**: Inspired by Linear and Stripe with a true-gray aesthetic
-
-### 👥 **CRM & Client Management**
-- Comprehensive client directory with full contact information
-- Track preferred communication channels (Email, Slack, WhatsApp)
-- **Sequential IDs**: Clean, human-readable tracking IDs (`PRJ-XXX`, `CL-XXX`) automatically generated for precise record keeping
-- **5-Star Rating System**: Rate clients for lifetime value analysis (defaults to 5-stars for new clients). Smart sorting brings your top-rated clients to the top of the list instantly.
-- Client performance insights and project history
-
-### 📊 **Advanced Financials Engine**
-- **Invoice Management**: Draft, Sent, Paid, Partially Paid, Overdue, and Void statuses
-- **Payment Tracking**: Record payments via multiple methods (Bank Transfer, Credit Card, Cash, Check) with precise timestamping automatically reflected on the UI and generated PDFs.
-- **Credit Notes & Reminders**: Manage refunds and automatic payment reminders
-- **Auto-Billing Assets**: Attached business assets are automatically included as billable line items
-- **Professional PDF Invoices**: Generated client-side or server-side with ISO code fallbacks for global currency safety
-- **1-Click Email Delivery**: Send beautiful React-based emails via Resend API
-- **Public Payment Portals**: Client-facing public invoice pages (`/invoices/[id]/pay`) with customizable payment instructions
-- **Global Currency Support**: Native currency symbols ($, ₹, ৳, £) across all web dashboards and emails
-
-### 📹 **Project & Pipeline Management**
-- **Kanban Pipeline**: Visual drag-and-drop workflow with customizable stages
-- **Stage Tracking**: Monitor project progression from concept to final delivery
-- **Time Tracking**: Billable and non-billable hours per project
-- **Project Notes**: Capture shots, client feedback, ideas, and todos
-- **Deadline Tracking**: Never miss a deadline with visual priority indicators
-
-### 🎬 **Production Hub (ProdP)**
-- **Client Intake Forms**: Share secure links with prospective clients to capture project briefs, scripts, and raw footage links. Auto-generates a pipeline project upon submission.
-- **Post-Production Reviews**: Generate targeted review links for clients to drop revision notes and link updated assets directly into your dashboard.
-- **State Persistence**: Tabs dynamically retain their state via local storage for a seamless workflow.
-
-### ⭐ **Client Feedback System**
-- **Automated Feedback Requests**: Automatically trigger aesthetic feedback forms (`/feedback/[token]`) after final project delivery.
-- **Comprehensive Reviews**: Collect overall scores, granular dimension scores, text comments, and video testimonials.
-- **Testimonial Conversion**: 1-click conversion from private feedback into a publishable testimonial.
-- **Inbox Management**: Dedicated dashboard for reviewing, filtering, and deleting client feedback.
-
-### 🎵 **Asset & License Vault**
-- Manage creative assets (Music, Fonts, LUTs, Plugins, Stock Footage, SFX, Vectors, Templates)
-- Track license types and expiration dates
-- Cost allocation by asset and project
-- 1-click asset deletion and project linking
-
-### ⚙️ **Customizable Settings**
-- Set default currency for your business
-- Fully customize pipeline stages to match your workflow (with built-in 1-click presets for specific creative industries)
-- 1-click **Restore Defaults** option to safely reset your pipeline and dashboard UI
-- Configure team members and roles
-
----
-
-## 🛠️ Tech Stack
-
-| Category | Technology |
-|----------|-----------|
-| **Frontend** | [Next.js 16](https://nextjs.org/) (App Router & Webpack) |
-| **Language** | [TypeScript 5](https://www.typescriptlang.org/) |
-| **Database** | [PostgreSQL](https://www.postgresql.org/) via [Aiven](https://aiven.io/) |
-| **ORM** | [Prisma](https://www.prisma.io/) |
-| **Auth** | [Clerk](https://clerk.com/) |
-| **UI Components** | [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS v4](https://tailwindcss.com/) |
-| **Emails** | [Resend](https://resend.com/) + [@react-email](https://react.email/) |
-| **PDF Generation** | [@react-pdf/renderer](https://react-pdf.org/) |
-| **Drag & Drop** | [@hello-pangea/dnd](https://react-beautiful-dnd.org/) |
-| **Database Seeding** | [Prisma Seed Scripts](https://www.prisma.io/docs/orm/more/recipes/seed-database) |
-
-### Important Considerations for Raw SQL vs. Prisma
-
-- **@updatedAt Triggers**: Prisma handles `@updatedAt` automatically at the ORM level. In raw PostgreSQL, you must use a trigger to automatically update the timestamp on row modifications. I have included a reusable trigger function and applied it to all relevant tables.
-- **@default(cuid())**: PostgreSQL does not have a native CUID generator. In raw SQL, the id columns are defined as `VARCHAR`, and your application layer (e.g., Node.js/Prisma client) must generate and insert the CUID string. (Alternatively, you can change the type to UUID and use `gen_random_uuid()` if you prefer native Postgres UUIDs).
-- **Naming Conventions**: Prisma's camelCase fields have been converted to standard PostgreSQL snake_case columns, and table names match your `@@map()` directives.
-
-<div align="center">
-  <img src="public/Schema.webp" alt="Database Schema" width="100%" />
-</div>
-
----
-
-## 🚀 Getting Started
+## ⚙️ Local Development Guide
 
 ### Prerequisites
+- Node.js 18+ and npm/yarn
+- A PostgreSQL Database instance (e.g., Neon or Aiven)
+- Clerk Application keys
+- Resend API key
 
-Before you begin, make sure you have the following:
-
-- **Node.js** 18+ and npm/yarn
-- **PostgreSQL Database**: [Aiven](https://aiven.io/) or any PostgreSQL provider
-- **Clerk Account**: For authentication and webhooks
-- **Resend API Key**: For transactional emails
-
-### Step 1: Clone & Install
+### 1. Repository Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/heisenberg-611/Cutline_Business_manager.git
 cd Cutline_Business_manager
-
-# Install dependencies
 npm install
 ```
 
-### Step 2: Environment Configuration
+### 2. Environment Configuration
 
-Create a `.env` file in the root directory:
+Create a `.env` file based on the required secrets:
 
 ```env
-# 🔒 Database
-# For Prisma Accelerate (Connection Pooling & Caching)
-DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=..."
-# Direct connection to the database (Required for Prisma migrations)
-DIRECT_URL="postgresql://username:password@host:port/dbname?sslmode=require"
+# Database Connection
+DATABASE_URL="postgresql://user:pass@host:port/db?sslmode=require"
+# Optional backup Prisma Accelerate connection
+# DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=..."
+DIRECT_URL="postgresql://user:pass@host:port/db?sslmode=require"
 
-# 🔑 Clerk Authentication
+# Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
 CLERK_SECRET_KEY="sk_test_..."
 
-# 🔗 Clerk Redirect URLs
+# Routing Defaults
 NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
 NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
 NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL="/dashboard"
 NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL="/dashboard"
 NEXT_PUBLIC_CLERK_AFTER_SIGN_OUT_URL="/sign-in"
 
-# 📧 Resend Email Service
+# Resend Mailer
 RESEND_API_KEY="re_..."
 ```
 
-### Prisma Acceleration & Database Polling
-
-This project utilizes **Prisma Accelerate** for connection pooling and query caching to optimize performance. Ensure you configure both `DATABASE_URL` (accelerated endpoint) and `DIRECT_URL` (direct database connection for migrations).
-
-### Step 3: Database Setup
-
-Initialize your database schema:
+### 3. Database Initialization
 
 ```bash
-# Create database tables
+# Push the schema and apply migrations
 npx prisma migrate dev
 
-# Or push schema directly
-npx prisma db push
+# (Optional) Seed the database for testing
+npm run seed
 ```
 
-**Note**: Clerk webhooks are required to sync Business and User data. During local development, use [Svix CLI](https://docs.svix.com/cli) to forward webhooks:
-
+*Note: You must route Clerk webhooks locally to sync Organization data. Use the [Svix CLI](https://docs.svix.com/cli):*
 ```bash
 svix listen http://localhost:3000/api/webhooks/clerk
 ```
 
-### Step 4: Start Development Server
+### 4. Start the Application
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The application will be available at `http://localhost:3000`.
 
----
+## 📁 Repository Structure
 
-## ⚡ Performance & Optimization Note
+The codebase follows a Domain-Driven Design approach within the Next.js `app` directory context:
 
-For the best possible performance and lowest latency, we highly recommend connecting the application to your own managed services and running it in an environment with robust computing power.
-
-- **Optimal Setup**: Using your own [Aiven.io](https://aiven.io/) PostgreSQL database and a dedicated [Clerk](https://clerk.com/) application ID, combined with running the app natively on your own computer, will yield exceptional, real-time performance.
-- **Production Hosting**: If deploying to the cloud, hosting the application on a platform that offers better virtual CPU (vCPU) allocation will significantly accelerate Server Actions, database queries, and on-the-fly PDF generation. Since Cutline heavily utilizes Next.js Server Components, raw computational power directly translates to a much snappier user experience.
-
----
-
-
-
-## 🔧 Available Scripts
-
-```bash
-# Development
-npm run dev           # Start dev server with Webpack
-
-# Production
-npm run build        # Build for production
-npm start            # Run production build
-
-# Database
-npm run reset-db     # Clear all data from database
-
-# Code Quality
-npm run lint         # Run ESLint
+```text
+src/
+├── app/                  # Next.js App Router (Layouts & Routes)
+├── components/           # Global UI components (shadcn/ui primitives)
+├── lib/                  # Shared utilities (PDF gen, email services)
+└── modules/              # Core Domain Modules
+    ├── assets/           # Asset & licensing tracking
+    ├── clients/          # Client CRM operations
+    ├── core/             # Auth helpers & database configuration
+    ├── financials/       # Invoicing & payment ledgers
+    ├── projects/         # Kanban pipeline & task management
+    └── settings/         # Tenant configurations & RBAC
 ```
 
----
+## 🤝 Contributing
 
-## 📁 Project Structure
-
-```
-cutline-business-manager/
-├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── api/                # API routes & webhooks
-│   │   ├── dashboard/          # Internal Dashboard pages
-│   │   └── invoices/           # Public client-facing invoice pages
-│   ├── middleware.ts           # Centralized RBAC and routing security
-│   ├── components/
-│   │   └── ui/                 # shadcn/ui components
-│   ├── modules/                # Feature modules (Domain Driven Design)
-│   │   ├── clients/            # Client management
-│   │   ├── projects/           # Project management
-│   │   ├── financials/         # Invoicing, reporting & payments
-│   │   ├── assets/             # Asset management
-│   │   ├── workflow/           # Pipeline & stages
-│   │   └── core/               # Database & auth
-│   ├── emails/                 # React email templates (Resend)
-│   └── lib/                    # Utilities & helpers
-│       ├── pdf/                # PDF Generation logic & templates
-│       └── emails/             # Email dispatch services
-├── prisma/
-│   └── schema.prisma           # Database schema
-├── scripts/
-│   ├── seed.ts                 # Seed script
-│   ├── reset-db.ts             # Reset script
-│   └── SEED_README.md          # Seed documentation
-└── public/                     # Static assets
-```
-
----
-
-## 🧠 What I Learned
-
-Building Cutline OS has been an incredible journey. Here are some of the key technical takeaways from this project:
-
-- **Next.js App Router & Server Actions**: Deepened my understanding of React server components, data fetching, and handling secure database mutations efficiently.
-- **Multi-Tenant Architecture**: Learned how to architect a robust multi-tenant system, partitioning data securely using Clerk Organizations and Prisma (`businessId`).
-- **Webhook Synchronization**: Implemented real-time data syncing between Clerk (Authentication) and the PostgreSQL database using Svix.
-- **Premium UI & Interactions**: Mastered crafting a professional, high-performance interface using Tailwind CSS v4, shadcn/ui, and implementing complex interactions like the global command palette (Cmd+K) and drag-and-drop Kanban boards.
-- **PDF Generation & Email Delivery**: Gained hands-on experience generating dynamic PDF invoices and designing React-based transactional emails with Resend.
-
----
-
-## 🤝 Issues & Contributing
-
-We welcome contributions from the community! Whether you want to fix a bug, improve documentation, or propose a new feature, your help is highly appreciated.
-
-### Reporting Issues
-If you encounter any bugs, have feature requests, or need help, please [open an issue](https://github.com/heisenberg-611/Cutline_Business_manager/issues). When reporting an issue, please include:
-- A clear, descriptive title
-- Steps to reproduce the bug
-- Expected vs. actual behavior
-- Relevant screenshots or console logs
-
-### How to Contribute
-1. **Fork the repository** and create your branch from `main`.
-2. **Install dependencies** (`npm install`) and ensure the local development environment works.
-3. **Make your changes** following the project's coding standards.
-4. **Test your changes** to ensure no existing functionality breaks.
-5. **Submit a Pull Request** with a clear description of the changes you've made.
-
-Please read our [DOCUMENTATION.md](DOCUMENTATION.md) before getting started to understand the architecture and conventions used in this project.
-
----
+Contributions, issues, and feature requests are welcome! 
+Please review the [Architecture & API Documentation](https://github.com/heisenberg-611/Cutline_Business_manager/wiki) in our Wiki before submitting pull requests to ensure alignment with existing patterns.
 
 ## 📄 License
 
-This project is [MIT](LICENSE) licensed. © 2026 Dhrubojyoti
+This software is released under the [MIT License](LICENSE).
 
 ---
-
-## 👨‍💻 Contributor
-
-**Dhrubojyoti** - *Lead Developer & Architect*
-
----
-
-## 📚 Documentation
-
-For a deep dive into the system architecture, database schema, API conventions, and contributing guidelines go to the [Wiki section](https://github.com/heisenberg-611/Cutline_Business_manager/wiki)
-
----
-
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=heisenberg-611/Cutline_Business_manager&type=Date)](https://star-history.com/#heisenberg-611/Cutline_Business_manager&Date)
+<p align="center">
+  Developed by <a href="https://github.com/heisenberg-611">Dhrubojyoti</a>
+</p>
