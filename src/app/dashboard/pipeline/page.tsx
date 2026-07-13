@@ -2,12 +2,10 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { ensureDefaultTemplate } from '@/modules/workflow/actions'
 import { getProjects } from '@/modules/projects/actions'
-import { getPendingProjectRequests } from '@/modules/prodp/actions'
 import { PipelineBoardWrapper as PipelineBoard } from '@/modules/workflow/components/PipelineBoardWrapper'
 import { PipelineTable } from '@/modules/workflow/components/PipelineTable'
 import { PipelineTimeline } from '@/modules/workflow/components/PipelineTimeline'
 import { PipelineViewToggle } from '@/modules/workflow/components/PipelineViewToggle'
-import { ProjectRequestsPanel } from '@/modules/prodp/components/ProjectRequestsPanel'
 
 export const metadata = {
   title: 'Pipeline',
@@ -29,11 +27,8 @@ export default async function PipelinePage({
   // 1. Ensure template exists and get it
   const template = await ensureDefaultTemplate(orgId)
 
-  // 2. Fetch all projects and pending requests
-  const [projects, pendingRequests] = await Promise.all([
-    getProjects(orgId),
-    getPendingProjectRequests(),
-  ])
+  // 2. Fetch all projects
+  const projects = await getProjects(orgId)
 
   if (!template) {
     return <div>Error loading pipeline.</div>
@@ -53,9 +48,7 @@ export default async function PipelinePage({
         <PipelineViewToggle />
       </div>
 
-      {/* Pending Project Requests */}
-      <ProjectRequestsPanel requests={pendingRequests as any} />
-      
+
       {/* View Container */}
       <div className="flex-1 overflow-visible -mx-6 md:-mx-10 px-6 md:px-10 pb-6">
         {view === 'timeline' ? (

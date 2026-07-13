@@ -155,17 +155,21 @@ export function ExpenseDialog({ open, onOpenChange, expense, projects, businessC
               value={formData.projectId} 
               onValueChange={val => setFormData({ ...formData, projectId: val ?? 'none' })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a project">
-                  {formData.projectId === 'none'
-                    ? 'No Project'
-                    : projects.find(project => project.id === formData.projectId)?.title}
+                  <div className="truncate text-left max-w-[280px] sm:max-w-[320px]">
+                    {formData.projectId === 'none'
+                      ? 'No Project'
+                      : projects.find(project => project.id === formData.projectId)?.title}
+                  </div>
                 </SelectValue>
               </SelectTrigger>
               <SelectContent align="start" alignItemWithTrigger={false}>
                 <SelectItem value="none">No Project</SelectItem>
                 {projects.map(p => (
-                  <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                  <SelectItem key={p.id} value={p.id}>
+                    <div className="truncate max-w-[320px]">{p.title}</div>
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>

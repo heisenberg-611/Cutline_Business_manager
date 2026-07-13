@@ -66,20 +66,18 @@ export async function getRevenueSummary(businessId: string, startDate: Date, end
 export async function getProfitByProject(businessId: string, projectId: string) {
   const invoices = await prisma.invoice.findMany({
     where: { businessId, projectId, status: { notIn: ['DRAFT', 'VOID', 'CREDIT_NOTE'] } },
-    include: { payments: true },
+    select: { amountPaidCents: true },
     cacheStrategy: { ttl: 60, swr: 60 }
   })
 
-  const expenses = await prisma.expense.findMany({
+  const expenses = await prisma.expense.aggregate({
     where: { businessId, projectId },
+    _sum: { amountCents: true },
     cacheStrategy: { ttl: 60, swr: 60 }
   })
 
-  const revenueCents = invoices.reduce((sum, inv) =>
-    sum + inv.payments.reduce((pSum, p) => pSum + p.amountCents, 0)
-    , 0)
-
-  const expenseCents = expenses.reduce((sum, exp) => sum + exp.amountCents, 0)
+  const revenueCents = invoices.reduce((sum, inv) => sum + inv.amountPaidCents, 0)
+  const expenseCents = expenses._sum.amountCents || 0
 
   return {
     revenueCents,

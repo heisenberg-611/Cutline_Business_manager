@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getProjects } from '@/modules/projects/actions'
 import { getClients } from '@/modules/clients/actions'
+import { getPendingProjectRequests } from '@/modules/prodp/actions'
+import { ProjectRequestsPanel } from '@/modules/prodp/components/ProjectRequestsPanel'
 import { ProjectForm } from '@/modules/projects/components/ProjectForm'
 import { ExportProjectsButton } from '@/modules/projects/components/ExportProjectsButton'
 import { StageProgressPipeline } from '@/modules/projects/components/StageProgressPipeline'
@@ -34,9 +36,10 @@ export default async function ProjectsPage({
     redirect('/dashboard/select-business')
   }
 
-  const [projects, clients] = await Promise.all([
+  const [projects, clients, pendingRequests] = await Promise.all([
     getProjects(orgId),
-    getClients(orgId)
+    getClients(orgId),
+    getPendingProjectRequests()
   ])
 
   return (
@@ -58,6 +61,8 @@ export default async function ProjectsPage({
           />
         </div>
       </div>
+      
+      <ProjectRequestsPanel requests={pendingRequests as any} />
       
       <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
         {projects.length === 0 ? (

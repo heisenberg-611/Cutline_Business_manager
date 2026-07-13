@@ -135,10 +135,6 @@ export async function getProjects(orgId: string) {
     },
     include: {
       client: true,
-      links: true,
-      assets: {
-        include: { asset: true }
-      },
       statusStage: {
         include: {
           template: {
@@ -151,7 +147,8 @@ export async function getProjects(orgId: string) {
         }
       },
       stageHistory: {
-        orderBy: { enteredAt: 'desc' }
+        orderBy: { enteredAt: 'desc' },
+        take: 1
       }
     },
     orderBy: {

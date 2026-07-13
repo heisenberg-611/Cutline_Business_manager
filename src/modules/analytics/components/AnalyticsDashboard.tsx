@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react'
 import { getAnalyticsData } from '../actions'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, TrendingUp, Briefcase, LayoutDashboard } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Loader2, TrendingUp, FolderKanban, Kanban, TrendingDown } from 'lucide-react'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -22,14 +23,24 @@ import {
 } from 'recharts'
 
 export function AnalyticsDashboard() {
-  const [days, setDays] = useState('30')
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date()
+    d.setDate(d.getDate() - 30)
+    return d.toISOString().split('T')[0]
+  })
+  const [endDate, setEndDate] = useState(() => {
+    return new Date().toISOString().split('T')[0]
+  })
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any>(null)
 
   useEffect(() => {
+    if (!startDate || !endDate) return
+    if (new Date(startDate) > new Date(endDate)) return
+
     let isMounted = true
     setLoading(true)
-    getAnalyticsData(parseInt(days))
+    getAnalyticsData(startDate, endDate)
       .then(res => {
         if (isMounted) {
           setData(res)
@@ -41,7 +52,7 @@ export function AnalyticsDashboard() {
         if (isMounted) setLoading(false)
       })
     return () => { isMounted = false }
-  }, [days])
+  }, [startDate, endDate])
 
   const formatCurrency = (amount: number, currency: string, compact: boolean = false) => {
     return new Intl.NumberFormat('en-US', {
@@ -62,18 +73,28 @@ export function AnalyticsDashboard() {
           <p className="text-sm text-zinc-500 dark:text-zinc-400">Track your workflow performance and financial growth.</p>
         </div>
 
-        <div className="self-end sm:self-auto ml-auto">
-          <Select value={days} onValueChange={(val) => { if (val) setDays(val) }}>
-            <SelectTrigger className="w-[120px] bg-white dark:bg-zinc-950">
-              <SelectValue placeholder="Select timeframe" />
-            </SelectTrigger>
-            <SelectContent align="end" alignItemWithTrigger={false}>
-              <SelectItem value="7">Last 7 Days</SelectItem>
-              <SelectItem value="30">Last 30 Days</SelectItem>
-              <SelectItem value="90">Last 90 Days</SelectItem>
-              <SelectItem value="365">Last 365 Days</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-2 self-end sm:self-auto ml-auto">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="start-date" className="sr-only">Start Date</Label>
+            <Input 
+              id="start-date" 
+              type="date" 
+              value={startDate} 
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-[140px] bg-white dark:bg-zinc-950 text-sm"
+            />
+          </div>
+          <span className="text-zinc-500">to</span>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="end-date" className="sr-only">End Date</Label>
+            <Input 
+              id="end-date" 
+              type="date" 
+              value={endDate} 
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-[140px] bg-white dark:bg-zinc-950 text-sm"
+            />
+          </div>
         </div>
       </div>
 
@@ -88,8 +109,8 @@ export function AnalyticsDashboard() {
       ) : (
         <>
           {/* KPI Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-6">
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden md:col-span-2">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium text-zinc-500">Collected Revenue</CardTitle>
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg">
@@ -100,45 +121,60 @@ export function AnalyticsDashboard() {
                 <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                   {formatCurrency(data.metrics.totalRevenue, data.metrics.currency)}
                 </div>
-                <p className="text-xs text-zinc-500 mt-1">In the last {days} days</p>
+                <p className="text-xs text-zinc-500 mt-1">Selected period</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm">
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden md:col-span-2">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium text-zinc-500">Net Profit</CardTitle>
+                <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                  {formatCurrency(data.metrics.totalNetProfit, data.metrics.currency)}
+                </div>
+                <p className="text-xs text-zinc-500 mt-1">Selected period</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden md:col-span-2">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium text-zinc-500">Total Expenses</CardTitle>
                 <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-lg">
-                  <TrendingUp className="h-4 w-4 text-red-600 dark:text-red-400 rotate-180" />
+                  <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                   {formatCurrency(data.metrics.totalExpenses, data.metrics.currency)}
                 </div>
-                <p className="text-xs text-zinc-500 mt-1">In the last {days} days</p>
+                <p className="text-xs text-zinc-500 mt-1">Selected period</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm">
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden md:col-span-3">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium text-zinc-500">New Projects</CardTitle>
                 <div className="p-2 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg">
-                  <Briefcase className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  <FolderKanban className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                   {data.metrics.totalProjects}
                 </div>
-                <p className="text-xs text-zinc-500 mt-1">Created in the last {days} days</p>
+                <p className="text-xs text-zinc-500 mt-1">Created in the selected period</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm">
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden md:col-span-3">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium text-zinc-500">Active Pipeline</CardTitle>
                 <div className="p-2 bg-amber-100 dark:bg-amber-500/20 rounded-lg">
-                  <LayoutDashboard className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <Kanban className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                 </div>
               </CardHeader>
               <CardContent>
@@ -151,22 +187,22 @@ export function AnalyticsDashboard() {
           </div>
 
           {/* Charts Grid */}
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
 
-            {/* Revenue Trend */}
-            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm col-span-1 md:col-span-2 lg:col-span-1">
+            {/* Net Profit Trend */}
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden lg:col-span-2">
               <CardHeader>
-                <CardTitle className="text-lg">Revenue Trend</CardTitle>
-                <CardDescription>Daily revenue collected over the selected period.</CardDescription>
+                <CardTitle className="text-lg">Net Profit Trend</CardTitle>
+                <CardDescription>Daily net profit (revenue minus expenses) over the selected period.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={data.revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height="100%" debounce={300}>
+                    <AreaChart data={data.netProfitData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                       <defs>
-                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                        <linearGradient id="colorNetProfit" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
@@ -174,27 +210,32 @@ export function AnalyticsDashboard() {
                       <YAxis width={80} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => formatCurrency(val, data.metrics.currency, true)} />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
-                        itemStyle={{ color: '#10b981' }}
-                        formatter={(value: any) => [formatCurrency(value, data.metrics.currency), 'Revenue']}
+                        itemStyle={{ color: '#3b82f6' }}
+                        formatter={(value: any) => [formatCurrency(value, data.metrics.currency), 'Net Profit']}
                       />
-                      <Area type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
+                      <Area type="monotone" dataKey="amount" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorNetProfit)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
-            {/* Expense Trend */}
-            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm col-span-1 md:col-span-2 lg:col-span-1">
+
+            {/* Revenue & Expenses Curve */}
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden lg:col-span-2">
               <CardHeader>
-                <CardTitle className="text-lg">Expenses Trend</CardTitle>
-                <CardDescription>Daily expenses incurred over the selected period.</CardDescription>
+                <CardTitle className="text-lg">Revenue & Expenses</CardTitle>
+                <CardDescription>Combined overview of money coming in and going out.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={data.expenseData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height="100%" debounce={300}>
+                    <AreaChart data={data.combinedFinanceData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                       <defs>
-                        <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
                           <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                         </linearGradient>
@@ -204,24 +245,29 @@ export function AnalyticsDashboard() {
                       <YAxis width={80} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => formatCurrency(val, data.metrics.currency, true)} />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
-                        itemStyle={{ color: '#ef4444' }}
-                        formatter={(value: any) => [formatCurrency(value, data.metrics.currency), 'Expenses']}
+                        itemStyle={{ color: '#fff' }}
+                        formatter={(value: any, name: any) => [
+                          formatCurrency(value, data.metrics.currency), 
+                          name ? String(name).charAt(0).toUpperCase() + String(name).slice(1) : ''
+                        ]}
                       />
-                      <Area type="monotone" dataKey="amount" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
+                      <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                      <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRev)" />
+                      <Area type="monotone" dataKey="expenses" name="Expenses" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorExp)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
             {/* Project Volume */}
-            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm col-span-1 md:col-span-2 lg:col-span-1">
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden col-span-1">
               <CardHeader>
                 <CardTitle className="text-lg">Project Inflow</CardTitle>
                 <CardDescription>New projects created per day.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" debounce={300}>
                     <BarChart data={data.volumeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
                       <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} dy={10} minTickGap={30} />
@@ -239,7 +285,7 @@ export function AnalyticsDashboard() {
             </Card>
 
             {/* Pipeline Distribution */}
-            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm col-span-1 md:col-span-2">
+            <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden col-span-1">
               <CardHeader>
                 <CardTitle className="text-lg">Pipeline Distribution</CardTitle>
                 <CardDescription>Current snapshot of where active projects are sitting.</CardDescription>
@@ -247,7 +293,7 @@ export function AnalyticsDashboard() {
               <CardContent>
                 <div className="h-[300px] w-full flex items-center justify-center">
                   {data.stageData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" debounce={300}>
                       <PieChart>
                         <Tooltip
                           contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}

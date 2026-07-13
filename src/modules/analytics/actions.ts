@@ -4,14 +4,15 @@ import { auth } from '@clerk/nextjs/server'
 import prisma from '@/modules/core/db/prisma'
 import { format, subDays, eachDayOfInterval } from 'date-fns'
 
-export async function getAnalyticsData(days: number = 30) {
+export async function getAnalyticsData(startDateStr: string, endDateStr: string) {
   const { orgId } = await auth()
   if (!orgId) throw new Error('Unauthorized')
 
-  const endDate = new Date()
-  endDate.setHours(23, 59, 59, 999)
-  const startDate = subDays(endDate, days - 1)
+  const startDate = new Date(startDateStr)
   startDate.setHours(0, 0, 0, 0)
+  
+  const endDate = new Date(endDateStr)
+  endDate.setHours(23, 59, 59, 999)
 
   // 1. Project Volume (Time-series)
   const projects = await prisma.project.findMany({
@@ -19,7 +20,8 @@ export async function getAnalyticsData(days: number = 30) {
       businessId: orgId,
       createdAt: { gte: startDate, lte: endDate }
     },
-    select: { createdAt: true }
+    select: { createdAt: true },
+    cacheStrategy: { ttl: 60, swr: 60 }
   })
 
   const volumeMap: Record<string, number> = {}
@@ -47,15 +49,19 @@ export async function getAnalyticsData(days: number = 30) {
   let stageData: any[] = []
   
   if (template) {
-    const allProjects = await prisma.project.findMany({
-      where: { businessId: orgId, isArchived: false }
+    const stageGroups = await prisma.project.groupBy({
+      by: ['statusStageId'],
+      where: { businessId: orgId, isArchived: false },
+      _count: { id: true },
+      cacheStrategy: { ttl: 60, swr: 60 }
     })
     
     // Gradient / Brand colors for the pie chart
     const colors = ['#6366f1', '#3b82f6', '#0ea5e9', '#06b6d4', '#14b8a6', '#10b981', '#84cc16', '#eab308', '#f59e0b', '#f97316']
     
     stageData = template.stages.map((stage, index) => {
-      const count = allProjects.filter(p => p.statusStageId === stage.id).length
+      const group = stageGroups.find(g => g.statusStageId === stage.id)
+      const count = group ? group._count.id : 0
       return {
         name: stage.name,
         value: count,
@@ -71,7 +77,8 @@ export async function getAnalyticsData(days: number = 30) {
       status: { in: ['PAID', 'PARTIALLY_PAID'] },
       updatedAt: { gte: startDate, lte: endDate } // Using updatedAt as a proxy for payment date since paidAt doesn't exist
     },
-    select: { updatedAt: true, amountPaidCents: true, totalCents: true, status: true }
+    select: { updatedAt: true, amountPaidCents: true, totalCents: true, status: true },
+    cacheStrategy: { ttl: 60, swr: 60 }
   })
 
   const revenueMap: Record<string, number> = {}
@@ -106,7 +113,8 @@ export async function getAnalyticsData(days: number = 30) {
       businessId: orgId,
       dateIncurred: { gte: startDate, lte: endDate }
     },
-    select: { dateIncurred: true, amountCents: true }
+    select: { dateIncurred: true, amountCents: true },
+    cacheStrategy: { ttl: 60, swr: 60 }
   })
 
   const expenseMap: Record<string, number> = {}
@@ -124,15 +132,35 @@ export async function getAnalyticsData(days: number = 30) {
   const expenseData = Object.entries(expenseMap).map(([date, amount]) => ({ date, amount }))
   const totalExpenses = Object.values(expenseMap).reduce((a, b) => a + b, 0)
 
+  // 5. Net Profit Trend
+  const netProfitData = daysInterval.map(day => {
+    const dateStr = format(day, 'MMM dd')
+    const rev = revenueMap[dateStr] || 0
+    const exp = expenseMap[dateStr] || 0
+    return { date: dateStr, amount: rev - exp }
+  })
+  const totalNetProfit = totalRevenue - totalExpenses
+
+  // 6. Combined Finance Data
+  const combinedFinanceData = daysInterval.map(day => {
+    const dateStr = format(day, 'MMM dd')
+    const rev = revenueMap[dateStr] || 0
+    const exp = expenseMap[dateStr] || 0
+    return { date: dateStr, revenue: rev, expenses: exp }
+  })
+
   return {
     volumeData,
     stageData,
     revenueData,
     expenseData,
+    netProfitData,
+    combinedFinanceData,
     metrics: {
       totalProjects,
       totalRevenue,
       totalExpenses,
+      totalNetProfit,
       activeProjectsCount,
       currency: business?.defaultCurrency || 'USD'
     }

@@ -55,7 +55,8 @@ export default async function DashboardPage() {
           }
         }, 
         stageHistory: {
-          orderBy: { enteredAt: 'desc' }
+          orderBy: { enteredAt: 'desc' },
+          take: 1
         },
         client: true 
       },

@@ -37,17 +37,29 @@ async function handler(req: NextRequest) {
         getRevenueSummary(businessId, startOfMonth, today),
         getRevenueSummary(businessId, startOfLastMonth, endOfLastMonth),
         prisma.invoice.findMany({
-          where: { businessId, status: { in: ['SENT', 'PARTIALLY_PAID', 'OVERDUE'] } }
+          where: { businessId, status: { in: ['SENT', 'PARTIALLY_PAID', 'OVERDUE'] } },
+          select: { amountDueCents: true, status: true, dueDate: true }
         }),
-        prisma.businessMembership.findMany({ where: { businessId } }),
-        prisma.timeEntry.findMany({
-          where: { project: { businessId }, isBillable: true, createdAt: { gte: startOfMonth } }
+        prisma.businessMembership.findMany({ 
+          where: { businessId },
+          select: { weeklyCapacityHours: true }
+        }),
+        prisma.timeEntry.aggregate({
+          where: { project: { businessId }, isBillable: true, createdAt: { gte: startOfMonth } },
+          _sum: { durationMinutes: true }
         }),
         prisma.project.findMany({
           where: { businessId, isArchived: false },
-          include: { statusStage: true, stageHistory: { orderBy: { enteredAt: 'desc' }, take: 1 } }
+          select: { 
+            deadline: true, 
+            statusStage: { select: { name: true, estimatedHours: true } }, 
+            stageHistory: { orderBy: { enteredAt: 'desc' }, take: 1, select: { enteredAt: true } } 
+          }
         }),
-        prisma.feedbackResponse.findMany({ where: { businessId } }),
+        prisma.feedbackResponse.aggregate({ 
+          where: { businessId },
+          _avg: { overallScore: true } 
+        }),
         getRevenueSummary(businessId, ninetyDaysAgo, today)
       ])
 
@@ -64,7 +76,7 @@ async function handler(req: NextRequest) {
       const weeksInPeriod = daysInPeriod / 7
 
       const totalAvailableHours = memberships.reduce((sum, m) => sum + (m.weeklyCapacityHours * weeksInPeriod), 0)
-      const billableHours = timeEntries.reduce((sum, t) => sum + t.durationMinutes, 0) / 60
+      const billableHours = (timeEntries._sum.durationMinutes || 0) / 60
       const utilization = totalAvailableHours > 0 ? (billableHours / totalAvailableHours) * 100 : 0
 
       const threeDaysFromNow = new Date()
@@ -113,8 +125,7 @@ async function handler(req: NextRequest) {
         if (isAtRisk) atRiskCount++
       })
 
-      const avgFeedback = feedback.length > 0
-        ? feedback.reduce((sum, f) => sum + f.overallScore, 0) / feedback.length : 0
+      const avgFeedback = feedback._avg.overallScore || 0
 
       const dso = revenue90d > 0 ? (outstandingCents / revenue90d) * 90 : 0
 

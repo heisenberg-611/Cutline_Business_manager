@@ -105,8 +105,8 @@ export async function getAssets(orgId: string) {
     where: { businessId: orgId },
     include: {
       projects: {
-        include: {
-          project: true
+        select: {
+          projectId: true
         }
       }
     },

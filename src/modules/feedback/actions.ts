@@ -104,7 +104,8 @@ export async function getFeedbackRequests() {
       client: true,
       response: true
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    take: 50
   })
 }
 
@@ -123,7 +124,8 @@ export async function getFeedbackResponses() {
       },
       testimonial: true
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    take: 50
   })
 }
 
@@ -173,7 +175,8 @@ export async function getTestimonials() {
       client: true,
       feedbackResponse: true
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    take: 50
   })
 }
 
