@@ -52,9 +52,9 @@ async function handler(req: NextRequest) {
       ])
 
       // 2. Calculations
-      const revenueDelta = lastMonthRevenue > 0 
+      const revenueDelta = lastMonthRevenue > 0
         ? ((revenueMTDCents - lastMonthRevenue) / lastMonthRevenue) * 100 : 0
-      
+
       const outstandingCents = outstandingInvoices.reduce((sum, inv) => sum + inv.amountDueCents, 0)
       const overdueCents = outstandingInvoices
         .filter(inv => inv.status === 'OVERDUE' || (inv.dueDate && inv.dueDate < today))
@@ -62,7 +62,7 @@ async function handler(req: NextRequest) {
 
       const daysInPeriod = Math.max(1, (today.getTime() - startOfMonth.getTime()) / (1000 * 60 * 60 * 24))
       const weeksInPeriod = daysInPeriod / 7
-      
+
       const totalAvailableHours = memberships.reduce((sum, m) => sum + (m.weeklyCapacityHours * weeksInPeriod), 0)
       const billableHours = timeEntries.reduce((sum, t) => sum + t.durationMinutes, 0) / 60
       const utilization = totalAvailableHours > 0 ? (billableHours / totalAvailableHours) * 100 : 0
@@ -72,7 +72,38 @@ async function handler(req: NextRequest) {
 
       let atRiskCount = 0
       activeProjects.forEach(p => {
-        if (p.statusStage?.name.toLowerCase().includes('final')) return
+        // Safely get the stage name and convert to lowercase once
+        const stageName = p.statusStage?.name?.toLowerCase() || ''
+
+        // Check if the project is in any final/delivery stage
+        const isFinalStage =
+          stageName.includes('deliver') ||
+          stageName.includes('done') ||
+          stageName.includes('complet') ||
+          stageName.includes('close') ||
+          stageName.includes('finish') ||
+          stageName.includes('final') ||
+          stageName.includes('launch') ||
+          stageName.includes('live') ||
+          stageName.includes('ship') ||
+          stageName.includes('release') ||
+          stageName.includes('handoff') ||
+          stageName.includes('handover') ||
+          stageName.includes('deploy') ||
+          stageName.includes('accept') ||
+          stageName.includes('approv') ||
+          stageName.includes('sign-off') ||
+          stageName.includes('signoff') ||
+          stageName.includes('archive') ||
+          stageName.includes('fulfill') ||
+          stageName.includes('wrap') ||
+          stageName.includes('conclude') ||
+          stageName.includes('resolve') ||
+          stageName.includes('settle')
+
+        // Skip calculating risk if the project is already in a final stage
+        if (isFinalStage) return
+
         let isAtRisk = false
         if (p.deadline && p.deadline <= threeDaysFromNow) isAtRisk = true
         if (!isAtRisk && p.statusStage?.estimatedHours && p.stageHistory[0]) {
@@ -82,7 +113,7 @@ async function handler(req: NextRequest) {
         if (isAtRisk) atRiskCount++
       })
 
-      const avgFeedback = feedback.length > 0 
+      const avgFeedback = feedback.length > 0
         ? feedback.reduce((sum, f) => sum + f.overallScore, 0) / feedback.length : 0
 
       const dso = revenue90d > 0 ? (outstandingCents / revenue90d) * 90 : 0

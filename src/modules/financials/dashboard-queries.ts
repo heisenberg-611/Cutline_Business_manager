@@ -26,9 +26,9 @@ export async function getOutstandingInvoices(businessId: string) {
   invoices.forEach(inv => {
     if (!inv.dueDate) return
     const daysOverdue = Math.floor((now.getTime() - inv.dueDate.getTime()) / (1000 * 60 * 60 * 24))
-    
+
     if (daysOverdue <= 0) return // Not overdue yet technically, but we might want to show them? The spec says "aging buckets" usually implies overdue.
-    
+
     if (daysOverdue <= 30) buckets['0-30'] += inv.amountDueCents
     else if (daysOverdue <= 60) buckets['31-60'] += inv.amountDueCents
     else if (daysOverdue <= 90) buckets['61-90'] += inv.amountDueCents
@@ -69,16 +69,16 @@ export async function getProfitByProject(businessId: string, projectId: string) 
     include: { payments: true },
     cacheStrategy: { ttl: 60, swr: 60 }
   })
-  
+
   const expenses = await prisma.expense.findMany({
     where: { businessId, projectId },
     cacheStrategy: { ttl: 60, swr: 60 }
   })
 
-  const revenueCents = invoices.reduce((sum, inv) => 
+  const revenueCents = invoices.reduce((sum, inv) =>
     sum + inv.payments.reduce((pSum, p) => pSum + p.amountCents, 0)
-  , 0)
-  
+    , 0)
+
   const expenseCents = expenses.reduce((sum, exp) => sum + exp.amountCents, 0)
 
   return {
@@ -164,12 +164,12 @@ export async function getStudioHealth(businessId: string) {
       getRevenueSummary(businessId, ninetyDaysAgo, now)
     ])
 
-    const revenueDelta = lastMonthRevenue > 0 
+    const revenueDelta = lastMonthRevenue > 0
       ? ((revenueMTD - lastMonthRevenue) / lastMonthRevenue) * 100 : 0
 
     const daysInPeriod = Math.max(1, (now.getTime() - startOfMonth.getTime()) / (1000 * 60 * 60 * 24))
     const weeksInPeriod = daysInPeriod / 7
-    
+
     const totalAvailableHours = memberships.reduce((sum, m) => sum + (m.weeklyCapacityHours * weeksInPeriod), 0)
     const billableHours = timeEntries.reduce((sum, t) => sum + t.durationMinutes, 0) / 60
     const utilization = totalAvailableHours > 0 ? (billableHours / totalAvailableHours) * 100 : 0
@@ -179,7 +179,38 @@ export async function getStudioHealth(businessId: string) {
 
     let atRiskCount = 0
     activeProjects.forEach(p => {
-      if (p.statusStage?.name.toLowerCase().includes('final')) return
+      // Safely get the stage name and convert to lowercase once
+      const stageName = p.statusStage?.name?.toLowerCase() || ''
+
+      // Check if the project is in any final/delivery stage
+      const isFinalStage =
+        stageName.includes('deliver') ||
+        stageName.includes('done') ||
+        stageName.includes('complet') ||
+        stageName.includes('close') ||
+        stageName.includes('finish') ||
+        stageName.includes('final') ||
+        stageName.includes('launch') ||
+        stageName.includes('live') ||
+        stageName.includes('ship') ||
+        stageName.includes('release') ||
+        stageName.includes('handoff') ||
+        stageName.includes('handover') ||
+        stageName.includes('deploy') ||
+        stageName.includes('accept') ||
+        stageName.includes('approv') ||
+        stageName.includes('sign-off') ||
+        stageName.includes('signoff') ||
+        stageName.includes('archive') ||
+        stageName.includes('fulfill') ||
+        stageName.includes('wrap') ||
+        stageName.includes('conclude') ||
+        stageName.includes('resolve') ||
+        stageName.includes('settle')
+
+      // Skip calculating risk if the project is already in a final stage
+      if (isFinalStage) return
+
       let isAtRisk = false
       if (p.deadline && p.deadline <= threeDaysFromNow) isAtRisk = true
       if (!isAtRisk && p.statusStage?.estimatedHours && p.stageHistory[0]) {
@@ -189,7 +220,7 @@ export async function getStudioHealth(businessId: string) {
       if (isAtRisk) atRiskCount++
     })
 
-    const avgFeedback = feedback.length > 0 
+    const avgFeedback = feedback.length > 0
       ? feedback.reduce((sum, f) => sum + f.overallScore, 0) / feedback.length : 0
 
     const dso = revenue90d > 0 ? (liveOutstanding / revenue90d) * 90 : 0
@@ -226,7 +257,7 @@ export async function getStudioHealth(businessId: string) {
 
 export async function getRevenueTrend(businessId: string) {
   const now = new Date()
-  
+
   // 1. Fetch latest snapshot for the 5 closed historical months
   const snapshot = await prisma.analyticsSnapshot.findFirst({
     where: { businessId },
@@ -259,7 +290,7 @@ export async function getRevenueTrend(businessId: string) {
   // 2. Live query for the current, still-open month
   const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const { cashRevenue: liveCurrentRevenue } = await getRevenueSummary(businessId, startOfCurrentMonth, now)
-  
+
   const currentMonthEntry = {
     month: startOfCurrentMonth.toLocaleString('default', { month: 'short' }),
     revenue: liveCurrentRevenue / 100
