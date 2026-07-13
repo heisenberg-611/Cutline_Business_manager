@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { getFinancialOverviewByDateRange } from '../actions'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Loader2, TrendingUp } from 'lucide-react'
+import { Loader2, TrendingUp, TrendingDown } from 'lucide-react'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -158,7 +158,7 @@ export function FinancialsTimeframeOverview() {
               
               <div className="p-4 rounded-lg bg-red-50/50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30">
                 <div className="flex items-center gap-2 text-red-500/80 mb-1">
-                  <TrendingUp className="w-4 h-4 rotate-180" />
+                  <TrendingDown className="w-4 h-4" />
                   <span className="text-xs font-medium uppercase tracking-wider">Total Expenses</span>
                 </div>
                 <div className="text-2xl font-bold text-zinc-900 dark:text-white">
