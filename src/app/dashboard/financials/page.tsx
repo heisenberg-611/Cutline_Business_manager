@@ -63,8 +63,6 @@ export default async function FinancialsPage({
       </div>
 
       <StudioHealthFinanceStrip data={studioHealth} variant="finance" />
-      
-      <FinancialsTimeframeOverview />
 
       <Tabs defaultValue={activeTab} className="w-full">
         <TabsList className="mb-4">
