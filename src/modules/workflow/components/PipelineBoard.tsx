@@ -6,6 +6,7 @@ import { useAuth } from '@clerk/nextjs'
 
 import { updateProjectStage, updateProjectOrder } from '../actions'
 import { FeedbackPromptModal } from './FeedbackPromptModal'
+import { MemberDeliveryModal } from './MemberDeliveryModal'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { format } from 'date-fns'
@@ -71,8 +72,9 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
   // Need local state for optimistic UI updates with dnd
   const [projects, setProjects] = useState(initialProjects)
 
-  // Feedback Modal State
+  // Feedback & Delivery Modal State
   const [feedbackPromptOpen, setFeedbackPromptOpen] = useState(false)
+  const [memberDeliveryModalOpen, setMemberDeliveryModalOpen] = useState(false)
   const [completedProject, setCompletedProject] = useState<Project | null>(null)
 
   // Sync if props change
@@ -175,9 +177,11 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
     // Trigger if it's BOTH the final stage AND it has a delivery keyword
     if (destStage && (isTerminal && isDelivery)) {
       if (draggedProject && draggedProject.client) {
+        setCompletedProject(draggedProject)
         if (isAdmin) {
-          setCompletedProject(draggedProject)
           setFeedbackPromptOpen(true)
+        } else {
+          setMemberDeliveryModalOpen(true)
         }
       }
     }
@@ -402,9 +406,11 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                                     // Trigger if it's BOTH the final stage AND it has a delivery keyword
                                     if (destStage && (isTerminal && isDelivery)) {
                                       if (project.client) {
+                                        setCompletedProject(project)
                                         if (isAdmin) {
-                                          setCompletedProject(project)
                                           setFeedbackPromptOpen(true)
+                                        } else {
+                                          setMemberDeliveryModalOpen(true)
                                         }
                                       }
                                     }
@@ -437,14 +443,22 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
       </DragDropContext>
 
       {isMounted && completedProject && completedProject.client && (
-        <FeedbackPromptModal
-          open={feedbackPromptOpen}
-          onOpenChange={setFeedbackPromptOpen}
-          projectId={completedProject.id}
-          clientId={(completedProject as any).clientId || completedProject.client?.displayName}
-          clientHasEmail={!!(completedProject as any).client?.email}
-          projectName={completedProject.title}
-        />
+        <>
+          <FeedbackPromptModal
+            open={feedbackPromptOpen}
+            onOpenChange={setFeedbackPromptOpen}
+            projectId={completedProject.id}
+            clientId={(completedProject as any).clientId || completedProject.client?.displayName}
+            clientHasEmail={!!(completedProject as any).client?.email}
+            projectName={completedProject.title}
+          />
+          <MemberDeliveryModal
+            open={memberDeliveryModalOpen}
+            onOpenChange={setMemberDeliveryModalOpen}
+            projectId={completedProject.id}
+            projectName={completedProject.title}
+          />
+        </>
       )}
     </div>
   )

@@ -8,20 +8,28 @@ export const metadata = {
 }
 
 export default async function ProdPPage() {
-  const { orgId } = await auth()
+  const { orgId, userId, orgRole } = await auth()
+  const isAdmin = orgRole === 'org:admin'
   
   if (!orgId) {
     redirect('/dashboard/select-business')
   }
 
   const activeProjects = await prisma.project.findMany({
-    where: { businessId: orgId, isArchived: false },
+    where: { 
+      businessId: orgId, 
+      isArchived: false,
+      ...(isAdmin ? {} : { assigneeId: userId })
+    },
     orderBy: { createdAt: 'desc' },
     include: { client: true }
   })
 
   const reviewRequests = await prisma.reviewRequest.findMany({
-    where: { businessId: orgId },
+    where: { 
+      businessId: orgId,
+      ...(isAdmin ? {} : { project: { assigneeId: userId } })
+    },
     orderBy: { createdAt: 'desc' },
     include: { project: true, client: true }
   })

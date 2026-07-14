@@ -48,6 +48,7 @@ export const sendFeedbackEmail = async (
     feedbackLink: string;
     customSubject?: string;
     customBody?: string;
+    driveLink?: string;
   }
 ) => {
   if (!process.env.RESEND_API_KEY) {

@@ -192,18 +192,25 @@ export function ProjectActions({ project, members = [] }: { project: Project, me
                       {formData.assigneeId && formData.assigneeId !== 'unassigned'
                         ? (() => {
                             const user = members.find(m => m.user.id === formData.assigneeId)?.user;
-                            return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : 'Unassigned'
+                            if (!user) return 'Unassigned';
+                            const rawName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+                            const name = rawName || user.email.split('@')[0] || 'Unknown User';
+                            return `${name} (${user.email})`;
                           })()
                         : 'Unassigned'}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent align="end" alignItemWithTrigger={false}>
                     <SelectItem value="unassigned">Unassigned</SelectItem>
-                    {members.map(m => (
-                      <SelectItem key={m.user.id} value={m.user.id}>
-                        {`${m.user.firstName || ''} ${m.user.lastName || ''}`.trim() || m.user.email}
-                      </SelectItem>
-                    ))}
+                    {members.map(m => {
+                      const rawName = `${m.user.firstName || ''} ${m.user.lastName || ''}`.trim();
+                      const name = rawName || m.user.email.split('@')[0] || 'Unknown User';
+                      return (
+                        <SelectItem key={m.user.id} value={m.user.id}>
+                          {name} ({m.user.email})
+                        </SelectItem>
+                      )
+                    })}
                   </SelectContent>
                 </Select>
               </div>

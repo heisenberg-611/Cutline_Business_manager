@@ -264,3 +264,59 @@ export async function updateProjectOrder(updates: { id: string, statusStageId: s
   revalidatePath('/dashboard/pipeline')
   revalidatePath('/dashboard/projects')
 }
+
+export async function submitMemberDelivery(projectId: string, driveLink: string) {
+  const { orgId, userId, orgRole } = await auth()
+  
+  if (!orgId || !userId) {
+    throw new Error('Unauthorized')
+  }
+
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, businessId: orgId }
+  })
+
+  if (!project) {
+    throw new Error('Project not found')
+  }
+
+  // Only the assigned member or an admin can submit
+  if (orgRole !== 'org:admin' && project.assigneeId !== userId) {
+    throw new Error('Forbidden: You are not assigned to this project.')
+  }
+
+  if (driveLink && driveLink.trim() !== '') {
+    // Add it to the Project Links
+    await prisma.projectLink.create({
+      data: {
+        projectId,
+        label: 'Final Delivery Drive Folder',
+        url: driveLink.trim()
+      }
+    })
+
+    // Optionally notify admins again specifically about the link
+    if (orgRole !== 'org:admin') {
+      const admins = await prisma.businessMembership.findMany({
+        where: { businessId: orgId, role: 'org:admin' }
+      })
+      const member = await prisma.user.findUnique({ where: { id: userId } })
+      const memberName = member ? `${member.firstName || ''} ${member.lastName || ''}`.trim() || member.email : 'A team member'
+      
+      if (admins.length > 0) {
+        await prisma.notification.createMany({
+          data: admins.map(admin => ({
+            businessId: orgId,
+            userId: admin.userId,
+            title: 'Delivery Link Submitted',
+            message: `${memberName} has attached a delivery link for "${project.title}".`,
+            type: 'project',
+            actionUrl: `/dashboard/projects/${project.id}`
+          }))
+        })
+      }
+    }
+  }
+
+  revalidatePath(`/dashboard/projects/${projectId}`)
+}

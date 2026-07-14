@@ -62,7 +62,7 @@ export async function createFeedbackRequest(projectId: string, clientId: string)
   return request
 }
 
-export async function sendFeedbackEmailAction(projectId: string, token: string) {
+export async function sendFeedbackEmailAction(projectId: string, token: string, providedDriveLink?: string) {
   const { orgId } = await requireAdmin()
 
   const request = await prisma.feedbackRequest.findFirst({
@@ -90,13 +90,39 @@ export async function sendFeedbackEmailAction(projectId: string, token: string) 
     .replace(/\{\{project_name\}\}/g, request.project.title)
     .replace(/\{\{business_name\}\}/g, request.business.name)
 
+  let finalDriveUrl = providedDriveLink?.trim();
+
+  // If provided, optionally save it to ProjectLinks for consistency
+  if (finalDriveUrl) {
+    await prisma.projectLink.create({
+      data: {
+        projectId,
+        label: 'Final Delivery Drive Folder',
+        url: finalDriveUrl
+      }
+    })
+  } else {
+    // Fall back to finding an existing one
+    const existingLink = await prisma.projectLink.findFirst({
+      where: {
+        projectId: request.projectId,
+        label: 'Final Delivery Drive Folder'
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    if (existingLink) {
+      finalDriveUrl = existingLink.url;
+    }
+  }
+
   await sendFeedbackEmail(request.client.email, {
     businessName: request.business.name,
     clientName: request.client.displayName,
     projectName: request.project.title,
     feedbackLink,
     customSubject,
-    customBody
+    customBody,
+    driveLink: finalDriveUrl || undefined
   })
 
   return { success: true }

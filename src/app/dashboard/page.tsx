@@ -16,89 +16,102 @@ export const metadata = {
 }
 
 export default async function DashboardPage() {
-  const { orgId } = await auth()
+  const { orgId, userId, orgRole } = await auth()
+  const isAdmin = orgRole === 'org:admin'
 
   if (!orgId) {
     redirect('/dashboard/select-business')
   }
 
-  // Fetch metrics data and user concurrently
-  const [
-    studioHealth,
-    revenueTrend,
-    activeProjects,
-    recentFeedback,
-    pendingFeedbackCount,
-    pendingReviewCount,
-    pendingProjectRequests,
-    agingBuckets
-  ] = await Promise.all([
-    getStudioHealth(orgId),
-    getRevenueTrend(orgId),
-    prisma.project.findMany({
-      where: { 
-        businessId: orgId,
-        isArchived: false,
-        NOT: {
-          statusStage: {
-            name: { contains: 'final', mode: 'insensitive' }
-          }
-        }
-      },
-      include: { 
+  // Fetch active projects first (filtered for members)
+  const activeProjects = await prisma.project.findMany({
+    where: { 
+      businessId: orgId,
+      isArchived: false,
+      ...(isAdmin ? {} : { assigneeId: userId }),
+      NOT: {
         statusStage: {
-          include: {
-            template: {
-              include: {
-                stages: {
-                  orderBy: { orderIndex: 'asc' }
-                }
+          name: { contains: 'final', mode: 'insensitive' }
+        }
+      }
+    },
+    include: { 
+      statusStage: {
+        include: {
+          template: {
+            include: {
+              stages: {
+                orderBy: { orderIndex: 'asc' }
               }
             }
           }
-        }, 
-        stageHistory: {
-          orderBy: { enteredAt: 'desc' },
-          take: 1
-        },
-        client: true 
-      },
-      orderBy: { createdAt: 'desc' },
-      cacheStrategy: { ttl: 30, swr: 30 }
-    }),
-    prisma.feedbackResponse.findMany({
-      where: { businessId: orgId },
-      include: {
-        request: {
-          include: {
-            project: true,
-            client: true
-          }
         }
+      }, 
+      stageHistory: {
+        orderBy: { enteredAt: 'desc' },
+        take: 1
       },
-      orderBy: { submittedAt: 'desc' },
-      take: 3,
-      cacheStrategy: { ttl: 30, swr: 30 }
-    }),
-    prisma.feedbackRequest.count({
-      where: { 
-        businessId: orgId, 
-        status: 'COMPLETED',
-        response: { isNot: null }
-      },
-      cacheStrategy: { ttl: 30, swr: 30 }
-    }),
-    prisma.reviewRequest.count({
-      where: { businessId: orgId, status: 'REPLIED' },
-      cacheStrategy: { ttl: 30, swr: 30 }
-    }),
-    prisma.projectRequest.findMany({
-      where: { businessId: orgId, status: 'PENDING' },
-      orderBy: { createdAt: 'desc' }
-    }),
-    getOutstandingInvoices(orgId)
-  ])
-  
+      client: true 
+    },
+    orderBy: { createdAt: 'desc' },
+    cacheStrategy: { ttl: 30, swr: 30 }
+  })
+
+  // Admin-only fetches
+  let studioHealth: any = null
+  let revenueTrend: any[] = []
+  let recentFeedback: any[] = []
+  let pendingFeedbackCount = 0
+  let pendingReviewCount = 0
+  let pendingProjectRequests: any[] = []
+  let agingBuckets: any = null
+
+  if (isAdmin) {
+    const adminData = await Promise.all([
+      getStudioHealth(orgId),
+      getRevenueTrend(orgId),
+      prisma.feedbackResponse.findMany({
+        where: { businessId: orgId },
+        include: {
+          request: {
+            include: {
+              project: true,
+              client: true
+            }
+          }
+        },
+        orderBy: { submittedAt: 'desc' },
+        take: 3,
+        cacheStrategy: { ttl: 30, swr: 30 }
+      }),
+      prisma.feedbackRequest.count({
+        where: { 
+          businessId: orgId, 
+          status: 'COMPLETED',
+          response: { isNot: null }
+        },
+        cacheStrategy: { ttl: 30, swr: 30 }
+      }),
+      prisma.reviewRequest.count({
+        where: { businessId: orgId, status: 'REPLIED' },
+        cacheStrategy: { ttl: 30, swr: 30 }
+      }),
+      prisma.projectRequest.findMany({
+        where: { businessId: orgId, status: 'PENDING' },
+        orderBy: { createdAt: 'desc' }
+      }),
+      getOutstandingInvoices(orgId)
+    ])
+    
+    studioHealth = adminData[0]
+    revenueTrend = adminData[1]
+    recentFeedback = adminData[2]
+    pendingFeedbackCount = adminData[3]
+    pendingReviewCount = adminData[4]
+    pendingProjectRequests = adminData[5]
+    agingBuckets = adminData[6]
+  }
+
   const today = new Date()
   const dateString = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
@@ -116,19 +129,23 @@ export default async function DashboardPage() {
           <p className="mt-2 text-sm text-zinc-500 flex items-center flex-wrap gap-2">
             <span>{dateString}</span>
             <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">·</span>
-            <span>{activeProjects.length} active project{activeProjects.length === 1 ? '' : 's'}</span>
-            <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">·</span>
-            <span>{pendingFeedbackCount} pending feedback{pendingFeedbackCount === 1 ? '' : 's'}</span>
-            <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">·</span>
-            <span>{pendingReviewCount} pending revision note{pendingReviewCount === 1 ? '' : 's'}</span>
+            <span>{activeProjects.length} active project{activeProjects.length === 1 ? '' : 's'}{!isAdmin && ' assigned to you'}</span>
+            
+            {isAdmin && (
+              <>
+                <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">·</span>
+                <span>{pendingFeedbackCount} pending feedback{pendingFeedbackCount === 1 ? '' : 's'}</span>
+                <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">·</span>
+                <span>{pendingReviewCount} pending revision note{pendingReviewCount === 1 ? '' : 's'}</span>
+              </>
+            )}
           </p>
         </div>
       </div>
       
       {/* Studio Health Summary Strip */}
-      <StudioHealthFinanceStrip data={studioHealth} />
+      {isAdmin && studioHealth && <StudioHealthFinanceStrip data={studioHealth} />}
 
-      {/* Main Grid */}
       {/* Main Grid */}
       <div className="flex flex-col lg:flex-row gap-6 mt-8 items-start">
         
@@ -136,7 +153,7 @@ export default async function DashboardPage() {
         <div className="w-full lg:w-2/3 flex flex-col gap-6">
           
           {/* Pending Project Requests */}
-          {pendingProjectRequests.length > 0 && (
+          {isAdmin && pendingProjectRequests.length > 0 && (
             <div className="bg-amber-50/50 dark:bg-amber-900/10 rounded-xl shadow-sm border border-amber-200 dark:border-amber-900/50 overflow-hidden w-full">
               <div className="px-6 py-5 border-b border-amber-200 dark:border-amber-900/50 bg-amber-100/50 dark:bg-amber-900/20 flex justify-between items-center">
                 <h3 className="text-sm font-medium leading-6 text-amber-900 dark:text-amber-500">
@@ -170,12 +187,12 @@ export default async function DashboardPage() {
           <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden w-full">
             <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
               <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
-                Active Pipeline
+                {isAdmin ? 'Active Pipeline' : 'Your Assigned Projects'}
               </h3>
             </div>
             {activeProjects.length === 0 ? (
               <div className="p-8 text-center text-zinc-500 text-sm">
-                No active projects.
+                {isAdmin ? 'No active projects.' : 'You have no active projects assigned to you.'}
               </div>
             ) : (
               <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -204,14 +221,16 @@ export default async function DashboardPage() {
           </div>
 
           {/* Revenue Trend Widget */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden p-6 w-full flex flex-col">
-            <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100 mb-4">
-              Revenue Trend (6 Months)
-            </h3>
-            <div className="flex-1 w-full overflow-hidden">
-              <RevenueTrendChart data={revenueTrend} currency={studioHealth.currency} />
+          {isAdmin && revenueTrend && (
+            <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden p-6 w-full flex flex-col">
+              <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100 mb-4">
+                Revenue Trend (6 Months)
+              </h3>
+              <div className="flex-1 w-full overflow-hidden">
+                <RevenueTrendChart data={revenueTrend} currency={studioHealth?.currency || 'USD'} />
+              </div>
             </div>
-          </div>
+          )}
           
         </div>
 
@@ -229,19 +248,23 @@ export default async function DashboardPage() {
           </div>
 
           {/* Aging Outstanding Invoices */}
-          <AgingBucketsCard buckets={agingBuckets} />
+          {isAdmin && agingBuckets && (
+            <AgingBucketsCard buckets={agingBuckets} />
+          )}
 
           {/* Recent Client Feedback Widget */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden w-full flex flex-col">
-            <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
-              <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
-                Recent Feedback
-              </h3>
+          {isAdmin && recentFeedback && (
+            <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden w-full flex flex-col">
+              <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950/50">
+                <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100">
+                  Recent Feedback
+                </h3>
+              </div>
+              <div className="flex-1 w-full overflow-hidden">
+                <RecentFeedback feedback={recentFeedback} />
+              </div>
             </div>
-            <div className="flex-1 w-full overflow-hidden">
-              <RecentFeedback feedback={recentFeedback} />
-            </div>
-          </div>
+          )}
 
         </div>
 

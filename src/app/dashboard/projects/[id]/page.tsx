@@ -38,9 +38,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="space-y-6 max-w-[1200px] mx-auto pb-12">
+    <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5 shrink-0">
         <div>
           <div className="flex items-center gap-3">
             <h3 className="text-2xl font-bold leading-6 text-zinc-900 dark:text-zinc-100">
@@ -69,7 +69,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               <>
                 <span>•</span>
                 Assignee: <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                  {members.find(m => m.user.id === project.assigneeId)?.user.firstName || 'Assigned'}
+                  {(() => {
+                    const assignee = members.find(m => m.user.id === project.assigneeId)?.user;
+                    if (!assignee) return 'Assigned';
+                    const rawName = `${assignee.firstName || ''} ${assignee.lastName || ''}`.trim();
+                    const name = rawName || assignee.email.split('@')[0] || 'Unknown User';
+                    return `${name} (${assignee.email})`;
+                  })()}
                 </span>
               </>
             )}

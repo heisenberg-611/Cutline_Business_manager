@@ -18,6 +18,7 @@ interface FeedbackRequestEmailProps {
   projectName: string
   feedbackLink: string
   customBody?: string
+  driveLink?: string
 }
 
 export const FeedbackRequestEmail = ({
@@ -26,6 +27,7 @@ export const FeedbackRequestEmail = ({
   projectName = 'Awesome Video Project',
   feedbackLink = 'https://cutlin.tech/feedback/xxx',
   customBody,
+  driveLink,
 }: FeedbackRequestEmailProps) => {
   const renderBody = () => {
     if (!customBody) {
@@ -64,6 +66,19 @@ export const FeedbackRequestEmail = ({
             </Heading>
             {renderBody()}
             <Section className="text-center mt-[32px] mb-[32px]">
+              {driveLink && (
+                <div className="mb-6">
+                  <Text className="text-black text-[14px] leading-[24px] mb-2 font-medium">
+                    Here are your final project assets:
+                  </Text>
+                  <Button
+                    className="bg-blue-600 rounded text-white text-[12px] font-semibold no-underline text-center px-5 py-3"
+                    href={driveLink}
+                  >
+                    View Final Delivery Folder
+                  </Button>
+                </div>
+              )}
               <Button
                 className="bg-[#000000] rounded text-white text-[12px] font-semibold no-underline text-center px-5 py-3"
                 href={feedbackLink}

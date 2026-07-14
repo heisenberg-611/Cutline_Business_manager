@@ -28,7 +28,8 @@ export default async function ProjectsPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { orgId } = await auth()
+  const { orgId, orgRole } = await auth()
+  const isAdmin = orgRole === 'org:admin'
   const resolvedSearchParams = await searchParams
   const shouldOpenNewProject = resolvedSearchParams.newProject === '1'
   
@@ -36,11 +37,16 @@ export default async function ProjectsPage({
     redirect('/dashboard/select-business')
   }
 
+  const projectsPromise = getProjects(orgId)
+  const clientsPromise = isAdmin ? getClients(orgId) : Promise.resolve([])
+  const pendingRequestsPromise = isAdmin ? getPendingProjectRequests() : Promise.resolve([])
+  const membersPromise = isAdmin ? getOrgUsers(orgId) : Promise.resolve([])
+
   const [projects, clients, pendingRequests, members] = await Promise.all([
-    getProjects(orgId),
-    getClients(orgId),
-    getPendingProjectRequests(),
-    getOrgUsers(orgId)
+    projectsPromise,
+    clientsPromise,
+    pendingRequestsPromise,
+    membersPromise
   ])
 
   return (
@@ -55,27 +61,35 @@ export default async function ProjectsPage({
           </p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <ExportProjectsButton projects={projects} />
-          <ProjectForm
-            clients={clients.map(c => ({ id: c.id, displayName: c.displayName }))}
-            members={members}
-            defaultOpen={shouldOpenNewProject}
-          />
+          {isAdmin && (
+            <>
+              <ExportProjectsButton projects={projects} />
+              <ProjectForm
+                clients={clients.map(c => ({ id: c.id, displayName: c.displayName }))}
+                members={members}
+                defaultOpen={shouldOpenNewProject}
+              />
+            </>
+          )}
         </div>
       </div>
       
-      <ProjectRequestsPanel requests={pendingRequests as any} />
+      {isAdmin && <ProjectRequestsPanel requests={pendingRequests as any} />}
       
       <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
         {projects.length === 0 ? (
           <div className="p-12 text-center text-zinc-500 text-sm flex flex-col items-center">
-            {clients.length === 0 ? (
-              <>
-                <p>You need to create a Client before you can create a project.</p>
-                <p className="mt-2 text-xs">Go to the Clients tab to get started.</p>
-              </>
+            {isAdmin ? (
+              clients.length === 0 ? (
+                <>
+                  <p>You need to create a Client before you can create a project.</p>
+                  <p className="mt-2 text-xs">Go to the Clients tab to get started.</p>
+                </>
+              ) : (
+                <p>You don't have any projects yet. Click "New Project" to get started!</p>
+              )
             ) : (
-              <p>You don't have any projects yet. Click "New Project" to get started!</p>
+              <p>You don't have any projects assigned to you yet.</p>
             )}
           </div>
         ) : (

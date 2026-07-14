@@ -38,6 +38,8 @@ export async function broadcastNotification(data: {
   })
 
   for (const member of members.data) {
+    if (member.role !== 'org:admin') continue
+    
     const userId = member.publicUserData?.userId
     if (!userId) continue
 

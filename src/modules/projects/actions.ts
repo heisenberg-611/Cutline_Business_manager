@@ -102,6 +102,19 @@ export async function createProject(data: FormData) {
     }
   })
 
+  if (assigneeId) {
+    await prisma.notification.create({
+      data: {
+        businessId: orgId,
+        userId: assigneeId,
+        title: 'New Project Assignment',
+        message: `You have been assigned to project "${project.title}".`,
+        type: 'project',
+        actionUrl: `/dashboard/projects/${project.id}`
+      }
+    })
+  }
+
   revalidatePath('/dashboard/projects')
   revalidatePath('/dashboard/pipeline')
   return project
@@ -138,6 +151,19 @@ export async function updateProject(projectId: string, data: { title?: string, d
         metadataJson: JSON.stringify({ oldAssigneeId, newAssigneeId: data.assigneeId })
       }
     })
+
+    if (data.assigneeId) {
+      await prisma.notification.create({
+        data: {
+          businessId: orgId,
+          userId: data.assigneeId,
+          title: 'Project Assignment',
+          message: `You have been assigned to project "${project.title}".`,
+          type: 'project',
+          actionUrl: `/dashboard/projects/${project.id}`
+        }
+      })
+    }
   }
 
   revalidatePath('/dashboard/projects')

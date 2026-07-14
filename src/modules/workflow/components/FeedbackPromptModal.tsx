@@ -36,6 +36,7 @@ export function FeedbackPromptModal({
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [emailSent, setEmailSent] = useState(false)
+  const [driveLink, setDriveLink] = useState('')
 
   // Generate the token as soon as the modal opens
   useEffect(() => {
@@ -56,6 +57,18 @@ export function FeedbackPromptModal({
     }
   }, [open, projectId, clientId, token])
 
+  // Reset state when closed
+  const handleOpenChange = (isOpen: boolean) => {
+    onOpenChange(isOpen)
+    if (!isOpen) {
+      setTimeout(() => {
+        setEmailSent(false)
+        setDriveLink('')
+        setError(null)
+      }, 300)
+    }
+  }
+
   const feedbackLink = token 
     ? `${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')}/feedback/${token}` 
     : ''
@@ -73,7 +86,7 @@ export function FeedbackPromptModal({
     setIsSending(true)
     setError(null)
     try {
-      await sendFeedbackEmailAction(projectId, token)
+      await sendFeedbackEmailAction(projectId, token, driveLink)
       setEmailSent(true)
     } catch (err: any) {
       setError(err.message || 'Failed to send email')
@@ -83,7 +96,7 @@ export function FeedbackPromptModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Request Client Feedback</DialogTitle>
@@ -113,13 +126,29 @@ export function FeedbackPromptModal({
                 </div>
               </div>
 
+              {!emailSent && (
+                <div className="space-y-2 pt-2">
+                  <label className="text-sm font-medium">Final Drive Folder Link (Optional)</label>
+                  <Input 
+                    placeholder="https://drive.google.com/..." 
+                    value={driveLink}
+                    onChange={(e) => setDriveLink(e.target.value)}
+                    disabled={isSending || !clientHasEmail}
+                    className="text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    If provided, this link will be embedded into the email so the client can access their final assets.
+                  </p>
+                </div>
+              )}
+
               {emailSent ? (
                 <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm flex items-center gap-2">
                   <Check className="h-4 w-4" /> Email sent successfully!
                 </div>
               ) : (
                 <Button 
-                  className="w-full" 
+                  className="w-full mt-2" 
                   onClick={handleSendEmail} 
                   disabled={!clientHasEmail || isSending}
                 >
@@ -133,7 +162,7 @@ export function FeedbackPromptModal({
 
               {!clientHasEmail && !emailSent && (
                 <p className="text-xs text-muted-foreground text-center">
-                  Client has no email address on file. Please copy the link manually.
+                  Client has no email address on file. Please copy the feedback link manually.
                 </p>
               )}
             </>

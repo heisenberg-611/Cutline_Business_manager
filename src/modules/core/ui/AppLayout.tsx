@@ -68,6 +68,7 @@ export function AppLayout({
   const [optimisticPathname, setOptimisticPathname] = useState<string | null>(null)
   const pathname = usePathname()
   const { orgRole } = useAuth()
+  const isAdmin = orgRole === 'org:admin'
   const { organization } = useOrganization()
 
   React.useEffect(() => {
@@ -302,36 +303,38 @@ export function AppLayout({
             </button>
           </motion.div>
 
-          <motion.div initial="initial" whileHover="hover" whileTap="tap">
-            <Link
-              href="/dashboard/settings"
-              className={`group relative z-0 flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                (optimisticPathname || pathname)?.startsWith('/dashboard/settings')
-                  ? 'text-zinc-900 dark:text-white'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5'
-              } ${isCollapsed ? 'justify-center' : ''}`}
-              title={isCollapsed ? 'Settings' : undefined}
-            >
-              {(optimisticPathname || pathname)?.startsWith('/dashboard/settings') && (
-                <motion.div
-                  layoutId="activeNavPill"
-                  className="absolute inset-0 bg-zinc-200/70 dark:bg-white/10 rounded-md -z-10"
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                />
-              )}
-              <motion.div
-                variants={{
-                  initial: { scale: 1 },
-                  hover: { scale: 1.1 },
-                  tap: { scale: 0.95 }
-                }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          {isAdmin && (
+            <motion.div initial="initial" whileHover="hover" whileTap="tap">
+              <Link
+                href="/dashboard/settings"
+                className={`group relative z-0 flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  (optimisticPathname || pathname)?.startsWith('/dashboard/settings')
+                    ? 'text-zinc-900 dark:text-white'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5'
+                } ${isCollapsed ? 'justify-center' : ''}`}
+                title={isCollapsed ? 'Settings' : undefined}
               >
-                <Settings className={`h-4 w-4 shrink-0 transition-colors ${(optimisticPathname || pathname)?.startsWith('/dashboard/settings') ? '' : 'group-hover:text-indigo-500 dark:group-hover:text-indigo-400'}`} />
-              </motion.div>
-              {!isCollapsed && <span className="whitespace-nowrap">Settings</span>}
-            </Link>
-          </motion.div>
+                {(optimisticPathname || pathname)?.startsWith('/dashboard/settings') && (
+                  <motion.div
+                    layoutId="activeNavPill"
+                    className="absolute inset-0 bg-zinc-200/70 dark:bg-white/10 rounded-md -z-10"
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  />
+                )}
+                <motion.div
+                  variants={{
+                    initial: { scale: 1 },
+                    hover: { scale: 1.1 },
+                    tap: { scale: 0.95 }
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <Settings className={`h-4 w-4 shrink-0 transition-colors ${(optimisticPathname || pathname)?.startsWith('/dashboard/settings') ? '' : 'group-hover:text-indigo-500 dark:group-hover:text-indigo-400'}`} />
+                </motion.div>
+                {!isCollapsed && <span className="whitespace-nowrap">Settings</span>}
+              </Link>
+            </motion.div>
+          )}
 
           <ThemeToggle isCollapsed={isCollapsed} />
 
@@ -503,13 +506,15 @@ export function AppLayout({
           <span className="text-[10px] font-medium">Calculator</span>
         </button>
 
-        <Link
-          href="/dashboard/settings"
-          className="flex flex-col items-center justify-center min-w-[72px] h-12 gap-1 rounded-lg shrink-0 snap-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-        >
-          <Settings className="w-5 h-5 shrink-0" />
-          <span className="text-[10px] font-medium">Settings</span>
-        </Link>
+        {isAdmin && (
+          <Link
+            href="/dashboard/settings"
+            className="flex flex-col items-center justify-center min-w-[72px] h-12 gap-1 rounded-lg shrink-0 snap-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          >
+            <Settings className="w-5 h-5 shrink-0" />
+            <span className="text-[10px] font-medium">Settings</span>
+          </Link>
+        )}
       </nav>
     </div>
   )

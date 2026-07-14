@@ -227,15 +227,20 @@ export async function rejectProjectRequest(requestId: string) {
 
 
 export async function createReviewRequest(projectId: string, draftLink: string) {
-  const { orgId } = await auth()
+  const { orgId, userId, orgRole } = await auth()
+  const isAdmin = orgRole === 'org:admin'
   if (!orgId) throw new Error('Unauthorized')
 
   const project = await prisma.project.findFirst({
-    where: { id: projectId, businessId: orgId },
+    where: { 
+      id: projectId, 
+      businessId: orgId,
+      ...(isAdmin ? {} : { assigneeId: userId })
+    },
     include: { client: true }
   })
 
-  if (!project) throw new Error('Project not found')
+  if (!project) throw new Error('Project not found or unauthorized')
 
   const request = await withUniqueToken(async (token) =>
     prisma.reviewRequest.create({
@@ -294,6 +299,17 @@ export async function submitReviewNotes(token: string, notes: string, links: str
       type: "project",
       actionUrl: `/dashboard/prodp`
     })
+
+    if (request.project.assigneeId) {
+      await createNotification({
+        businessId: request.businessId,
+        userId: request.project.assigneeId,
+        title: "Client Revision Notes",
+        message: `${request.client.displayName} added revisions for "${request.project.title}".`,
+        type: "project",
+        actionUrl: `/dashboard/prodp`
+      })
+    }
   } catch (err) {
     console.error("Notification failed", err)
   }
@@ -302,22 +318,37 @@ export async function submitReviewNotes(token: string, notes: string, links: str
 }
 
 export async function getActiveReviewRequests() {
-  const { orgId } = await auth()
+  const { orgId, userId, orgRole } = await auth()
+  const isAdmin = orgRole === 'org:admin'
   if (!orgId) return []
 
   return await prisma.reviewRequest.findMany({
-    where: { businessId: orgId },
+    where: { 
+      businessId: orgId,
+      ...(isAdmin ? {} : { project: { assigneeId: userId } })
+    },
     include: { project: true, client: true },
     orderBy: { createdAt: 'desc' }
   })
 }
 
 export async function deleteReviewRequest(id: string) {
-  const { orgId } = await auth()
+  const { orgId, userId, orgRole } = await auth()
+  const isAdmin = orgRole === 'org:admin'
   if (!orgId) throw new Error('Unauthorized')
 
-  await prisma.reviewRequest.deleteMany({
-    where: { id, businessId: orgId }
+  const request = await prisma.reviewRequest.findFirst({
+    where: {
+      id,
+      businessId: orgId,
+      ...(isAdmin ? {} : { project: { assigneeId: userId } })
+    }
+  })
+
+  if (!request) throw new Error('Request not found or unauthorized')
+
+  await prisma.reviewRequest.delete({
+    where: { id: request.id }
   })
   
   revalidatePath('/dashboard/prodp')
@@ -325,11 +356,22 @@ export async function deleteReviewRequest(id: string) {
 }
 
 export async function resolveReviewRequest(id: string) {
-  const { orgId } = await auth()
+  const { orgId, userId, orgRole } = await auth()
+  const isAdmin = orgRole === 'org:admin'
   if (!orgId) throw new Error('Unauthorized')
 
-  await prisma.reviewRequest.updateMany({
-    where: { id, businessId: orgId },
+  const request = await prisma.reviewRequest.findFirst({
+    where: {
+      id,
+      businessId: orgId,
+      ...(isAdmin ? {} : { project: { assigneeId: userId } })
+    }
+  })
+
+  if (!request) throw new Error('Request not found or unauthorized')
+
+  await prisma.reviewRequest.update({
+    where: { id: request.id },
     data: { status: 'RESOLVED' }
   })
   
