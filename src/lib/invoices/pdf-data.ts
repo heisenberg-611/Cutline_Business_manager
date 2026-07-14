@@ -32,6 +32,11 @@ export async function getInvoiceDataForPdf(
 
   if (!invoice) return null
 
+  const firstAdmin = await prisma.businessMembership.findFirst({
+    where: { businessId, role: 'org:admin' },
+    include: { user: true }
+  })
+
   return {
     invoiceNumber: invoice.invoiceNumber,
     status: invoice.status as InvoiceStatus,
@@ -48,10 +53,8 @@ export async function getInvoiceDataForPdf(
 
     business: {
       name: invoice.business.name,
-      // Business model doesn't have email/phone/address fields yet,
-      // so we provide sensible fallbacks. When those fields are added
-      // to the schema, swap these out.
-      email: undefined,
+      // Use the first org admin's email as the business contact email
+      email: firstAdmin?.user?.email || undefined,
       phone: undefined,
       address: undefined,
     },

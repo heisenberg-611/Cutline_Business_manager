@@ -28,6 +28,7 @@ interface InvoiceEmailProps {
   bodyMessage: string;
   paymentLink: string;
   currency: string;
+  businessEmail?: string;
 }
 
 export const InvoiceEmail = ({
@@ -44,6 +45,7 @@ export const InvoiceEmail = ({
   ],
   bodyMessage = "Here is your invoice. Thank you for your business!",
   paymentLink = "https://example.com/pay",
+  businessEmail,
 }: InvoiceEmailProps) => {
   return (
     <Html>
@@ -152,9 +154,15 @@ export const InvoiceEmail = ({
             <Text style={footerText}>
               Sent securely via <Link href="https://cutlin.tech" style={footerLink}>Cutline OS</Link>.
             </Text>
-            <Text style={footerSubtext}>
-              If you have any questions about this invoice, simply reply to this email to contact {businessName}.
-            </Text>
+            {businessEmail ? (
+              <Text style={footerSubtext}>
+                If you have any questions about this invoice, please email <Link href={`mailto:${businessEmail}`} style={{ ...footerSubtext, textDecoration: 'underline' }}>{businessEmail}</Link>.
+              </Text>
+            ) : (
+              <Text style={footerSubtext}>
+                If you have any questions about this invoice, please contact {businessName}.
+              </Text>
+            )}
           </Section>
         </Container>
       </Body>

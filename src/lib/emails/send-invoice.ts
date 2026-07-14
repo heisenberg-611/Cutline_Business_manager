@@ -62,6 +62,12 @@ export async function sendDynamicInvoiceEmail(invoiceId: string, businessId: str
   const subject = replacePlaceholders(business.emailSubjectTemplate)
   const bodyMessage = replacePlaceholders(business.emailBodyTemplate)
 
+  const firstAdmin = await prisma.businessMembership.findFirst({
+    where: { businessId, role: 'org:admin' },
+    include: { user: true }
+  })
+  const businessEmail = firstAdmin?.user?.email
+
   // Generate Email HTML from React component
   const htmlContent = await render(
     React.createElement(InvoiceEmail, {
@@ -76,7 +82,8 @@ export async function sendDynamicInvoiceEmail(invoiceId: string, businessId: str
       lineItems: formattedLineItems,
       bodyMessage: bodyMessage,
       paymentLink: paymentLink,
-      currency: invoice.currency
+      currency: invoice.currency,
+      businessEmail: businessEmail
     })
   )
 

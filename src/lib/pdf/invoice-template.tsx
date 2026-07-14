@@ -635,8 +635,12 @@ export const InvoiceTemplate = ({ invoice }: { invoice: InvoiceData }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerLeft}>Thank you for your business</Text>
-          <Text style={styles.footerRight}>{invoice.invoiceNumber}</Text>
+          <Text style={styles.footerLeft}>We are grateful for your business.</Text>
+          {invoice.business.email ? (
+            <Text style={styles.footerRight}>If you have any questions please email us at {invoice.business.email}</Text>
+          ) : (
+            <Text style={styles.footerRight}></Text>
+          )}
         </View>
       </Page>
     </Document>

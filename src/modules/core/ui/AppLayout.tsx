@@ -96,7 +96,7 @@ export function AppLayout({
         e.preventDefault()
         setIsCommandOpen((open) => !open)
       }
-      if (e.key === '+' && (e.metaKey || e.ctrlKey)) {
+      if (e.key.toLowerCase() === 'q' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setIsQuickActionsOpen((open) => !open)
       }

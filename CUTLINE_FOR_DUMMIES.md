@@ -36,7 +36,9 @@ Do you buy premium fonts, stock footage, licensed music, or specific plugins for
 * Link it directly to a Project.
 * **Why do this?** When you generate an invoice for that project later, Cutline OS will *automatically* prompt you to include those asset costs on the invoice so you don't forget to bill the client for them!
 
-## 5. Invoicing & Getting Paid 💸
+## 5. Financials: Invoicing & Expenses 💸
+
+### Getting Paid (Invoices)
 When the work is done (or when you need a deposit), it's time to get paid. Go to **Financials**.
 * Click **"Create Invoice"**.
 * Select the Client and the Project.
@@ -44,18 +46,20 @@ When the work is done (or when you need a deposit), it's time to get paid. Go to
 * Your **Payment Instructions** and **Currency** will automatically load based on your Settings.
 * Click **Save Changes**.
 
-### Sending the Invoice 📧
-Once the invoice is drafted:
+**Sending the Invoice:**
 1. Open the invoice.
 2. Click **"Mark as Sent"**. Cutline OS will automatically shoot a beautifully styled, highly professional HTML email directly to your client. 
 3. **The Public Payment Page**: The email includes a button linking to a secure, public payment portal. Your client can view this page to see exactly what they owe and read your Payment Instructions.
 
-### Recording Payments 💰
-When the client pays you (via bank transfer, cash, etc.):
-1. Open the invoice in Cutline OS.
-2. Click **"Record Payment"**.
-3. Enter the amount paid, the method (Bank, Card, Cash), and the **exact date and time** the payment was received.
-4. The invoice will update to **"Partially Paid"** or **"Paid"** instantly. Furthermore, any **PDFs generated** will display the exact timestamp of that payment on the receipt!
+**Recording Payments:**
+When the client pays you, open the invoice and click **"Record Payment"**. Enter the amount paid, the method, and the **exact date and time** the payment was received. The invoice will instantly update to "Partially Paid" or "Paid", and PDFs will reflect the precise payment timestamp!
+
+### Tracking Expenses
+Keeping track of money going out is just as important as money coming in.
+* Navigate to the **Expenses** tab under Financials.
+* Click **"Log Expense"**.
+* Track category, date, and link it to a specific project if applicable. 
+* All expenses will be automatically displayed using your default business currency!
 
 ## 6. Visual Analytics 📊
 Want to see how your business is doing? Head over to the **Analytics** tab. 
@@ -63,9 +67,11 @@ Want to see how your business is doing? Head over to the **Analytics** tab.
 * View your **Pipeline Distribution** via a clean Pie chart.
 * Export all your Project or Invoice data to CSV with just 1-click for external accounting tools.
 
-## 7. The Command Palette (Cmd+K) ⚡
-For power users: anywhere in the app, press `Cmd + K` (or `Ctrl + K` on Windows).
-This opens a global search bar. You can type a client's name, a project title, or an invoice number, and hit Enter to jump straight to it without touching your mouse!
+## 7. Power User Tools ⚡
+
+* **The Command Palette (Cmd + K)**: Anywhere in the app, press `Cmd + K` (or `Ctrl + K` on Windows) to open global search. Type a client's name, project title, or invoice number, and hit Enter to jump straight to it.
+* **Quick Actions (Cmd + Q)**: Click the "New" button in the top bar or use the shortcut `Cmd + Q` to slide out the Quick Actions panel. It lets you instantly log an expense, add an asset, create a new project, or draft an invoice from anywhere in the app!
+* **Currency Converter**: Need to quickly check exchange rates before sending an invoice to an international client? Use the built-in Currency Converter located right in your sidebar!
 
 ---
 *Now get back to being creative, and let Cutline OS handle the business.*
