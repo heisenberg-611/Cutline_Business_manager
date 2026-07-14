@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import {
   Table,
   TableBody,
@@ -52,9 +53,19 @@ const formatDate = (date: Date) => {
 }
 
 export function ExpenseTable({ expenses, projects, openNewExpense = false, businessCurrency = 'USD' }: Props) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [isCreating, setIsCreating] = useState(openNewExpense)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (openNewExpense) {
+      setIsCreating(true)
+    }
+  }, [openNewExpense])
 
   const notify = (title: string, description?: string) => {
     window.alert(description ? `${title}\n${description}` : title)
@@ -115,7 +126,7 @@ export function ExpenseTable({ expenses, projects, openNewExpense = false, busin
                     {expense.project?.title || '-'}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatMoney(expense.amountCents, expense.currency)}
+                    {formatMoney(expense.amountCents, businessCurrency)}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -153,6 +164,11 @@ export function ExpenseTable({ expenses, projects, openNewExpense = false, busin
           if (!open) {
             setEditingExpense(null)
             setIsCreating(false)
+            if (searchParams.get('newExpense') === '1') {
+              const params = new URLSearchParams(searchParams.toString())
+              params.delete('newExpense')
+              router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+            }
           }
         }}
         expense={editingExpense}

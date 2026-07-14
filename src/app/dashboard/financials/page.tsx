@@ -75,7 +75,7 @@ export default async function FinancialsPage({
 
       <StudioHealthFinanceStrip data={studioHealth} variant="finance" />
 
-      <Tabs defaultValue={activeTab} className="w-full">
+      <Tabs key={activeTab} defaultValue={activeTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="invoices">Invoices & Revenue</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>

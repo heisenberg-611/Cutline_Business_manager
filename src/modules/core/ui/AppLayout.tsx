@@ -250,7 +250,7 @@ export function AppLayout({
           <motion.div initial="initial" whileHover="hover" whileTap="tap">
             <button
               onClick={() => setIsCommandOpen(true)}
-              className={`group w-full flex items-center px-3 py-2 text-sm text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+              className={`group relative z-0 w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 ${isCollapsed ? 'justify-center' : 'justify-between'}`}
               title={isCollapsed ? 'Search (Cmd+K)' : undefined}
             >
               <div className="flex items-center gap-3 overflow-hidden">
@@ -267,7 +267,7 @@ export function AppLayout({
                 {!isCollapsed && <span className="whitespace-nowrap">Search...</span>}
               </div>
               {!isCollapsed && (
-                <span className="flex items-center text-xs opacity-50 bg-zinc-200 dark:bg-white/10 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0">
+                <span className="flex items-center text-xs opacity-50 bg-zinc-200 dark:bg-white/10 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0 font-normal">
                   <CmdIcon className="h-3 w-3 mr-0.5 shrink-0" /> K
                 </span>
               )}
@@ -277,7 +277,7 @@ export function AppLayout({
           <motion.div initial="initial" whileHover="hover" whileTap="tap">
             <button 
               onClick={() => setIsCurrencyConverterOpen(true)}
-              className={`group w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+              className={`group relative z-0 w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 ${isCollapsed ? 'justify-center' : ''}`}
               title={isCollapsed ? 'Currency Converter' : undefined}
             >
               <motion.div
@@ -297,9 +297,20 @@ export function AppLayout({
           <motion.div initial="initial" whileHover="hover" whileTap="tap">
             <Link
               href="/dashboard/settings"
-              className={`group flex items-center gap-3 px-3 py-2 text-sm text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+              className={`group relative z-0 flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                (optimisticPathname || pathname)?.startsWith('/dashboard/settings')
+                  ? 'text-zinc-900 dark:text-white'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5'
+              } ${isCollapsed ? 'justify-center' : ''}`}
               title={isCollapsed ? 'Settings' : undefined}
             >
+              {(optimisticPathname || pathname)?.startsWith('/dashboard/settings') && (
+                <motion.div
+                  layoutId="activeNavPill"
+                  className="absolute inset-0 bg-zinc-200/70 dark:bg-white/10 rounded-md -z-10"
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                />
+              )}
               <motion.div
                 variants={{
                   initial: { scale: 1 },
@@ -308,7 +319,7 @@ export function AppLayout({
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                <Settings className="h-4 w-4 shrink-0 transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-400" />
+                <Settings className={`h-4 w-4 shrink-0 transition-colors ${(optimisticPathname || pathname)?.startsWith('/dashboard/settings') ? '' : 'group-hover:text-indigo-500 dark:group-hover:text-indigo-400'}`} />
               </motion.div>
               {!isCollapsed && <span className="whitespace-nowrap">Settings</span>}
             </Link>
@@ -319,7 +330,7 @@ export function AppLayout({
           <motion.div initial="initial" whileHover="hover" whileTap="tap">
             <button 
               onClick={togglePin}
-              className={`group w-full flex items-center gap-3 py-2 px-3 text-sm text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors ${isExpanded ? '' : 'justify-center'}`}
+              className={`group relative z-0 w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 ${isExpanded ? '' : 'justify-center'}`}
               title={isExpanded ? (isPinned ? 'Unpin Sidebar' : 'Pin Sidebar') : undefined}
             >
               <motion.div
@@ -331,9 +342,9 @@ export function AppLayout({
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 {isPinned ? (
-                  <PinOff className="h-4 w-4 transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-400" />
+                  <PinOff className="h-4 w-4 shrink-0 transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-400" />
                 ) : (
-                  <Pin className="h-4 w-4 transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-400" />
+                  <Pin className="h-4 w-4 shrink-0 transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-400" />
                 )}
               </motion.div>
               {isExpanded && <span className="whitespace-nowrap">{isPinned ? 'Unpin' : 'Pin'}</span>}
