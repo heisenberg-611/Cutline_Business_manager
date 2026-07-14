@@ -10,6 +10,7 @@ import { createNotification, broadcastNotification } from '@/modules/notificatio
 import { getAppUrl } from '@/lib/utils'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/utils/rate-limit'
+import { requireAdmin } from '@/lib/auth'
 
 const FeedbackSchema = z.object({
   overallScore: z.number().int().min(1).max(10),
@@ -24,8 +25,7 @@ const FeedbackSchema = z.object({
 // -----------------------------------------------------------------------------
 
 export async function createFeedbackRequest(projectId: string, clientId: string) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   const project = await prisma.project.findFirst({
     where: { id: projectId, businessId: orgId }
@@ -63,8 +63,7 @@ export async function createFeedbackRequest(projectId: string, clientId: string)
 }
 
 export async function sendFeedbackEmailAction(projectId: string, token: string) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   const request = await prisma.feedbackRequest.findFirst({
     where: { token, businessId: orgId, projectId },

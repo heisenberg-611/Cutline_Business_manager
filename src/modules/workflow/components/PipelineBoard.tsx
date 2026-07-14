@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
+import { useAuth } from '@clerk/nextjs'
 
 import { updateProjectStage, updateProjectOrder } from '../actions'
 import { FeedbackPromptModal } from './FeedbackPromptModal'
@@ -63,6 +64,8 @@ const isDeliveryStage = (stageName: string) => {
 
 export default function PipelineBoard({ stages, projects: initialProjects }: { stages: Stage[], projects: Project[] }) {
 
+  const { orgRole } = useAuth()
+  const isAdmin = orgRole === 'org:admin'
   const [isPending, startTransition] = useTransition()
 
   // Need local state for optimistic UI updates with dnd
@@ -172,8 +175,10 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
     // Trigger if it's BOTH the final stage AND it has a delivery keyword
     if (destStage && (isTerminal && isDelivery)) {
       if (draggedProject && draggedProject.client) {
-        setCompletedProject(draggedProject)
-        setFeedbackPromptOpen(true)
+        if (isAdmin) {
+          setCompletedProject(draggedProject)
+          setFeedbackPromptOpen(true)
+        }
       }
     }
   }
@@ -397,8 +402,10 @@ export default function PipelineBoard({ stages, projects: initialProjects }: { s
                                     // Trigger if it's BOTH the final stage AND it has a delivery keyword
                                     if (destStage && (isTerminal && isDelivery)) {
                                       if (project.client) {
-                                        setCompletedProject(project)
-                                        setFeedbackPromptOpen(true)
+                                        if (isAdmin) {
+                                          setCompletedProject(project)
+                                          setFeedbackPromptOpen(true)
+                                        }
                                       }
                                     }
                                   }}

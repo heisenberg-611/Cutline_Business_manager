@@ -81,7 +81,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           priority: project.priority,
           deadline: project.deadline,
           isArchived: project.isArchived,
-          assigneeId: project.assigneeId
+          assigneeId: project.assigneeId,
+          clientId: project.clientId,
+          clientHasEmail: !!project.client?.email
         }} members={members} />
       </div>
       

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { updateProject, deleteProject, archiveProject, unarchiveProject } from '../actions'
+import { FeedbackPromptModal } from '../../workflow/components/FeedbackPromptModal'
 import { format } from 'date-fns'
 
 type Project = {
@@ -19,6 +20,8 @@ type Project = {
   deadline: Date | null
   isArchived?: boolean
   assigneeId?: string | null
+  clientId?: string
+  clientHasEmail?: boolean
 }
 
 type Member = {
@@ -34,6 +37,7 @@ export function ProjectActions({ project, members = [] }: { project: Project, me
   const { orgRole } = useAuth()
   const isAdmin = orgRole === 'org:admin'
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   
@@ -117,7 +121,23 @@ export function ProjectActions({ project, members = [] }: { project: Project, me
         <Button variant="outline" size="sm" onClick={handleDelete} className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" title="Delete Project">
           <Trash className="h-4 w-4" />
         </Button>
+        {isAdmin && project.clientId && (
+          <Button variant="default" size="sm" onClick={() => setIsFeedbackOpen(true)} className="ml-2">
+            Request Feedback
+          </Button>
+        )}
       </div>
+
+      {isAdmin && project.clientId && (
+        <FeedbackPromptModal
+          open={isFeedbackOpen}
+          onOpenChange={setIsFeedbackOpen}
+          projectId={project.id}
+          clientId={project.clientId}
+          clientHasEmail={!!project.clientHasEmail}
+          projectName={project.title}
+        />
+      )}
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="sm:max-w-[425px]">

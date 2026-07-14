@@ -132,8 +132,52 @@ export async function updateProjectStage(projectId: string, newStageId: string) 
       })
     ])
 
-    revalidatePath('/dashboard/pipeline')
-    revalidatePath('/dashboard/projects')
+    const newStage = await prisma.workflowStage.findUnique({
+      where: { id: newStageId },
+      include: { template: { include: { stages: true } } }
+    })
+    
+    if (newStage) {
+      const isTerminal = newStage.orderIndex === Math.max(...newStage.template.stages.map(s => s.orderIndex))
+      const isDelivery = newStage.name.toLowerCase().includes('deliver')
+      
+      if (isTerminal && isDelivery) {
+        await prisma.auditLog.create({
+          data: {
+            businessId: orgId,
+            entityType: 'Project',
+            entityId: projectId,
+            action: 'STAGE_CHANGED_TO_DELIVERED',
+            actorUserId: userId,
+            metadataJson: JSON.stringify({ previousStageId: currentStageId })
+          }
+        })
+
+        if (orgRole !== 'org:admin') {
+          const admins = await prisma.businessMembership.findMany({
+            where: { businessId: orgId, role: 'org:admin' }
+          })
+        const member = await prisma.user.findUnique({ where: { id: userId } })
+        const memberName = member ? `${member.firstName || ''} ${member.lastName || ''}`.trim() || member.email : 'A team member'
+        
+        if (admins.length > 0) {
+          await prisma.notification.createMany({
+            data: admins.map(admin => ({
+              businessId: orgId,
+              userId: admin.userId,
+              title: 'Project Ready for Review',
+              message: `Project "${project.title}" is ready for review by ${memberName}.`,
+              type: 'project',
+              actionUrl: `/dashboard/projects/${projectId}`
+            }))
+          })
+        }
+      }
+    }
+  }
+
+  revalidatePath('/dashboard/pipeline')
+  revalidatePath('/dashboard/projects')
   }
 }
 
@@ -168,6 +212,54 @@ export async function updateProjectOrder(updates: { id: string, statusStageId: s
       })
     )
   )
+
+  // Check if any moved to terminal delivery stage
+  for (const update of updates) {
+    const newStage = await prisma.workflowStage.findUnique({
+      where: { id: update.statusStageId },
+      include: { template: { include: { stages: true } } }
+    })
+    if (newStage) {
+      const isTerminal = newStage.orderIndex === Math.max(...newStage.template.stages.map(s => s.orderIndex))
+      const isDelivery = newStage.name.toLowerCase().includes('deliver')
+      if (isTerminal && isDelivery) {
+        await prisma.auditLog.create({
+          data: {
+            businessId: orgId,
+            entityType: 'Project',
+            entityId: update.id,
+            action: 'STAGE_CHANGED_TO_DELIVERED',
+            actorUserId: userId,
+            metadataJson: JSON.stringify({})
+          }
+        })
+        
+        if (orgRole !== 'org:admin') {
+          const project = await prisma.project.findUnique({ where: { id: update.id } })
+          if (project) {
+            const admins = await prisma.businessMembership.findMany({
+              where: { businessId: orgId, role: 'org:admin' }
+            })
+            const member = await prisma.user.findUnique({ where: { id: userId } })
+            const memberName = member ? `${member.firstName || ''} ${member.lastName || ''}`.trim() || member.email : 'A team member'
+            
+            if (admins.length > 0) {
+              await prisma.notification.createMany({
+                data: admins.map(admin => ({
+                  businessId: orgId,
+                  userId: admin.userId,
+                  title: 'Project Ready for Review',
+                  message: `Project "${project.title}" is ready for review by ${memberName}.`,
+                  type: 'project',
+                  actionUrl: `/dashboard/projects/${project.id}`
+                }))
+              })
+            }
+          }
+        }
+      }
+    }
+  }
 
   revalidatePath('/dashboard/pipeline')
   revalidatePath('/dashboard/projects')

@@ -108,7 +108,7 @@ export async function createProject(data: FormData) {
 }
 
 export async function updateProject(projectId: string, data: { title?: string, deadline?: Date | null, priority?: string | null, assigneeId?: string | null }) {
-  const { orgId, orgRole } = await auth()
+  const { orgId, orgRole, userId } = await auth()
   if (!orgId) throw new Error('Unauthorized')
 
   if ('assigneeId' in data && orgRole !== 'org:admin') {
@@ -120,10 +120,25 @@ export async function updateProject(projectId: string, data: { title?: string, d
   })
   if (!project) throw new Error('Project not found')
 
+  const oldAssigneeId = project.assigneeId
+
   await prisma.project.update({
     where: { id: projectId, businessId: orgId },
     data
   })
+
+  if ('assigneeId' in data && data.assigneeId !== undefined && oldAssigneeId !== data.assigneeId) {
+    await prisma.auditLog.create({
+      data: {
+        businessId: orgId,
+        entityType: 'Project',
+        entityId: projectId,
+        action: 'ASSIGNEE_CHANGED',
+        actorUserId: userId,
+        metadataJson: JSON.stringify({ oldAssigneeId, newAssigneeId: data.assigneeId })
+      }
+    })
+  }
 
   revalidatePath('/dashboard/projects')
   revalidatePath(`/dashboard/projects/${projectId}`)
