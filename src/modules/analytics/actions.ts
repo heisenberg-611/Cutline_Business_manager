@@ -1,12 +1,11 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { requireAdmin } from '@/lib/auth'
 import prisma from '@/modules/core/db/prisma'
 import { format, subDays, eachDayOfInterval } from 'date-fns'
 
 export async function getAnalyticsData(startDateStr: string, endDateStr: string) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   const startDate = new Date(startDateStr)
   startDate.setHours(0, 0, 0, 0)

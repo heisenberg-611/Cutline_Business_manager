@@ -1,6 +1,6 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { requireAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import prisma from '@/modules/core/db/prisma'
 
@@ -9,7 +9,7 @@ import prisma from '@/modules/core/db/prisma'
 // -----------------------------------------------------------------------------
 
 export async function checkClientEmailExists(email: string, excludeClientId?: string): Promise<{ exists: boolean; clientName?: string }> {
-  const { orgId } = await auth()
+  const { orgId } = await requireAdmin()
   if (!orgId || !email || email.trim() === '') return { exists: false }
 
   const existing = await prisma.client.findFirst({
@@ -29,11 +29,7 @@ export async function checkClientEmailExists(email: string, excludeClientId?: st
 // -----------------------------------------------------------------------------
 
 export async function createClient(data: FormData) {
-  const { orgId } = await auth()
-  
-  if (!orgId) {
-    throw new Error('Unauthorized: No active business selected.')
-  }
+  const { orgId } = await requireAdmin()
 
   const displayName = data.get('displayName') as String
   const companyName = data.get('companyName') as String
@@ -80,8 +76,7 @@ export async function createClient(data: FormData) {
 }
 
 export async function updateClient(clientId: string, data: { displayName: string, companyName: string, email?: string, phone?: string, industry: string, preferredChannel: string }) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   // Verify ownership
   const client = await prisma.client.findFirst({
@@ -115,8 +110,7 @@ export async function updateClient(clientId: string, data: { displayName: string
 }
 
 export async function deleteClient(clientId: string) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   // Verify ownership
   const client = await prisma.client.findFirst({
@@ -132,8 +126,7 @@ export async function deleteClient(clientId: string) {
 }
 
 export async function updateClientRating(clientId: string, rating: number) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   // Validate rating
   if (rating < 0 || rating > 5) {
@@ -155,8 +148,7 @@ export async function updateClientRating(clientId: string, rating: number) {
 }
 
 export async function getClients(orgId: string) {
-  const { orgId: userOrgId } = await auth()
-  if (!userOrgId || userOrgId !== orgId) throw new Error('Unauthorized')
+  const { orgId: userOrgId } = await requireAdmin()
 
   return await prisma.client.findMany({
     where: {

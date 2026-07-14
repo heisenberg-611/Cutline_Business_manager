@@ -9,25 +9,58 @@ async function exportUserData() {
   try {
     const users = await prisma.user.findMany({
       include: {
+        // Include direct user relations
+        notifications: true,
         // Users are connected to businesses via memberships
         memberships: {
           include: {
             business: {
               include: {
-                // Fetch the projects tied to the business
+                clients: true,
+                // Fetch the projects tied to the business with all their relations
                 projects: {
                   include: {
-                    client: true // Include client info for the project
+                    client: true,
+                    statusStage: true,
+                    stageHistory: true,
+                    invoices: true,
+                    notes: true,
+                    links: true,
+                    timeEntries: true,
+                    assets: true,
+                    expenses: true,
+                    feedbackRequests: true,
+                    testimonials: true,
+                    reviewRequests: true
+                  }
+                },
+                projectRequests: true,
+                workflowTemplates: {
+                  include: {
+                    stages: true
                   }
                 },
                 // Fetch the financial information tied to the business
                 invoices: {
                   include: {
                     lineItems: true,
-                    payments: true
+                    payments: true,
+                    creditNotes: true,
+                    reminders: true
                   }
                 },
-                expenses: true
+                assets: true,
+                payments: true,
+                expenses: true,
+                creditNotes: true,
+                invoiceReminders: true,
+                auditLogs: true,
+                notifications: true,
+                feedbackRequests: true,
+                feedbackResponses: true,
+                testimonials: true,
+                reviewRequests: true,
+                analyticsSnapshots: true
               }
             }
           }

@@ -106,50 +106,58 @@ export function AppLayout({
   }, [])
 
   const navItems = React.useMemo(() => {
-    if (!initialNavPreferences || initialNavPreferences.length === 0) {
-      return ALL_NAV_ITEMS
+    let items = ALL_NAV_ITEMS
+
+    if (initialNavPreferences && initialNavPreferences.length > 0) {
+      const preferenceMap = new Map(initialNavPreferences.map(p => [p.href, p]))
+      const sorted = [...ALL_NAV_ITEMS].sort((a, b) => {
+        const indexA = initialNavPreferences.findIndex(p => p.href === a.href)
+        const indexB = initialNavPreferences.findIndex(p => p.href === b.href)
+        if (indexA === -1 && indexB === -1) return 0
+        if (indexA === -1) return 1
+        if (indexB === -1) return -1
+        return indexA - indexB
+      })
+      items = sorted.filter(item => {
+        const pref = preferenceMap.get(item.href)
+        return pref ? pref.visible : true
+      })
     }
 
-    const preferenceMap = new Map(initialNavPreferences.map(p => [p.href, p]))
+    if (orgRole !== 'org:admin') {
+      const restricted = ['/dashboard/financials', '/dashboard/analytics', '/dashboard/settings', '/dashboard/archive', '/dashboard/clients']
+      items = items.filter(item => !restricted.some(r => item.href.startsWith(r)))
+    }
 
-    const sorted = [...ALL_NAV_ITEMS].sort((a, b) => {
-      const indexA = initialNavPreferences.findIndex(p => p.href === a.href)
-      const indexB = initialNavPreferences.findIndex(p => p.href === b.href)
-
-      if (indexA === -1 && indexB === -1) return 0
-      if (indexA === -1) return 1
-      if (indexB === -1) return -1
-      return indexA - indexB
-    })
-
-    return sorted.filter(item => {
-      const pref = preferenceMap.get(item.href)
-      return pref ? pref.visible : true
-    })
-  }, [initialNavPreferences])
+    return items
+  }, [initialNavPreferences, orgRole])
 
   const quickActions = React.useMemo(() => {
-    if (!initialQuickActionPreferences || initialQuickActionPreferences.length === 0) {
-      return ALL_QUICK_ACTIONS
+    let items = ALL_QUICK_ACTIONS
+
+    if (initialQuickActionPreferences && initialQuickActionPreferences.length > 0) {
+      const preferenceMap = new Map(initialQuickActionPreferences.map(p => [p.id, p]))
+      const sorted = [...ALL_QUICK_ACTIONS].sort((a, b) => {
+        const indexA = initialQuickActionPreferences.findIndex(p => p.id === a.id)
+        const indexB = initialQuickActionPreferences.findIndex(p => p.id === b.id)
+        if (indexA === -1 && indexB === -1) return 0
+        if (indexA === -1) return 1
+        if (indexB === -1) return -1
+        return indexA - indexB
+      })
+      items = sorted.filter(item => {
+        const pref = preferenceMap.get(item.id)
+        return pref ? pref.visible : true
+      })
     }
 
-    const preferenceMap = new Map(initialQuickActionPreferences.map(p => [p.id, p]))
+    if (orgRole !== 'org:admin') {
+      const restricted = ['/dashboard/financials', '/dashboard/analytics', '/dashboard/settings', '/dashboard/archive', '/dashboard/clients']
+      items = items.filter(item => !restricted.some(r => item.href.startsWith(r)))
+    }
 
-    const sorted = [...ALL_QUICK_ACTIONS].sort((a, b) => {
-      const indexA = initialQuickActionPreferences.findIndex(p => p.id === a.id)
-      const indexB = initialQuickActionPreferences.findIndex(p => p.id === b.id)
-
-      if (indexA === -1 && indexB === -1) return 0
-      if (indexA === -1) return 1
-      if (indexB === -1) return -1
-      return indexA - indexB
-    })
-
-    return sorted.filter(item => {
-      const pref = preferenceMap.get(item.id)
-      return pref ? pref.visible : true
-    })
-  }, [initialQuickActionPreferences])
+    return items
+  }, [initialQuickActionPreferences, orgRole])
 
   // Contextual Topbar Logic
   const getContextualTitle = () => {

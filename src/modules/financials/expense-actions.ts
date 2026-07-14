@@ -2,6 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server'
 import prisma from '@/modules/core/db/prisma'
+import { requireAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -17,13 +18,12 @@ const ExpenseInputSchema = z.object({
 export type ExpenseInput = z.infer<typeof ExpenseInputSchema>
 
 async function requireBusiness() {
-  const { orgId, userId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId, userId } = await requireAdmin()
   return { orgId, userId }
 }
 
 export async function getExpenses(orgId: string) {
-  const { orgId: userOrgId } = await auth()
+  const { orgId: userOrgId } = await requireAdmin()
   if (!userOrgId || userOrgId !== orgId) throw new Error('Unauthorized')
 
   return await prisma.expense.findMany({

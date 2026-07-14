@@ -1,6 +1,6 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { requireAdmin } from '@/lib/auth'
 import prisma from '@/modules/core/db/prisma'
 import { revalidatePath } from 'next/cache'
 import { WORKFLOW_PRESETS } from './config/presets'
@@ -21,8 +21,7 @@ const DEFAULT_STAGES = [
  * Update the business's default currency.
  */
 export async function updateBusinessCurrency(currency: string) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   await prisma.business.update({
     where: { id: orgId },
@@ -38,8 +37,7 @@ export async function updateBusinessCurrency(currency: string) {
  * Normally Clerk webhooks handle this, but this guarantees immediate UI updates locally.
  */
 export async function syncBusinessName(name: string) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   await prisma.business.update({
     where: { id: orgId },
@@ -61,8 +59,7 @@ export async function updateInvoiceSettings(data: {
   feedbackEmailSubjectTemplate: string
   feedbackEmailBodyTemplate: string
 }) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   await prisma.business.update({
     where: { id: orgId },
@@ -77,8 +74,7 @@ export async function updateInvoiceSettings(data: {
  * Add a new workflow stage to the business's pipeline template.
  */
 export async function addWorkflowStage(name: string, icon?: string | null) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   const template = await prisma.workflowTemplate.findFirst({
     where: { businessId: orgId },
@@ -106,8 +102,7 @@ export async function addWorkflowStage(name: string, icon?: string | null) {
  * Update an existing workflow stage.
  */
 export async function updateWorkflowStage(stageId: string, updates: { name?: string, icon?: string | null }) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   // Verify stage belongs to this business
   const stage = await prisma.workflowStage.findFirst({
@@ -128,8 +123,7 @@ export async function updateWorkflowStage(stageId: string, updates: { name?: str
  * Delete a workflow stage. Projects on this stage will be moved to the first stage.
  */
 export async function deleteWorkflowStage(stageId: string) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   const stage = await prisma.workflowStage.findFirst({
     where: { id: stageId, template: { businessId: orgId } },
@@ -161,8 +155,7 @@ export async function deleteWorkflowStage(stageId: string) {
  * Reorder workflow stages.
  */
 export async function reorderWorkflowStages(stageIds: string[]) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   // Verify all stages belong to this business's template
   const template = await prisma.workflowTemplate.findFirst({
@@ -195,8 +188,7 @@ export async function reorderWorkflowStages(stageIds: string[]) {
  * Update the user's navigation preferences.
  */
 export async function updateNavPreferences(preferences: { href: string; visible: boolean }[]) {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const { userId } = await requireAdmin()
 
   await prisma.user.update({
     where: { id: userId },
@@ -210,8 +202,7 @@ export async function updateNavPreferences(preferences: { href: string; visible:
  * Update the user's quick action preferences.
  */
 export async function updateQuickActionPreferences(preferences: { id: string; visible: boolean }[]) {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const { userId } = await requireAdmin()
 
   await prisma.user.update({
     where: { id: userId },
@@ -225,8 +216,7 @@ export async function updateQuickActionPreferences(preferences: { id: string; vi
  * Apply a complete workflow preset (Navigation + Pipeline Stages).
  */
 export async function applyWorkflowPreset(presetId: string) {
-  const { orgId, userId } = await auth()
-  if (!orgId || !userId) throw new Error('Unauthorized')
+  const { orgId, userId } = await requireAdmin()
 
   const preset = WORKFLOW_PRESETS.find(p => p.id === presetId)
   if (!preset) throw new Error('Preset not found')
@@ -290,8 +280,7 @@ export async function applyWorkflowPreset(presetId: string) {
  * Restore user navigation and business pipeline back to their defaults.
  */
 export async function restoreDefaults() {
-  const { orgId, userId } = await auth()
-  if (!orgId || !userId) throw new Error('Unauthorized')
+  const { orgId, userId } = await requireAdmin()
 
   // 1. Reset Nav Preferences
   const defaultNavPrefs = ALL_NAV_ITEMS.map(item => ({ href: item.href, visible: true }))
@@ -345,8 +334,7 @@ export async function restoreDefaults() {
  * Update the user's notification preferences.
  */
 export async function updateNotificationPreferences(preferences: { tone: string; dnd: boolean }) {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const { userId } = await requireAdmin()
 
   await prisma.user.update({
     where: { id: userId },

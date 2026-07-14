@@ -2,6 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server'
 import prisma from '@/modules/core/db/prisma'
+import { requireAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { generateInvoiceNumber } from '@/lib/invoices/number-generator'
 import { sendDynamicInvoiceEmail } from '@/lib/emails/send-invoice'
@@ -15,8 +16,7 @@ import { format, eachDayOfInterval } from 'date-fns'
 // -----------------------------------------------------------------------------
 
 async function requireBusiness() {
-  const { orgId, userId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId, userId } = await requireAdmin()
   return { orgId, userId }
 }
 
@@ -376,7 +376,7 @@ export async function sendReminder(invoiceId: string, tone: 'gentle' | 'firm' | 
 }
 
 export async function getInvoices(orgId: string) {
-  const { orgId: userOrgId } = await auth()
+  const { orgId: userOrgId } = await requireAdmin()
   if (!userOrgId || userOrgId !== orgId) throw new Error('Unauthorized')
 
   return await prisma.invoice.findMany({

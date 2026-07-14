@@ -24,7 +24,18 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.redirect(new URL('/dashboard/select-business', req.url));
     }
 
-    // Enforce RBAC removed: All members can see everything
+    if (orgRole !== 'org:admin') {
+      const restrictedPrefixes = [
+        '/dashboard/financials', 
+        '/dashboard/analytics', 
+        '/dashboard/settings', 
+        '/dashboard/archive', 
+        '/dashboard/clients'
+      ];
+      if (restrictedPrefixes.some(prefix => req.nextUrl.pathname.startsWith(prefix))) {
+        return NextResponse.redirect(new URL('/dashboard/pipeline', req.url));
+      }
+    }
   }
 })
 

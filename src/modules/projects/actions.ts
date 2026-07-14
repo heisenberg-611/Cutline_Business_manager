@@ -1,6 +1,7 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
+import { requireAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import prisma from '@/modules/core/db/prisma'
 import { ensureDefaultTemplate } from '@/modules/workflow/actions'
@@ -157,8 +158,7 @@ export async function getProjects(orgId: string) {
 }
 
 export async function getArchivedProjects(orgId: string) {
-  const { orgId: userOrgId } = await auth()
-  if (!userOrgId || userOrgId !== orgId) throw new Error('Unauthorized')
+  const { orgId: userOrgId } = await requireAdmin()
 
   return await prisma.project.findMany({
     where: {
@@ -175,8 +175,7 @@ export async function getArchivedProjects(orgId: string) {
 }
 
 export async function archiveProject(projectId: string) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   const project = await prisma.project.findFirst({
     where: { id: projectId, businessId: orgId }
@@ -195,8 +194,7 @@ export async function archiveProject(projectId: string) {
 }
 
 export async function unarchiveProject(projectId: string) {
-  const { orgId } = await auth()
-  if (!orgId) throw new Error('Unauthorized')
+  const { orgId } = await requireAdmin()
 
   const project = await prisma.project.findFirst({
     where: { id: projectId, businessId: orgId }
