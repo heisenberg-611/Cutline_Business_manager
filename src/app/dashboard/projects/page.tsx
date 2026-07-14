@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { getProjects } from '@/modules/projects/actions'
+import { getProjects, getOrgUsers } from '@/modules/projects/actions'
 import { getClients } from '@/modules/clients/actions'
 import { getPendingProjectRequests } from '@/modules/prodp/actions'
 import { ProjectRequestsPanel } from '@/modules/prodp/components/ProjectRequestsPanel'
@@ -36,10 +36,11 @@ export default async function ProjectsPage({
     redirect('/dashboard/select-business')
   }
 
-  const [projects, clients, pendingRequests] = await Promise.all([
+  const [projects, clients, pendingRequests, members] = await Promise.all([
     getProjects(orgId),
     getClients(orgId),
-    getPendingProjectRequests()
+    getPendingProjectRequests(),
+    getOrgUsers(orgId)
   ])
 
   return (
@@ -57,6 +58,7 @@ export default async function ProjectsPage({
           <ExportProjectsButton projects={projects} />
           <ProjectForm
             clients={clients.map(c => ({ id: c.id, displayName: c.displayName }))}
+            members={members}
             defaultOpen={shouldOpenNewProject}
           />
         </div>

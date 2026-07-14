@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { useAuth } from '@clerk/nextjs'
 import { createProject, checkProjectDuplicate } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,7 +22,18 @@ type Client = {
   displayName: string
 }
 
-export function ProjectForm({ clients, defaultOpen = false }: { clients: Client[], defaultOpen?: boolean }) {
+type Member = {
+  user: {
+    id: string
+    firstName: string | null
+    lastName: string | null
+    email: string
+  }
+}
+
+export function ProjectForm({ clients, members = [], defaultOpen = false }: { clients: Client[], members?: Member[], defaultOpen?: boolean }) {
+  const { orgRole } = useAuth()
+  const isAdmin = orgRole === 'org:admin'
   const [open, setOpen] = useState(defaultOpen)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -31,6 +43,7 @@ export function ProjectForm({ clients, defaultOpen = false }: { clients: Client[
   const [clientId, setClientId] = useState('')
   const [priority, setPriority] = useState('')
   const [title, setTitle] = useState('')
+  const [assigneeId, setAssigneeId] = useState('')
 
   useEffect(() => {
     if (defaultOpen) setOpen(true)
@@ -54,6 +67,7 @@ export function ProjectForm({ clients, defaultOpen = false }: { clients: Client[
   async function handleSubmit(formData: FormData) {
     if (clientId) formData.set('clientId', clientId)
     if (priority) formData.set('priority', priority)
+    if (assigneeId && assigneeId !== 'unassigned') formData.set('assigneeId', assigneeId)
 
     setLoading(true)
     setError(null)
@@ -63,6 +77,7 @@ export function ProjectForm({ clients, defaultOpen = false }: { clients: Client[
       setClientId('')
       setPriority('')
       setTitle('')
+      setAssigneeId('')
       setDuplicateWarning(null)
     } catch (err: any) {
       setError(err?.message || "Error creating project.")
@@ -79,6 +94,7 @@ export function ProjectForm({ clients, defaultOpen = false }: { clients: Client[
       setTitle('')
       setClientId('')
       setPriority('')
+      setAssigneeId('')
     }
   }
 
@@ -179,6 +195,32 @@ export function ProjectForm({ clients, defaultOpen = false }: { clients: Client[
             <Label htmlFor="deadline">Deadline</Label>
             <Input id="deadline" name="deadline" type="date" />
           </div>
+
+          {isAdmin && members && members.length > 0 && (
+            <div className="space-y-2">
+              <Label>Assignee</Label>
+              <Select value={assigneeId} onValueChange={(val) => setAssigneeId(val || '')}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Unassigned">
+                    {assigneeId && assigneeId !== 'unassigned' 
+                      ? (() => {
+                          const user = members.find(m => m.user.id === assigneeId)?.user;
+                          return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : 'Unassigned'
+                        })()
+                      : 'Unassigned'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent align="end" alignItemWithTrigger={false}>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {members.map(m => (
+                    <SelectItem key={m.user.id} value={m.user.id}>
+                      {`${m.user.firstName || ''} ${m.user.lastName || ''}`.trim() || m.user.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           
           <div className="pt-4 flex justify-end">
             <Button type="submit" disabled={loading || !clientId}>

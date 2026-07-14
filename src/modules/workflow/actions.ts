@@ -82,9 +82,9 @@ export async function ensureDefaultTemplate(orgId: string) {
 }
 
 export async function updateProjectStage(projectId: string, newStageId: string) {
-  const { orgId } = await auth()
+  const { orgId, userId, orgRole } = await auth()
   
-  if (!orgId) {
+  if (!orgId || !userId) {
     throw new Error('Unauthorized')
   }
 
@@ -94,6 +94,10 @@ export async function updateProjectStage(projectId: string, newStageId: string) 
 
   if (!project || project.businessId !== orgId) {
     throw new Error('Project not found or unauthorized')
+  }
+
+  if (orgRole !== 'org:admin' && project.assigneeId !== userId) {
+    throw new Error('Forbidden: You are not assigned to this project.')
   }
 
   const currentStageId = project.statusStageId
@@ -134,10 +138,22 @@ export async function updateProjectStage(projectId: string, newStageId: string) 
 }
 
 export async function updateProjectOrder(updates: { id: string, statusStageId: string, orderIndex: number }[]) {
-  const { orgId } = await auth()
+  const { orgId, userId, orgRole } = await auth()
   
-  if (!orgId) {
+  if (!orgId || !userId) {
     throw new Error('Unauthorized')
+  }
+
+  if (orgRole !== 'org:admin') {
+    const projectIds = updates.map(u => u.id)
+    const projects = await prisma.project.findMany({
+      where: { id: { in: projectIds }, businessId: orgId }
+    })
+    for (const project of projects) {
+      if (project.assigneeId !== userId) {
+        throw new Error(`Forbidden: You are not assigned to this project.`)
+      }
+    }
   }
 
   // Update all projects in a transaction

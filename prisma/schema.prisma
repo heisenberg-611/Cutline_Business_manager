@@ -12,10 +12,17 @@ datasource db {
 // CORE & MULTI-TENANCY (Synced via Clerk Webhooks)
 // -----------------------------------------------------------------------------
 
+enum WorkspaceType {
+  CREATIVE
+  EDUCATION
+  RESEARCH
+}
+
 model Business {
   id              String @id // Matches Clerk Organization ID
   name            String
   defaultCurrency String @default("USD")
+  workspaceType   WorkspaceType @default(CREATIVE)
 
   // Invoice & Email Settings
   invoicePrefix                String @default("INV")
@@ -66,8 +73,9 @@ model User {
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
-  memberships   BusinessMembership[]
-  notifications Notification[]
+  memberships      BusinessMembership[]
+  notifications    Notification[]
+  assignedProjects Project[]
 
   @@map("users")
 }
@@ -139,6 +147,8 @@ model Project {
   business         Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
   client           Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
   statusStage      WorkflowStage?        @relation(fields: [statusStageId], references: [id])
+  assigneeId       String?
+  assignee         User?                 @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
   stageHistory     ProjectStageHistory[]
   invoices         Invoice[]
   notes            Note[]

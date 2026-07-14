@@ -31,8 +31,19 @@ export async function checkProjectDuplicate(title: string, clientId: string): Pr
 // MUTATIONS
 // -----------------------------------------------------------------------------
 
+export async function getOrgUsers(orgId: string) {
+  const { orgId: userOrgId } = await auth()
+  if (!userOrgId || userOrgId !== orgId) throw new Error('Unauthorized')
+  
+  return await prisma.businessMembership.findMany({
+    where: { businessId: orgId },
+    include: { user: true },
+    orderBy: { createdAt: 'desc' }
+  })
+}
+
 export async function createProject(data: FormData) {
-  const { orgId } = await auth()
+  const { orgId, orgRole } = await auth()
   
   if (!orgId) {
     throw new Error('Unauthorized: No active business selected.')
@@ -43,6 +54,12 @@ export async function createProject(data: FormData) {
   const type = data.get('type') as string
   const priority = data.get('priority') as string
   const deadlineStr = data.get('deadline') as string
+  const assigneeId = data.get('assigneeId') as string
+
+  // Only Admins can set an assignee
+  if (assigneeId && orgRole !== 'org:admin') {
+    throw new Error('Forbidden: Only Admins can assign projects.')
+  }
 
   if (!title || title.trim() === '') {
     throw new Error('Title is required')
@@ -74,6 +91,7 @@ export async function createProject(data: FormData) {
       priority: priority || null,
       deadline,
       statusStageId: firstStageId,
+      assigneeId: assigneeId || null,
       ...(firstStageId ? {
         stageHistory: {
           create: {
@@ -89,9 +107,13 @@ export async function createProject(data: FormData) {
   return project
 }
 
-export async function updateProject(projectId: string, data: { title: string, deadline: Date | null, priority: string | null }) {
-  const { orgId } = await auth()
+export async function updateProject(projectId: string, data: { title?: string, deadline?: Date | null, priority?: string | null, assigneeId?: string | null }) {
+  const { orgId, orgRole } = await auth()
   if (!orgId) throw new Error('Unauthorized')
+
+  if ('assigneeId' in data && orgRole !== 'org:admin') {
+    throw new Error('Forbidden: Only Admins can reassign projects.')
+  }
 
   const project = await prisma.project.findFirst({
     where: { id: projectId, businessId: orgId }
@@ -125,13 +147,16 @@ export async function deleteProject(projectId: string) {
 }
 
 export async function getProjects(orgId: string) {
-  const { orgId: userOrgId } = await auth()
+  const { orgId: userOrgId, userId, orgRole } = await auth()
   if (!userOrgId || userOrgId !== orgId) throw new Error('Unauthorized')
 
-  return await prisma.project.findMany({
+  const isMember = orgRole !== 'org:admin';
+
+  const projects = await prisma.project.findMany({
     where: {
       businessId: orgId,
-      isArchived: false
+      isArchived: false,
+      ...(isMember ? { assigneeId: userId } : {})
     },
     include: {
       client: true,
@@ -155,6 +180,22 @@ export async function getProjects(orgId: string) {
       createdAt: 'desc'
     }
   })
+
+  if (isMember) {
+    return projects.map(p => ({
+      ...p,
+      client: {
+        ...p.client,
+        email: null,
+        phone: null,
+        industry: null,
+        preferredChannel: null,
+        internalRating: null,
+      }
+    }))
+  }
+
+  return projects
 }
 
 export async function getArchivedProjects(orgId: string) {

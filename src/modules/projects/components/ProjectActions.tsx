@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useTransition } from 'react'
+import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { Edit, Trash, Archive, ArchiveRestore } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,9 +18,21 @@ type Project = {
   priority: string | null
   deadline: Date | null
   isArchived?: boolean
+  assigneeId?: string | null
 }
 
-export function ProjectActions({ project }: { project: Project }) {
+type Member = {
+  user: {
+    id: string
+    firstName: string | null
+    lastName: string | null
+    email: string
+  }
+}
+
+export function ProjectActions({ project, members = [] }: { project: Project, members?: Member[] }) {
+  const { orgRole } = useAuth()
+  const isAdmin = orgRole === 'org:admin'
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -27,7 +40,8 @@ export function ProjectActions({ project }: { project: Project }) {
   const [formData, setFormData] = useState({
     title: project.title,
     priority: project.priority || 'Medium',
-    deadline: project.deadline ? format(new Date(project.deadline), 'yyyy-MM-dd') : ''
+    deadline: project.deadline ? format(new Date(project.deadline), 'yyyy-MM-dd') : '',
+    assigneeId: project.assigneeId || 'unassigned'
   })
 
   const handleUpdate = (e: React.FormEvent) => {
@@ -37,7 +51,10 @@ export function ProjectActions({ project }: { project: Project }) {
         await updateProject(project.id, {
           title: formData.title,
           priority: formData.priority,
-          deadline: formData.deadline ? new Date(formData.deadline) : null
+          deadline: formData.deadline ? new Date(formData.deadline) : null,
+          ...(isAdmin && formData.assigneeId !== project.assigneeId && {
+            assigneeId: formData.assigneeId === 'unassigned' ? null : formData.assigneeId
+          })
         })
         setIsEditOpen(false)
       } catch (err) {
@@ -142,6 +159,36 @@ export function ProjectActions({ project }: { project: Project }) {
                 onChange={e => setFormData({ ...formData, deadline: e.target.value })}
               />
             </div>
+            
+            {isAdmin && members.length > 0 && (
+              <div className="space-y-2">
+                <Label>Assignee</Label>
+                <Select 
+                  value={formData.assigneeId} 
+                  onValueChange={val => setFormData({ ...formData, assigneeId: val || 'unassigned' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Unassigned">
+                      {formData.assigneeId && formData.assigneeId !== 'unassigned'
+                        ? (() => {
+                            const user = members.find(m => m.user.id === formData.assigneeId)?.user;
+                            return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : 'Unassigned'
+                          })()
+                        : 'Unassigned'}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent align="end" alignItemWithTrigger={false}>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {members.map(m => (
+                      <SelectItem key={m.user.id} value={m.user.id}>
+                        {`${m.user.firstName || ''} ${m.user.lastName || ''}`.trim() || m.user.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
             <div className="flex justify-end pt-2">
               <Button type="submit" disabled={isPending}>
                 {isPending ? 'Saving...' : 'Save Changes'}

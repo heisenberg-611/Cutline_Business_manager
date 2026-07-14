@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getProjectDetails } from '@/modules/projects/detail-actions'
+import { getOrgUsers } from '@/modules/projects/actions'
 import { NotesPanel } from '@/modules/projects/components/NotesPanel'
 import { LinksPanel } from '@/modules/projects/components/LinksPanel'
 import { TimePanel } from '@/modules/projects/components/TimePanel'
@@ -23,12 +24,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   // Next.js 15: params must be awaited
   const { id } = await params
   
-  const [project, availableAssets] = await Promise.all([
+  const [project, availableAssets, members] = await Promise.all([
     getProjectDetails(id),
     prisma.asset.findMany({
       where: { businessId: orgId },
       orderBy: { name: 'asc' }
-    })
+    }),
+    getOrgUsers(orgId)
   ])
 
   if (!project) {
@@ -36,40 +38,51 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col">
-      <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-5 shrink-0">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard/projects">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h3 className="text-xl font-semibold leading-6 text-zinc-900 dark:text-zinc-100">
-                {project.title}
-              </h3>
-              {project.statusStage && (
-                <Badge variant="outline" className="bg-zinc-50 text-zinc-600 border-zinc-200">
-                  {project.statusStage.name}
-                </Badge>
-              )}
-            </div>
-            <div className="text-sm text-zinc-500 flex items-center gap-4">
-              <span className="flex items-center gap-1.5"><Folder className="w-3.5 h-3.5" /> {project.client.displayName}</span>
-              {project.deadline && (
-                <span className="flex items-center gap-1.5"><CalendarDays className="w-3.5 h-3.5" /> Due {format(new Date(project.deadline), 'MMM d, yyyy')}</span>
-              )}
-            </div>
+    <div className="space-y-6 max-w-[1200px] mx-auto pb-12">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
+        <div>
+          <div className="flex items-center gap-3">
+            <h3 className="text-2xl font-bold leading-6 text-zinc-900 dark:text-zinc-100">
+              {project.title}
+            </h3>
+            {project.displayId && (
+              <Badge variant="outline" className="text-xs bg-zinc-50 dark:bg-zinc-900">
+                {project.displayId}
+              </Badge>
+            )}
+            {project.isArchived && (
+              <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 hover:bg-amber-100">
+                Archived
+              </Badge>
+            )}
           </div>
+          <p className="mt-2 text-sm text-zinc-500 flex items-center gap-2">
+            Client: <span className="font-medium text-zinc-700 dark:text-zinc-300">{project.client?.displayName}</span>
+            {project.priority && (
+              <>
+                <span>•</span>
+                Priority: <span className="font-medium text-zinc-700 dark:text-zinc-300">{project.priority}</span>
+              </>
+            )}
+            {project.assigneeId && (
+              <>
+                <span>•</span>
+                Assignee: <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                  {members.find(m => m.user.id === project.assigneeId)?.user.firstName || 'Assigned'}
+                </span>
+              </>
+            )}
+          </p>
         </div>
         <ProjectActions project={{
           id: project.id,
           title: project.title,
           priority: project.priority,
           deadline: project.deadline,
-          isArchived: project.isArchived
-        }} />
+          isArchived: project.isArchived,
+          assigneeId: project.assigneeId
+        }} members={members} />
       </div>
       
       {/* Main Content Area - Split into Panels */}
