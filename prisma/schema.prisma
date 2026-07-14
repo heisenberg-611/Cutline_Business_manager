@@ -35,6 +35,8 @@ model Business {
   paymentInstructions          String @default("Please send payment via bank transfer to:\nBank: \nAccount Number: \nRouting Number: ")
   feedbackEmailSubjectTemplate String @default("We'd love your feedback on {{project_name}}")
   feedbackEmailBodyTemplate    String @default("Hi {{client_name}},\n\nYour project \"{{project_name}}\" has just been delivered by {{business_name}}.\nWe hope you love the final result!\n\nCould you take 2 minutes to let us know how we did? Your feedback helps us improve and serve you better.\n\nThanks for trusting us with your project.\n- The {{business_name}} Team")
+  // Messaging Settings
+  realtimeMessagesEnabled      Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

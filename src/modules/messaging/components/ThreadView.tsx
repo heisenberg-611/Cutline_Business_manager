@@ -4,7 +4,7 @@ import { useConversationMessages, useConversations } from '../hooks'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Send, Megaphone, Loader2, Users, MessageSquare, Bell, BellOff, Trash2 } from 'lucide-react'
+import { Send, Megaphone, Loader2, Users, MessageSquare, Bell, BellOff, Trash2, RefreshCcw } from 'lucide-react'
 import { toggleMuteConversation, deleteConversation, deleteMessage } from '../actions'
 import { useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import React from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup } from '@/components/ui/dropdown-menu'
 import { useRouter } from 'next/navigation'
+import { useMessagingConfig } from './QueryProvider'
 
 function formatMessageContent(text: string) {
   const LINK_REGEX = /(https?:\/\/[^\s]+)|([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|((?:\+?[0-9]{1,3}[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4})/g;
@@ -35,7 +36,7 @@ function formatMessageContent(text: string) {
 }
 
 export function ThreadView({ conversationId, currentUserId, isAdmin }: { conversationId: string, currentUserId: string, isAdmin: boolean }) {
-  const { messages, isLoading, sendMessage, isSending, markAsRead } = useConversationMessages(conversationId)
+  const { messages, isLoading, sendMessage, isSending, markAsRead, refetch, isFetching } = useConversationMessages(conversationId)
   const { data: conversations } = useConversations()
   const [content, setContent] = useState('')
   const [isMuting, setIsMuting] = useState(false)
@@ -43,6 +44,7 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
   const queryClient = useQueryClient()
   const router = useRouter()
   const [isDeletingChat, setIsDeletingChat] = useState(false)
+  const { realtimeEnabled } = useMessagingConfig()
 
   const conversation = conversations?.find(c => c.id === conversationId)
   const isBroadcast = conversation?.type === 'BROADCAST'
@@ -219,6 +221,36 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
             </Button>
           )}
         </div>
+      </div>
+      
+      {/* Mode Indicator & Refresh */}
+      <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b shrink-0">
+        {realtimeEnabled ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            Real-time Enabled
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            Manual Mode: Click refresh to get new messages
+          </div>
+        )}
+        
+        {!realtimeEnabled && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-7 text-xs" 
+            onClick={() => refetch()}
+            disabled={isFetching}
+          >
+            <RefreshCcw className={cn("w-3 h-3 mr-2", isFetching && "animate-spin")} />
+            Refresh
+          </Button>
+        )}
       </div>
 
       {/* Messages */}

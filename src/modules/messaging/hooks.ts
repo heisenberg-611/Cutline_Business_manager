@@ -8,16 +8,24 @@ import {
   sendMessage, 
   markConversationRead 
 } from './actions'
+import { useMessagingConfig } from './components/QueryProvider'
 
 /**
  * Polls the conversation list every 15 seconds to keep unread counts fresh.
  */
 export function useConversations() {
-  return useQuery({
+  const { realtimeEnabled } = useMessagingConfig()
+
+  const query = useQuery({
     queryKey: ['conversations'],
     queryFn: () => getConversations(),
-    refetchInterval: 15000, // 15 seconds
+    refetchInterval: realtimeEnabled ? 15000 : false, // 15 seconds or manual
   })
+
+  return {
+    ...query,
+    conversations: query.data || [],
+  }
 }
 
 /**
@@ -25,6 +33,7 @@ export function useConversations() {
  */
 export function useConversationMessages(conversationId: string | null) {
   const queryClient = useQueryClient()
+  const { realtimeEnabled } = useMessagingConfig()
   
   const query = useQuery({
     queryKey: ['messages', conversationId],
@@ -54,7 +63,7 @@ export function useConversationMessages(conversationId: string | null) {
       // No cache, fetch initial page
       return getMessages(conversationId)
     },
-    refetchInterval: 5000, // 5 seconds (only when open)
+    refetchInterval: realtimeEnabled ? 5000 : false, // 5 seconds or manual
     enabled: !!conversationId
   })
 
@@ -86,6 +95,8 @@ export function useConversationMessages(conversationId: string | null) {
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
+    refetch: query.refetch,
+    isFetching: query.isFetching,
     sendMessage: sendMutation.mutateAsync,
     isSending: sendMutation.isPending,
     markAsRead: markReadMutation.mutate

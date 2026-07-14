@@ -3,23 +3,33 @@
 import { useConversations } from '../hooks'
 import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Plus, MessageSquare, Megaphone, Users } from 'lucide-react'
+import { Plus, MessageSquare, Megaphone, Users, RefreshCcw } from 'lucide-react'
 import { NewMessageModal } from './NewMessageModal'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { useMessagingConfig } from './QueryProvider'
 
 export function MessagingSidebar({ currentUserId, isAdmin }: { currentUserId: string, isAdmin: boolean }) {
-  const { data: conversations, isLoading } = useConversations()
+  const { data, isLoading, refetch, isFetching } = useConversations()
+  const conversations = data || []
   const router = useRouter()
   const params = useParams()
   const activeId = params.id as string
+  const { realtimeEnabled } = useMessagingConfig()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <div className="w-80 border-r flex flex-col bg-muted/20">
       <div className="p-4 border-b flex items-center justify-between bg-background">
-        <h2 className="font-semibold text-lg tracking-tight">Messages</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold text-lg tracking-tight">Messages</h2>
+          {!realtimeEnabled && (
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => refetch()} disabled={isFetching} title="Refresh Messages">
+              <RefreshCcw className={cn("w-3 h-3 text-muted-foreground", isFetching && "animate-spin")} />
+            </Button>
+          )}
+        </div>
         {/* Allow all users to create group chats or DMs */}
         <Button size="icon" variant="ghost" onClick={() => setIsModalOpen(true)}>
           <Plus className="h-4 w-4" />

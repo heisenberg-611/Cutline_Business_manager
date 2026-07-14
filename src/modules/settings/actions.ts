@@ -344,3 +344,17 @@ export async function updateNotificationPreferences(preferences: { tone: string;
   // We don't necessarily need to revalidate the whole layout, but doing so keeps the UI in sync
   revalidatePath('/dashboard', 'layout')
 }
+
+/**
+ * Update the organization's realtime messages setting.
+ */
+export async function updateRealtimeMessagesSetting(enabled: boolean) {
+  const { orgId } = await requireAdmin()
+
+  await prisma.business.update({
+    where: { id: orgId },
+    data: { realtimeMessagesEnabled: enabled },
+  })
+
+  revalidatePath('/dashboard', 'layout')
+}
