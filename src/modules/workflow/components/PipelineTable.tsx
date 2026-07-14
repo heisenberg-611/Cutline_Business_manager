@@ -48,8 +48,8 @@ export function PipelineTable({ projects, stages }: { projects: Project[], stage
   })
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden min-h-[600px]">
-      <Table>
+    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-x-auto min-h-[600px]">
+      <Table className="min-w-[800px]">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead>Project Title</TableHead>

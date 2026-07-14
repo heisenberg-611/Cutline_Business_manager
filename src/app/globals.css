@@ -154,6 +154,13 @@
   body {
     @apply bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary;
   }
+  
+  /* Prevent iOS Safari from zooming in on inputs when tapped */
+  @media screen and (max-width: 768px) {
+    input, textarea, select {
+      font-size: 16px !important;
+    }
+  }
 }
 
 @keyframes shimmer-sweep {

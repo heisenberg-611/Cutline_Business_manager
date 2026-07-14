@@ -67,8 +67,8 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 export function InvoiceTable({ invoices }: Props) {
   return (
-    <div className="border border-zinc-200 dark:border-zinc-800 rounded-md">
-      <Table>
+    <div className="border border-zinc-200 dark:border-zinc-800 rounded-md overflow-x-auto">
+      <Table className="min-w-[800px]">
         <TableHeader>
           <TableRow>
             <TableHead>Invoice</TableHead>

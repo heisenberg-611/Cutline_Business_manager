@@ -129,6 +129,21 @@ export async function getConversations() {
   const { userId, orgId } = await auth()
   if (!userId || !orgId) return []
 
+  // Ensure at least one BROADCAST conversation exists for the business
+  const existingBroadcast = await prisma.conversation.findFirst({
+    where: { businessId: orgId, type: 'BROADCAST' }
+  })
+
+  if (!existingBroadcast) {
+    await prisma.conversation.create({
+      data: {
+        businessId: orgId,
+        type: 'BROADCAST',
+        createdBy: userId,
+      }
+    })
+  }
+
   // Auto-join any broadcasts that the user isn't part of yet
   const unjoinedBroadcasts = await prisma.conversation.findMany({
     where: {
@@ -352,17 +367,39 @@ export async function createBroadcast(content: string) {
   }))
 
   const broadcast = await prisma.$transaction(async (tx) => {
-    // 1. Create conversation with all members as participants
-    const conversation = await tx.conversation.create({
-      data: {
-        businessId: orgId,
-        type: 'BROADCAST',
-        createdBy: userId,
-        participants: {
-          create: participantData
-        }
-      }
+    // 1. Find existing broadcast conversation or create one
+    let conversation = await tx.conversation.findFirst({
+      where: { businessId: orgId, type: 'BROADCAST' }
     })
+
+    if (!conversation) {
+      conversation = await tx.conversation.create({
+        data: {
+          businessId: orgId,
+          type: 'BROADCAST',
+          createdBy: userId,
+          participants: {
+            create: participantData
+          }
+        }
+      })
+    } else {
+      // Ensure all active members are participants
+      const existingParticipants = await tx.conversationParticipant.findMany({
+        where: { conversationId: conversation.id }
+      })
+      const existingUserIds = existingParticipants.map(p => p.userId)
+      const newParticipants = participantData.filter(p => !existingUserIds.includes(p.userId))
+      
+      if (newParticipants.length > 0) {
+        await tx.conversationParticipant.createMany({
+          data: newParticipants.map(p => ({
+            conversationId: conversation!.id,
+            userId: p.userId
+          }))
+        })
+      }
+    }
 
     // 2. Create the broadcast message
     const message = await tx.message.create({

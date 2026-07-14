@@ -67,7 +67,14 @@ Want to see how your business is doing? Head over to the **Analytics** tab.
 * View your **Pipeline Distribution** via a clean Pie chart.
 * Export all your Project or Invoice data to CSV with just 1-click for external accounting tools.
 
-## 7. Power User Tools ⚡
+## 7. Internal Team Messaging 💬
+Collaboration is key. You don't need external chat apps when you use the built-in **Messages** tab!
+* **Start a Chat**: Click the `+ New` button at the top of the chat sidebar to start a Direct Message (1-on-1) or create a Group Chat. 
+* **Group Chats**: You can view all group members by clicking on the member count in the chat header. Anyone can be added to a group.
+* **Broadcast Announcements**: If you are an **Admin**, you can create a Broadcast. This sends a one-way announcement to everyone in your organization! Standard members will see the broadcast locked in a read-only state.
+* **Manage Your Inbox**: You can click the bell icon to **mute notifications** for any chat. If you want to clean up your sidebar, click the trash can icon. Admins can permanently delete chats, while standard members can "soft delete" (which hides the chat until someone replies again).
+
+## 8. Power User Tools ⚡
 
 * **The Command Palette (Cmd + K)**: Anywhere in the app, press `Cmd + K` (or `Ctrl + K` on Windows) to open global search. Type a client's name, project title, or invoice number, and hit Enter to jump straight to it.
 * **Quick Actions (Cmd + Q)**: Click the "New" button in the top bar or use the shortcut `Cmd + Q` to slide out the Quick Actions panel. It lets you instantly log an expense, add an asset, create a new project, or draft an invoice from anywhere in the app!

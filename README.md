@@ -73,6 +73,11 @@ The application is built as a Modular Monolith, leveraging Server Components and
 - Unified notification hub for tracking unread alerts and workflow updates.
 - Instantly exportable CSV reporting for external accounting integrations.
 
+### 5. Internal Team Messaging
+- **Direct & Group Chats:** Seamlessly communicate with team members in 1-on-1 direct messages or multi-participant group chats.
+- **Admin Broadcasts:** Dedicated announcement channels where admins can blast updates to the entire organization (read-only for members).
+- **Smart Chat Management:** Features include mute notifications, soft-deletion for members (hides history until new message), and hard-deletion capabilities for admins.
+
 ## ⚡ Performance & Benchmarks
 
 Performance is treated as a core feature. We rely on React Server Components to offload computational weight from the client, ensuring near-instant page transitions even with dense data tables. 

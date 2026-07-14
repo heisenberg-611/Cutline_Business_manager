@@ -14,7 +14,7 @@ export default function Home() {
       <div className="absolute bottom-[-10%] md:bottom-[-20%] right-[-10%] w-[80%] md:w-[50%] h-[60%] md:h-[50%] rounded-full bg-fuchsia-300/40 dark:bg-fuchsia-500/20 blur-[100px] dark:blur-[120px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
       
       {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 md:py-6">
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 py-4 md:px-12 md:py-6">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -49,7 +49,7 @@ export default function Home() {
       </header>
 
       {/* HERO SECTION */}
-      <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-6 pt-20">
+      <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-4 sm:px-6 pt-20 pb-12">
         <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
           
           <motion.div
@@ -66,7 +66,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter leading-[1.05] text-transparent bg-clip-text bg-gradient-to-b from-zinc-900 to-zinc-500 dark:from-white dark:to-white/60 mb-8 pb-2"
+            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter leading-[1.05] text-transparent bg-clip-text bg-gradient-to-b from-zinc-900 to-zinc-500 dark:from-white dark:to-white/60 mb-6 sm:mb-8 pb-2"
           >
             Creative work,<br />
             perfectly pipelined.
