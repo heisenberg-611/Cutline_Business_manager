@@ -118,7 +118,7 @@ export function AnalyticsDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(data.metrics.totalRevenue, data.metrics.currency)}
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">Selected period</p>
@@ -128,12 +128,16 @@ export function AnalyticsDashboard() {
             <Card className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 shadow-sm min-w-0 overflow-hidden md:col-span-2">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium text-zinc-500">Net Profit</CardTitle>
-                <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-lg">
-                  <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div className={`p-2 rounded-lg ${data.metrics.totalNetProfit >= 0 ? 'bg-emerald-100 dark:bg-emerald-500/20' : 'bg-red-100 dark:bg-red-500/20'}`}>
+                  {data.metrics.totalNetProfit >= 0 ? (
+                    <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <div className={`text-3xl font-bold ${data.metrics.totalNetProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                   {formatCurrency(data.metrics.totalNetProfit, data.metrics.currency)}
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">Selected period</p>
@@ -148,7 +152,7 @@ export function AnalyticsDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <div className="text-3xl font-bold text-red-600 dark:text-red-400">
                   {formatCurrency(data.metrics.totalExpenses, data.metrics.currency)}
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">Selected period</p>
@@ -163,7 +167,7 @@ export function AnalyticsDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                   {data.metrics.totalProjects}
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">Created in the selected period</p>
@@ -178,7 +182,7 @@ export function AnalyticsDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
                   {data.metrics.activeProjectsCount}
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">Total projects in progress</p>

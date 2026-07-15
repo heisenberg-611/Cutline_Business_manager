@@ -128,7 +128,7 @@ export function AppLayout({
   const navItems = React.useMemo(() => {
     let items = ALL_NAV_ITEMS
 
-    if (initialNavPreferences && initialNavPreferences.length > 0) {
+    if (orgRole === 'org:admin' && initialNavPreferences && initialNavPreferences.length > 0) {
       const preferenceMap = new Map(initialNavPreferences.map(p => [p.href, p]))
       const sorted = [...ALL_NAV_ITEMS].sort((a, b) => {
         const indexA = initialNavPreferences.findIndex(p => p.href === a.href)
@@ -162,7 +162,7 @@ export function AppLayout({
   const quickActions = React.useMemo(() => {
     let items = ALL_QUICK_ACTIONS
 
-    if (initialQuickActionPreferences && initialQuickActionPreferences.length > 0) {
+    if (orgRole === 'org:admin' && initialQuickActionPreferences && initialQuickActionPreferences.length > 0) {
       const preferenceMap = new Map(initialQuickActionPreferences.map(p => [p.id, p]))
       const sorted = [...ALL_QUICK_ACTIONS].sort((a, b) => {
         const indexA = initialQuickActionPreferences.findIndex(p => p.id === a.id)
