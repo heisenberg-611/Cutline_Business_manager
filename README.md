@@ -88,7 +88,11 @@ Performance is treated as a core feature. We rely on React Server Components to 
 </div>
 
 **Optimizations Include:**
-- Direct database connection polling (with Prisma Accelerate maintained as an optional backup caching layer).
+- **Database Aggregation:** Replaced in-memory JavaScript `.reduce()` calculations with Prisma `.aggregate()`, offloading heavy math to Postgres and minimizing memory overhead.
+- **Optimized Data Pagination:** Replaced massive unpaginated queries with targeted, database-level filtering (`take`, `orderBy`) to prevent over-fetching on dashboards.
+- **Concurrent Execution:** Eliminated query waterfalls by wrapping independent database reads in `Promise.all`.
+- **Database Indexing:** Maintained strict relational integrity and fast lookups through optimized foreign keys and indexes (e.g., user-based time tracking).
+- Direct database connection pooling (with Prisma Accelerate maintained as an optional backup caching layer).
 - Optimistic UI updates during drag-and-drop operations.
 - Server-side JWT decryption to prevent blocking network requests to the Auth provider.
 

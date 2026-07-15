@@ -64,7 +64,9 @@ export function AppLayout({
   const [isHovered, setIsHovered] = useState(false)
   const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false)
   const [isCurrencyConverterOpen, setIsCurrencyConverterOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isNavigating, setIsNavigating] = useState(false)
+  const sidebarRef = React.useRef<HTMLElement>(null)
   const [optimisticPathname, setOptimisticPathname] = useState<string | null>(null)
   const pathname = usePathname()
   const { orgRole } = useAuth()
@@ -88,7 +90,24 @@ export function AppLayout({
     localStorage.setItem('cutline_sidebar_pinned', JSON.stringify(next))
   }
 
-  const isExpanded = isPinned || isHovered
+  React.useEffect(() => {
+    if (!sidebarRef.current) return
+    const observer = new MutationObserver(() => {
+      const trigger = sidebarRef.current?.querySelector('.cl-organizationSwitcherTrigger')
+      if (trigger) {
+        setIsDropdownOpen(trigger.getAttribute('aria-expanded') === 'true')
+      }
+    })
+    
+    observer.observe(sidebarRef.current, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ['aria-expanded']
+    })
+    return () => observer.disconnect()
+  }, [])
+
+  const isExpanded = isPinned || isHovered || isDropdownOpen
   const isCollapsed = !isExpanded
 
   React.useEffect(() => {
@@ -177,6 +196,7 @@ export function AppLayout({
 
       {/* LEFT SIDEBAR */}
       <aside
+        ref={sidebarRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={`hidden md:flex border-r border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-[#0A0A0A] flex-col transition-all duration-300 ease-in-out-smooth z-20 ${isExpanded ? 'w-64' : 'w-16'}`}
