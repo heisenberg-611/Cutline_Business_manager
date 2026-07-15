@@ -180,7 +180,7 @@ export function AppLayout({
 
     if (orgRole !== 'org:admin') {
       const restricted = ['/dashboard/financials', '/dashboard/analytics', '/dashboard/settings', '/dashboard/archive', '/dashboard/clients']
-      items = items.filter(item => !restricted.some(r => item.href.startsWith(r)))
+      items = items.filter(item => !restricted.some(r => item.href.startsWith(r)) && item.id !== 'new-project')
     }
 
     return items
