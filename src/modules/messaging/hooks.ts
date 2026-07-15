@@ -31,7 +31,7 @@ export function useConversations() {
 /**
  * Polls active conversation messages every 5 seconds using delta fetching.
  */
-export function useConversationMessages(conversationId: string | null) {
+export function useConversationMessages(conversationId: string | null, currentUserId?: string) {
   const queryClient = useQueryClient()
   const { realtimeEnabled } = useMessagingConfig()
   
@@ -44,19 +44,22 @@ export function useConversationMessages(conversationId: string | null) {
       
       // If we have cached messages, only fetch the new ones
       if (currentData && currentData.messages && currentData.messages.length > 0) {
-        const latestMessage = currentData.messages[currentData.messages.length - 1]
-        try {
-          const newMessages = await getNewMessages(conversationId, latestMessage.createdAt)
-          if (newMessages.length > 0) {
-            return {
-              messages: [...currentData.messages, ...newMessages],
-              nextCursor: currentData.nextCursor
+        const realMessages = currentData.messages.filter((m: any) => !m.isOptimistic)
+        if (realMessages.length > 0) {
+          const latestMessage = realMessages[realMessages.length - 1]
+          try {
+            const newMessages = await getNewMessages(conversationId, latestMessage.createdAt)
+            if (newMessages.length > 0) {
+              return {
+                messages: [...realMessages, ...newMessages],
+                nextCursor: currentData.nextCursor
+              }
             }
+            return currentData
+          } catch (e) {
+            // If delta fetch fails, fallback to standard fetch
+            return getMessages(conversationId)
           }
-          return currentData
-        } catch (e) {
-          // If delta fetch fails, fallback to standard fetch
-          return getMessages(conversationId)
         }
       }
       
@@ -73,7 +76,66 @@ export function useConversationMessages(conversationId: string | null) {
       if (!conversationId) throw new Error('No active conversation')
       return sendMessage(conversationId, content)
     },
-    onSuccess: () => {
+    onMutate: async (content: string) => {
+      if (!conversationId) return
+
+      await queryClient.cancelQueries({ queryKey: ['messages', conversationId] })
+      await queryClient.cancelQueries({ queryKey: ['conversations'] })
+
+      const previousMessages = queryClient.getQueryData<{messages: any[], nextCursor?: string}>(['messages', conversationId])
+      const previousConversations = queryClient.getQueryData<any[]>(['conversations'])
+
+      // Optimistically update messages
+      if (previousMessages) {
+        const optimisticMessage = {
+          id: `temp-${Date.now()}`,
+          conversationId,
+          senderId: currentUserId || 'optimistic',
+          content,
+          createdAt: new Date(),
+          sender: null,
+          isOptimistic: true
+        }
+        
+        queryClient.setQueryData(['messages', conversationId], {
+          ...previousMessages,
+          messages: [...previousMessages.messages, optimisticMessage]
+        })
+      }
+
+      // Optimistically update conversations list (sidebar)
+      if (previousConversations) {
+        queryClient.setQueryData(['conversations'], previousConversations.map(conv => {
+          if (conv.id === conversationId) {
+            return {
+              ...conv,
+              lastActivity: new Date(),
+              messages: [{
+                id: `temp-${Date.now()}`,
+                content,
+                createdAt: new Date()
+              }]
+            }
+          }
+          return conv
+        }).sort((a, b) => {
+          if (a.type === 'BROADCAST' && b.type !== 'BROADCAST') return -1;
+          if (b.type === 'BROADCAST' && a.type !== 'BROADCAST') return 1;
+          return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
+        }))
+      }
+
+      return { previousMessages, previousConversations }
+    },
+    onError: (err, newContent, context) => {
+      if (context?.previousMessages) {
+        queryClient.setQueryData(['messages', conversationId], context.previousMessages)
+      }
+      if (context?.previousConversations) {
+        queryClient.setQueryData(['conversations'], context.previousConversations)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] })
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
     }

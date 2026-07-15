@@ -36,7 +36,7 @@ function formatMessageContent(text: string) {
 }
 
 export function ThreadView({ conversationId, currentUserId, isAdmin }: { conversationId: string, currentUserId: string, isAdmin: boolean }) {
-  const { messages, isLoading, sendMessage, isSending, markAsRead, refetch, isFetching } = useConversationMessages(conversationId)
+  const { messages, isLoading, sendMessage, isSending, markAsRead, refetch, isFetching } = useConversationMessages(conversationId, currentUserId)
   const { data: conversations } = useConversations()
   const [content, setContent] = useState('')
   const [isMuting, setIsMuting] = useState(false)
@@ -84,12 +84,14 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
   }, [messages])
 
   const handleSend = async () => {
-    if (!content.trim() || isSending) return
+    const text = content.trim()
+    if (!text) return
+    setContent('')
     try {
-      await sendMessage(content)
-      setContent('')
+      await sendMessage(text)
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : 'An error occurred')
+      setContent(text)
     }
   }
 
@@ -135,12 +137,22 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
     const confirmed = confirm('Are you sure you want to permanently delete this message?')
     if (!confirmed) return
     
+    // Optimistically remove from UI
+    queryClient.setQueryData(['messages', conversationId], (old: any) => {
+      if (!old) return old;
+      return {
+        ...old,
+        messages: old.messages.filter((m: any) => m.id !== msgId)
+      }
+    })
+
     try {
       await deleteMessage(msgId)
-      // Standard invalidation for react-query to trigger a fresh fetch
-      queryClient.invalidateQueries({ queryKey: ['messages', conversationId] })
     } catch (e: any) {
       alert(e.message || 'Failed to delete message')
+      // On failure, clear cache and force full refetch to restore correct state
+      queryClient.setQueryData(['messages', conversationId], undefined)
+      queryClient.invalidateQueries({ queryKey: ['messages', conversationId] })
     }
   }
 
@@ -264,7 +276,8 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
               {(!isMine && (isGroup || isBroadcast)) && <span className="text-xs text-muted-foreground mb-1 ml-1">{senderName}</span>}
               <div className={cn(
                 "px-4 py-2.5 rounded-2xl whitespace-pre-wrap text-sm break-words relative group/msg",
-                isMine ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted text-foreground rounded-tl-sm"
+                isMine ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted text-foreground rounded-tl-sm",
+                (msg as any).isOptimistic && "opacity-70"
               )}>
                 {formatMessageContent(msg.content)}
                 {isBroadcast && isAdmin && (
@@ -309,8 +322,8 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
                 }
               }}
             />
-            <Button size="icon" onClick={handleSend} disabled={!content.trim() || isSending} className="shrink-0 h-[44px] w-[44px]">
-              {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            <Button size="icon" onClick={handleSend} disabled={!content.trim()} className="shrink-0 h-[44px] w-[44px]">
+              <Send className="w-4 h-4" />
             </Button>
           </div>
         </div>
