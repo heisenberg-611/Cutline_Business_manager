@@ -98,6 +98,7 @@ export default async function ProjectsPage({
               <TableRow className="hover:bg-transparent">
                 <TableHead>Project Title</TableHead>
                 <TableHead>Client</TableHead>
+                {isAdmin && <TableHead>Assignee</TableHead>}
                 <TableHead>Type</TableHead>
                 <TableHead>Priority</TableHead>
                 <TableHead className="w-[300px]">Pipeline Progress</TableHead>
@@ -119,6 +120,12 @@ export default async function ProjectsPage({
                     {/* @ts-ignore - TS doesn't know client is included despite prisma query include */}
                     {project.client?.displayName || '-'}
                   </TableCell>
+                  {isAdmin && (
+                    <TableCell className="text-zinc-500">
+                      {/* @ts-ignore */}
+                      {project.assignee ? (project.assignee.firstName ? `${project.assignee.firstName} ${project.assignee.lastName || ''}`.trim() : project.assignee.email) : <span className="italic text-zinc-400">Unassigned</span>}
+                    </TableCell>
+                  )}
                   <TableCell>{project.type || '-'}</TableCell>
                   <TableCell>
                     {project.priority ? (

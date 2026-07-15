@@ -201,6 +201,7 @@ export async function getProjects(orgId: string) {
     },
     include: {
       client: true,
+      assignee: true,
       statusStage: {
         include: {
           template: {
