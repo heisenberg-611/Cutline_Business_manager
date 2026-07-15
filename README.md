@@ -101,17 +101,29 @@ Performance is treated as a core feature. We rely on React Server Components to 
 <details>
 <summary><b>Click to expand screenshots</b></summary>
 
-| Dashboard | Project Pipeline |
+| Dashboard | Messages |
 |:---:|:---:|
-| <img src="public/SS1.JPG" width="100%" alt="Dashboard" /> | <img src="public/SS2.JPG" width="100%" alt="Pipeline" /> |
+| <img src="public/SS1.JPG" width="100%" alt="Dashboard" /> | <img src="public/SS2.JPG" width="100%" alt="Messages" /> |
 
-| Projects Management | Clients Management |
+| Project Pipeline | Projects Management |
 |:---:|:---:|
-| <img src="public/SS3.JPG" width="100%" alt="Projects" /> | <img src="public/SS4.JPG" width="100%" alt="Clients" /> |
+| <img src="public/SS3.JPG" width="100%" alt="Pipeline" /> | <img src="public/SS4.JPG" width="100%" alt="Projects" /> |
 
-| Financials Management | Analytics |
+| Pre-Post Production | Clients Management |
 |:---:|:---:|
-| <img src="public/SS5.JPG" width="100%" alt="Financials" /> | <img src="public/SS6.JPG" width="100%" alt="Analytics" /> |
+| <img src="public/SS5.JPG" width="100%" alt="Pre-Post Production" /> | <img src="public/SS6.JPG" width="100%" alt="Clients" /> |
+
+| Financials | Analytics |
+|:---:|:---:|
+| <img src="public/SS7.JPG" width="100%" alt="Financials" /> | <img src="public/SS8.JPG" width="100%" alt="Analytics" /> |
+
+| Assets Library | Feedback |
+|:---:|:---:|
+| <img src="public/SS9.JPG" width="100%" alt="Assets Library" /> | <img src="public/SS10.JPG" width="100%" alt="Feedback" /> |
+
+| Archived Projects |
+|:---:|
+| <img src="public/SS11.JPG" width="50%" alt="Invoices" />
 
 </details>
 
