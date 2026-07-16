@@ -48,6 +48,15 @@ const AnimatedMeme = ({ src }: { src: string }) => {
   )
 }
 
+function isOnlyEmojis(str: string) {
+  const withoutSpaces = str.replace(/\s+/g, '');
+  if (!withoutSpaces) return false;
+  // Replace all emoji-related characters. If nothing is left, it's purely emojis.
+  const emojiRegex = /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{200D}\u{FE0F}]/gu;
+  const replaced = withoutSpaces.replace(emojiRegex, '');
+  return replaced.length === 0;
+}
+
 function formatMessageContent(text: string) {
   const LINK_REGEX = /(https?:\/\/[^\s]+)|([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|((?:\+?[0-9]{1,3}[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4})/g;
   
@@ -354,13 +363,19 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
         {messages.map((msg: { id: string, senderId: string | null, content: string, createdAt: Date, sender: { firstName: string | null, lastName: string | null } | null }) => {
           const isMine = msg.senderId === currentUserId
           const senderName = msg.sender ? `${msg.sender.firstName} ${msg.sender.lastName}` : 'Former Member'
+          const onlyEmojis = isOnlyEmojis(msg.content)
 
           return (
             <div key={msg.id} className={cn("flex flex-col max-w-[90%] md:max-w-[80%]", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
               {(!isMine && (isGroup || isBroadcast)) && <span className="text-xs text-muted-foreground mb-1 ml-1">{senderName}</span>}
               <div className={cn(
-                "px-4 py-2.5 rounded-2xl whitespace-pre-wrap text-sm break-words relative group/msg",
-                isMine ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted text-foreground rounded-tl-sm",
+                "rounded-2xl whitespace-pre-wrap break-words relative group/msg",
+                onlyEmojis 
+                  ? "bg-transparent p-0 text-5xl leading-tight" 
+                  : cn(
+                      "px-4 py-2.5 text-sm",
+                      isMine ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted text-foreground rounded-tl-sm"
+                    ),
                 (msg as any).isOptimistic && "opacity-70"
               )}>
                 {formatMessageContent(msg.content)}
