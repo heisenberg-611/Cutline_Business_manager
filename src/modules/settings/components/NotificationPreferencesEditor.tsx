@@ -14,13 +14,24 @@ export interface NotificationPrefs {
   dnd: boolean
 }
 
+let sharedAudioContext: any = null;
+
 export function playSound(tone: NotificationTone) {
   if (tone === 'none') return
 
   try {
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext
     if (!AudioContext) return
-    const ctx = new AudioContext()
+    
+    if (!sharedAudioContext) {
+      sharedAudioContext = new AudioContext()
+    }
+    
+    if (sharedAudioContext.state === 'suspended') {
+      sharedAudioContext.resume()
+    }
+    
+    const ctx = sharedAudioContext
     
     const playNote = (freq: number, startTime: number, type: OscillatorType = 'triangle', duration = 0.4) => {
       const osc = ctx.createOscillator()

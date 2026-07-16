@@ -18,6 +18,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '💻',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/clients', visible: true },
@@ -44,6 +45,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '🎬',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/prodp', visible: true },
       { href: '/dashboard/pipeline', visible: true },
@@ -71,6 +73,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '✍️',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/clients', visible: true },
@@ -98,6 +101,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '🎥',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/clients', visible: true },
@@ -123,6 +127,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '🏢',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/financials', visible: true },
       { href: '/dashboard/analytics', visible: true },
       { href: '/dashboard/clients', visible: true },
@@ -149,6 +154,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '🎨',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/assets', visible: true },
@@ -175,6 +181,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '🎧',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/assets', visible: true },
@@ -201,6 +208,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '✨',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/feedback', visible: true },
@@ -227,6 +235,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '📸',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/assets', visible: true },
@@ -253,6 +262,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '🧑‍🏫',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/clients', visible: true },
@@ -279,6 +289,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '🎓',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/analytics', visible: true },
@@ -305,6 +316,7 @@ export const WORKFLOW_PRESETS: WorkflowPreset[] = [
     icon: '🔬',
     navPreferences: [
       { href: '/dashboard', visible: true },
+      { href: '/dashboard/messages', visible: true },
       { href: '/dashboard/projects', visible: true },
       { href: '/dashboard/pipeline', visible: true },
       { href: '/dashboard/assets', visible: true },
