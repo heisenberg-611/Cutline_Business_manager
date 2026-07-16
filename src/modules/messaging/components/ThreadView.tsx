@@ -4,7 +4,7 @@ import { useConversationMessages, useConversations } from '../hooks'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Ghost, Send, Megaphone, Loader2, Users, MessageSquare, Bell, BellOff, Trash2, RefreshCcw, SmilePlus } from 'lucide-react'
+import { Ghost, Send, Megaphone, Loader2, Users, MessageSquare, Bell, BellOff, Trash2, RefreshCcw, SmilePlus, ChevronLeft } from 'lucide-react'
 import { MemeFinder } from './MemeFinder'
 import EmojiPicker, { Theme } from 'emoji-picker-react'
 import { useTheme } from 'next-themes'
@@ -241,10 +241,18 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background relative">
       {/* Header */}
-      <div className="p-4 border-b flex items-center justify-between bg-background shrink-0">
+      <div className="p-3 sm:p-4 border-b flex items-center justify-between bg-background shrink-0">
         <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => router.push('/dashboard/messages')} 
+            className="md:hidden mr-0 -ml-2 h-8 w-8"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
           <div className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center",
             isBroadcast ? "bg-blue-500/10 text-blue-500" : isGroup ? "bg-green-500/10 text-green-600" : "bg-primary/10 text-primary"
@@ -348,7 +356,7 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
           const senderName = msg.sender ? `${msg.sender.firstName} ${msg.sender.lastName}` : 'Former Member'
 
           return (
-            <div key={msg.id} className={cn("flex flex-col max-w-[80%]", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
+            <div key={msg.id} className={cn("flex flex-col max-w-[90%] md:max-w-[80%]", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
               {(!isMine && (isGroup || isBroadcast)) && <span className="text-xs text-muted-foreground mb-1 ml-1">{senderName}</span>}
               <div className={cn(
                 "px-4 py-2.5 rounded-2xl whitespace-pre-wrap text-sm break-words relative group/msg",
@@ -383,8 +391,8 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
 
       {/* Composer (Hidden for members in a broadcast) */}
       {!(isBroadcast && !isAdmin) && (
-        <div className="p-4 border-t bg-background shrink-0">
-          <div className="flex items-end gap-2">
+        <div className="p-2 sm:p-4 border-t bg-background shrink-0 pb-safe">
+          <div className="flex items-end gap-1 sm:gap-2">
             <div className="flex gap-1 shrink-0">
               <Button 
                 variant="outline" 

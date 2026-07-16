@@ -20,7 +20,7 @@ export function MessagingSidebar({ currentUserId, isAdmin }: { currentUserId: st
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
-    <div className="w-80 border-r flex flex-col bg-muted/20">
+    <div className={cn("w-full md:w-80 border-r flex-col bg-muted/20 shrink-0", activeId ? "hidden md:flex" : "flex")}>
       <div className="p-4 border-b flex items-center justify-between bg-background">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-lg tracking-tight">Messages</h2>
