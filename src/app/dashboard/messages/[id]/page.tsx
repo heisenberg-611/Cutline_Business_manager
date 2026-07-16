@@ -1,7 +1,7 @@
 import { ThreadView } from '@/modules/messaging/components/ThreadView'
 import { auth } from '@clerk/nextjs/server'
 
-export default async function ConversationPage({ params }: { params: { id: string } }) {
+export default async function ConversationPage({ params }: { params: Promise<{ id: string }> }) {
   const { userId, orgRole } = await auth()
   if (!userId) return null
 

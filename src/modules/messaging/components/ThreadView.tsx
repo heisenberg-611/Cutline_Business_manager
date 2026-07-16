@@ -4,7 +4,10 @@ import { useConversationMessages, useConversations } from '../hooks'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Send, Megaphone, Loader2, Users, MessageSquare, Bell, BellOff, Trash2, RefreshCcw } from 'lucide-react'
+import { Ghost, Send, Megaphone, Loader2, Users, MessageSquare, Bell, BellOff, Trash2, RefreshCcw, SmilePlus } from 'lucide-react'
+import { MemeFinder } from './MemeFinder'
+import EmojiPicker, { Theme } from 'emoji-picker-react'
+import { useTheme } from 'next-themes'
 import { toggleMuteConversation, deleteConversation, deleteMessage } from '../actions'
 import { useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
@@ -14,6 +17,37 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useRouter } from 'next/navigation'
 import { useMessagingConfig } from './QueryProvider'
 
+const AnimatedMeme = ({ src }: { src: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [loopCount, setLoopCount] = useState(0)
+
+  const handleEnded = () => {
+    // 0-indexed: < 1 means it will run twice total
+    if (loopCount < 1) {
+      setLoopCount(prev => prev + 1)
+      videoRef.current?.play().catch(() => {})
+    }
+  }
+
+  const handleMouseEnter = () => {
+    setLoopCount(0)
+    videoRef.current?.play().catch(() => {})
+  }
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      autoPlay
+      muted
+      playsInline
+      onEnded={handleEnded}
+      onMouseEnter={handleMouseEnter}
+      className="max-w-[250px] max-h-[250px] rounded-lg object-contain cursor-pointer"
+    />
+  )
+}
+
 function formatMessageContent(text: string) {
   const LINK_REGEX = /(https?:\/\/[^\s]+)|([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|((?:\+?[0-9]{1,3}[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4})/g;
   
@@ -22,6 +56,34 @@ function formatMessageContent(text: string) {
     if (!part) return null;
     
     if (/(https?:\/\/[^\s]+)/.test(part)) {
+      if (/\.(mp4)(\?.*)?$/i.test(part) || part.includes('media.giphy.com/media/')) {
+        let mediaSrc = part;
+        // Upgrade legacy giphy links to mp4 for controlled playback
+        if (part.includes('giphy.com/media/') && !part.includes('.mp4')) {
+          mediaSrc = part.replace(/\.(webp|gif)(\?.*)?$/, '.mp4');
+        }
+        
+        return (
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="block my-2" onClick={(e) => e.preventDefault()}>
+            <AnimatedMeme src={mediaSrc} />
+          </a>
+        );
+      }
+
+      if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(part) || part.includes('media.tenor.com/')) {
+        return (
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="block my-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src={part} 
+              alt="Attachment" 
+              loading="lazy"
+              decoding="async"
+              className="max-w-[250px] max-h-[250px] rounded-lg object-contain" 
+            />
+          </a>
+        );
+      }
       return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:opacity-80 transition-opacity break-all">{part}</a>;
     }
     if (/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/.test(part)) {
@@ -45,6 +107,10 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
   const router = useRouter()
   const [isDeletingChat, setIsDeletingChat] = useState(false)
   const { realtimeEnabled } = useMessagingConfig()
+  const [isMemeFinderOpen, setIsMemeFinderOpen] = useState(false)
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
+  const emojiPickerRef = useRef<HTMLDivElement>(null)
+  const { resolvedTheme } = useTheme()
 
   const conversation = conversations?.find(c => c.id === conversationId)
   const isBroadcast = conversation?.type === 'BROADCAST'
@@ -82,6 +148,16 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setIsEmojiPickerOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleSend = async () => {
     const text = content.trim()
@@ -309,11 +385,42 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
       {!(isBroadcast && !isAdmin) && (
         <div className="p-4 border-t bg-background shrink-0">
           <div className="flex items-end gap-2">
+            <div className="flex gap-1 shrink-0">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => setIsMemeFinderOpen(true)}
+                className="shrink-0 h-[44px] w-[44px] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                title="Add Meme"
+              >
+                <Ghost className="w-5 h-5" />
+              </Button>
+              <div ref={emojiPickerRef} className="relative">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => setIsEmojiPickerOpen(prev => !prev)}
+                  className="shrink-0 h-[44px] w-[44px] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                  title="Add Emoji"
+                >
+                  <SmilePlus className="w-5 h-5" />
+                </Button>
+                {isEmojiPickerOpen && (
+                  <div className="absolute bottom-12 left-0 z-50 shadow-xl rounded-lg">
+                    <EmojiPicker 
+                      onEmojiClick={(emojiData) => setContent(prev => prev + emojiData.emoji)}
+                      theme={resolvedTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                      lazyLoadEmojis={true}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
             <Textarea 
               value={content}
               onChange={e => setContent(e.target.value)}
               placeholder="Type your message..."
-              className="resize-none max-h-32 min-h-[44px]"
+              className="resize-none max-h-32 min-h-[44px] text-base py-2.5"
               rows={1}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -337,6 +444,12 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
           </p>
         </div>
       )}
+      
+      <MemeFinder 
+        open={isMemeFinderOpen} 
+        onOpenChange={setIsMemeFinderOpen} 
+        onSelect={(url) => setContent(prev => prev ? `${prev}\n${url}` : url)} 
+      />
     </div>
   )
 }
