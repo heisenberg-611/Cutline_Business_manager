@@ -65,6 +65,13 @@ export async function sendPushNotification(
     }
 
     const data = await response.json();
+    
+    // OneSignal often returns 200 OK even if delivery fails or recipients is 0
+    if (data.errors || data.recipients === 0) {
+      console.warn("OneSignal API returned 200 OK, but there was an issue:", JSON.stringify(data));
+      console.warn("Payload attempted:", JSON.stringify(payload));
+    }
+    
     return data;
   } catch (error) {
     console.error("Error sending push notification:", error);
