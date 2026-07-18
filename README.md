@@ -21,6 +21,14 @@
   </p>
 </div>
 
+<br><br><br>
+
+<div align="center">
+  <i>To the person I love the most</i>
+</div>
+
+<br><br><br>
+
 <hr />
 
 ## 📖 Overview
@@ -222,5 +230,5 @@ This software is released under the [MIT License](LICENSE).
 
 ---
 <p align="center">
-  Developed by <a href="https://github.com/heisenberg-611">Dhrubojyoti</a>
+  Developed with ❤️ by <a href="https://github.com/heisenberg-611">Dhrubojyoti</a>
 </p>
