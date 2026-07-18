@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { toast } from 'sonner';
 
 declare global {
   interface Window {
@@ -60,6 +61,24 @@ export function OneSignalInit() {
         }
       }
 
+      // Ensure that when the tab is open, we manually display a beautiful Toast notification!
+      OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event: any) {
+        event.preventDefault(); // Stop native browser push which might be suppressed by OS anyway
+
+        const notification = event.notification;
+        const title = notification.title || "New Notification";
+        const body = notification.body || "";
+        
+        toast.info(title, {
+          description: body,
+          action: notification.url ? {
+            label: "View",
+            onClick: () => window.location.href = notification.url
+          } : undefined,
+          duration: 8000,
+        });
+      });
+
       const changeHandler = () => {
         if (OneSignal.User && OneSignal.User.PushSubscription) {
           evaluateSubscriptionId(OneSignal.User.PushSubscription.id);
@@ -77,12 +96,12 @@ export function OneSignalInit() {
   }, []);
 
   if (!showVerificationDialog) {
-    return <DebugOneSignal />;
+    return null;
   }
 
   return (
     <>
-      <DebugOneSignal />
+
       {showVerificationDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 max-w-sm w-full shadow-xl">
@@ -111,30 +130,3 @@ export function OneSignalInit() {
   );
 }
 
-function DebugOneSignal() {
-  return (
-    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[99999]">
-      <button 
-        onClick={() => {
-          if (!window.OneSignal) {
-            alert("OneSignal SDK completely failed to load! Do you have an AdBlocker (uBlock Origin, Brave Shields) turned on? Please disable it and refresh.");
-            return;
-          }
-          window.OneSignalDeferred.push(async function(OneSignal: any) {
-            try {
-              const result = await OneSignal.Notifications.requestPermission();
-              alert("Permission result: " + result + " | Current Permission: " + OneSignal.Notifications.permission);
-              const subId = OneSignal.User?.PushSubscription?.id;
-              alert("Subscription ID: " + (subId || "NONE"));
-            } catch (e: any) {
-              alert("Error: " + e.message);
-            }
-          });
-        }}
-        className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-2xl border-4 border-white animate-pulse"
-      >
-        Force Subscribe Test
-      </button>
-    </div>
-  );
-}

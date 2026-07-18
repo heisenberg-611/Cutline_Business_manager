@@ -5,6 +5,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { ThemeProvider } from "@/components/theme-provider"
 import { PWARegister } from "@/components/pwa-register"
 import { OneSignalInit } from "@/components/onesignal-init"
+import { Toaster } from "@/components/ui/sonner"
 import Script from "next/script";
 import "./globals.css";
 
@@ -84,6 +85,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <PWARegister />
+            <Toaster position="top-right" richColors />
             {children}
           </ThemeProvider>
         </body>
