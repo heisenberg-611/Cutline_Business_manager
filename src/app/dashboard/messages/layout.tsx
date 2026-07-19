@@ -19,7 +19,7 @@ export default async function MessagesLayout({ children }: { children: React.Rea
 
   return (
     <MessagingQueryProvider realtimeEnabled={business?.realtimeMessagesEnabled ?? true}>
-      <div className="flex h-[calc(100vh-8rem)] bg-background border rounded-xl overflow-hidden shadow-sm">
+      <div className="absolute top-0 left-0 right-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-0 flex bg-background overflow-hidden z-10">
         <MessagingSidebar currentUserId={userId} isAdmin={orgRole === 'org:admin'} />
         <div className="flex-1 flex flex-col min-w-0">
           {children}

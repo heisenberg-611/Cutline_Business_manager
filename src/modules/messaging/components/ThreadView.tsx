@@ -319,7 +319,7 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
                   <DropdownMenuTrigger className="hover:underline hover:text-foreground outline-none text-left flex items-center gap-1 cursor-pointer">
                     {headerSubtitle} <Users className="w-3 h-3" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-auto min-w-[250px] max-w-[400px] max-h-[50vh] overflow-y-auto">
+                  <DropdownMenuContent align="start" className="w-auto min-w-[250px] max-w-[calc(100vw-2rem)] sm:max-w-[400px] max-h-[50vh] overflow-y-auto">
                     <DropdownMenuGroup>
                       <DropdownMenuLabel>Group Members ({conversation.participants?.length || 0})</DropdownMenuLabel>
                       <DropdownMenuSeparator />
@@ -526,7 +526,7 @@ export function ThreadView({ conversationId, currentUserId, isAdmin }: { convers
 
       {/* Composer (Hidden for members in a broadcast) */}
       {!(isBroadcast && !isAdmin) && (
-        <div className="p-2 sm:p-4 border-t bg-background shrink-0 pb-safe">
+        <div className="p-2 sm:p-4 border-t bg-background shrink-0 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:pb-4">
           <div className="flex items-end gap-1 sm:gap-2">
             <div className="flex gap-1 shrink-0">
               <Button 
