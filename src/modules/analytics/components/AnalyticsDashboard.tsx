@@ -64,7 +64,7 @@ export function AnalyticsDashboard() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="w-full mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
@@ -73,26 +73,26 @@ export function AnalyticsDashboard() {
           <p className="text-sm text-zinc-500 dark:text-zinc-400">Track your workflow performance and financial growth.</p>
         </div>
 
-        <div className="flex items-center gap-2 self-end sm:self-auto ml-auto">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+          <div className="flex-1 flex items-center gap-2">
             <Label htmlFor="start-date" className="sr-only">Start Date</Label>
             <Input 
               id="start-date" 
               type="date" 
               value={startDate} 
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-[140px] bg-white dark:bg-zinc-950 text-sm"
+              className="w-full sm:w-[140px] bg-white dark:bg-zinc-950 text-sm"
             />
           </div>
-          <span className="text-zinc-500">to</span>
-          <div className="flex items-center gap-2">
+          <span className="text-zinc-500 flex-shrink-0">to</span>
+          <div className="flex-1 flex items-center gap-2">
             <Label htmlFor="end-date" className="sr-only">End Date</Label>
             <Input 
               id="end-date" 
               type="date" 
               value={endDate} 
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-[140px] bg-white dark:bg-zinc-950 text-sm"
+              className="w-full sm:w-[140px] bg-white dark:bg-zinc-950 text-sm"
             />
           </div>
         </div>
