@@ -125,7 +125,13 @@ export function ClientForm({ defaultOpen = false }: { defaultOpen?: boolean }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Mobile Number</Label>
-            <Input id="phone" name="phone" type="tel" placeholder="+1 (555) 000-0000" />
+            <Input 
+              id="phone" 
+              name="phone" 
+              type="tel" 
+              placeholder="+1 (555) 000-0000" 
+              onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+\-()\s]/g, '') }}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="industry">Industry</Label>
