@@ -21,6 +21,7 @@ type SearchResult = {
   type: string
   subtitle: string
   href: string
+  originalType?: string
 }
 
 const SEARCH_GROUPS = [
