@@ -103,7 +103,7 @@ export function AssetForm({ asset, onSuccess, currency = 'USD' }: { asset?: Asse
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Asset Type</Label>
           <Select 
@@ -155,7 +155,7 @@ export function AssetForm({ asset, onSuccess, currency = 'USD' }: { asset?: Asse
         </div>
       )}
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="vendor">Vendor / Creator</Label>
           <Input
@@ -176,7 +176,7 @@ export function AssetForm({ asset, onSuccess, currency = 'USD' }: { asset?: Asse
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="expiresAt">Expiry Date</Label>
           <Input

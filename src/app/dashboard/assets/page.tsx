@@ -51,7 +51,7 @@ export default async function AssetsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-5">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
         <div>
           <h3 className="text-xl font-semibold leading-6 text-zinc-900 dark:text-zinc-100">
             Asset Library
@@ -61,7 +61,7 @@ export default async function AssetsPage({
           </p>
         </div>
         <Dialog key={shouldOpenNewAsset ? 'new-asset' : 'add-asset'} defaultOpen={shouldOpenNewAsset}>
-          <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:pointer-events-none disabled:opacity-50 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 h-9 px-4 py-2">
+          <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:pointer-events-none disabled:opacity-50 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 h-9 px-4 py-2 w-full sm:w-auto">
             Add Asset
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
