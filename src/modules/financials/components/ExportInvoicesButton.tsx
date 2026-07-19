@@ -75,7 +75,7 @@ export function ExportInvoicesButton({ invoices }: { invoices: any[] }) {
     <Button 
       variant="outline" 
       onClick={handleExport}
-      className="bg-white hover:bg-zinc-100 text-zinc-900 border-zinc-200 dark:bg-zinc-950 dark:hover:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-800"
+      className="w-full sm:w-auto bg-white hover:bg-zinc-100 text-zinc-900 border-zinc-200 dark:bg-zinc-950 dark:hover:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-800"
     >
       <Download className="w-4 h-4 mr-2" />
       Export

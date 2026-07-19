@@ -148,7 +148,11 @@ export function ProdPTabs({ businessId, activeProjects, reviewRequests }: { busi
                     </SelectTrigger>
                     <SelectContent align="start" alignItemWithTrigger={false}>
                       {activeProjects.map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.title} ({p.client?.displayName})</SelectItem>
+                        <SelectItem key={p.id} value={p.id}>
+                          <span className="break-words whitespace-normal leading-tight text-left block w-full pr-4">
+                            {p.title} ({p.client?.displayName})
+                          </span>
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

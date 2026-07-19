@@ -72,7 +72,7 @@ export function ClientForm({ defaultOpen = false }: { defaultOpen?: boolean }) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger 
         render={
-          <Button className="bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
+          <Button className="w-full sm:w-auto bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
             <Plus className="w-4 h-4 mr-2" />
             New Client
           </Button>
@@ -125,7 +125,13 @@ export function ClientForm({ defaultOpen = false }: { defaultOpen?: boolean }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Mobile Number</Label>
-            <Input id="phone" name="phone" type="tel" placeholder="+1 (555) 000-0000" />
+            <Input 
+              id="phone" 
+              name="phone" 
+              type="tel" 
+              placeholder="+1 (555) 000-0000" 
+              onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+\-()\s]/g, '') }}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="industry">Industry</Label>

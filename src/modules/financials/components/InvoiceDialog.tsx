@@ -145,7 +145,7 @@ export function InvoiceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800">
         <DialogHeader>
           <DialogTitle>{invoiceId ? 'Edit Invoice' : 'Create Invoice'}</DialogTitle>
           <DialogDescription>
@@ -227,9 +227,10 @@ export function InvoiceDialog({
         </div>
         
         {lineItems.map((item: LineItemState, index: number) => (
-          <div key={item.id} className="flex gap-4 items-start">
-            <div className="flex-1 space-y-2">
-              {index === 0 && <Label className="text-xs text-zinc-500">Description</Label>}
+          <div key={item.id} className="flex flex-col sm:flex-row gap-4 items-start w-full border sm:border-0 border-zinc-200 dark:border-zinc-800 p-4 sm:p-0 rounded-lg">
+            <div className="w-full sm:flex-1 space-y-2">
+              <Label className="text-xs text-zinc-500 sm:hidden">Description</Label>
+              {index === 0 && <Label className="text-xs text-zinc-500 hidden sm:block">Description</Label>}
               <Input 
                 placeholder="e.g. YouTube Edit - Ep 5" 
                 value={item.description}
@@ -237,45 +238,50 @@ export function InvoiceDialog({
                 required
               />
             </div>
-            <div className="w-24 space-y-2">
-              {index === 0 && <Label className="text-xs text-zinc-500">Qty</Label>}
-              <Input 
-                type="number" 
-                min="1"
-                value={item.quantity}
-                onChange={e => handleLineChange(item.id, 'quantity', e.target.value)}
-                required
-              />
-            </div>
-            <div className="w-32 space-y-2">
-              {index === 0 && <Label className="text-xs text-zinc-500">Rate ({currencySymbol})</Label>}
-              <Input 
-                type="number" 
-                step="0.01"
-                min="0"
-                placeholder="0.00" 
-                value={item.amount}
-                onChange={e => handleLineChange(item.id, 'amount', e.target.value)}
-                required
-              />
-            </div>
-            <div className="w-32 space-y-2">
-              {index === 0 && <Label className="text-xs text-zinc-500">Amount</Label>}
-              <div className="h-9 flex items-center justify-end px-3 bg-zinc-50 dark:bg-zinc-900 rounded-md border border-transparent font-medium">
-                {currencySymbol}{((parseInt(item.quantity) || 0) * (parseFloat(item.amount) || 0)).toFixed(2)}
+            <div className="flex gap-2 sm:gap-4 w-full sm:w-auto items-end">
+              <div className="flex-1 sm:w-20 space-y-2">
+                <Label className="text-xs text-zinc-500 sm:hidden">Qty</Label>
+                {index === 0 && <Label className="text-xs text-zinc-500 hidden sm:block">Qty</Label>}
+                <Input 
+                  type="number" 
+                  min="1"
+                  value={item.quantity}
+                  onChange={e => handleLineChange(item.id, 'quantity', e.target.value)}
+                  required
+                />
               </div>
-            </div>
-            <div className={index === 0 ? "pt-6" : ""}>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="icon" 
-                className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                onClick={() => handleRemoveLine(item.id)}
-                disabled={lineItems.length === 1}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              <div className="flex-1 sm:w-28 space-y-2">
+                <Label className="text-xs text-zinc-500 sm:hidden">Rate</Label>
+                {index === 0 && <Label className="text-xs text-zinc-500 hidden sm:block">Rate ({currencySymbol})</Label>}
+                <Input 
+                  type="number" 
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00" 
+                  value={item.amount}
+                  onChange={e => handleLineChange(item.id, 'amount', e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex-1 sm:w-28 space-y-2">
+                <Label className="text-xs text-zinc-500 sm:hidden">Amount</Label>
+                {index === 0 && <Label className="text-xs text-zinc-500 hidden sm:block">Amount</Label>}
+                <div className="h-9 flex items-center justify-end px-2 sm:px-3 bg-zinc-50 dark:bg-zinc-900 rounded-md border border-transparent font-medium text-sm">
+                  {currencySymbol}{((parseInt(item.quantity) || 0) * (parseFloat(item.amount) || 0)).toFixed(2)}
+                </div>
+              </div>
+              <div className="sm:pt-6">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/50"
+                  onClick={() => handleRemoveLine(item.id)}
+                  disabled={lineItems.length === 1}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         ))}
@@ -302,7 +308,7 @@ export function InvoiceDialog({
 
       {/* Totals */}
       <div className="flex justify-end pt-6 border-t border-zinc-200 dark:border-zinc-800">
-        <div className="w-64 space-y-3">
+        <div className="w-full sm:w-64 space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-zinc-500">Subtotal</span>
             <span className="font-medium">{currencySymbol}{(subtotalCents / 100).toFixed(2)}</span>
@@ -328,11 +334,11 @@ export function InvoiceDialog({
         </div>
       </div>
 
-      <div className="flex justify-end pt-4 gap-2">
-        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+      <div className="flex flex-col-reverse sm:flex-row justify-end pt-4 gap-2">
+        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
           Cancel
         </Button>
-        <Button type="submit" disabled={loading} className="w-40 bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
+        <Button type="submit" disabled={loading} className="w-full sm:w-40 bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {loading ? "Saving..." : invoiceId ? "Save Changes" : "Create Invoice"}
         </Button>

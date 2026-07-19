@@ -10,7 +10,7 @@ export function NewInvoiceButton({ clients, projects, businessCurrency }: { clie
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} className="bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90">
+      <Button onClick={() => setOpen(true)} className="w-full sm:w-auto bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90">
         <Plus className="mr-2 h-4 w-4" />
         New Invoice
       </Button>

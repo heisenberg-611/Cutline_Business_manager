@@ -58,12 +58,12 @@ export default async function FinancialsPage({
 
   return (
     <div className="w-full mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Financials</h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage your studio revenue, expenses, and outstanding payments.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
           <ExportInvoicesButton invoices={invoices} />
           <NewInvoiceButton 
             clients={clients} 
@@ -76,9 +76,9 @@ export default async function FinancialsPage({
       <StudioHealthFinanceStrip data={studioHealth} variant="finance" />
 
       <Tabs key={activeTab} defaultValue={activeTab} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="invoices">Invoices & Revenue</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
+        <TabsList className="mb-4 w-full sm:w-fit">
+          <TabsTrigger value="invoices" className="text-xs sm:text-sm">Invoices & Revenue</TabsTrigger>
+          <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
         </TabsList>
 
         <TabsContent value="invoices" className="mt-0">
