@@ -22,7 +22,7 @@ export function AgingBucketsCard({ buckets }: Props) {
   const total = Object.values(buckets).reduce((a, b) => a + b, 0)
   
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10 overflow-hidden w-full flex flex-col p-6">
+    <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden w-full flex flex-col p-6 h-full">
       <h3 className="text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100 mb-4">Aging Outstanding Invoices</h3>
       
       {total === 0 ? (

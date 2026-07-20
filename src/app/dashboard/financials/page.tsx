@@ -75,37 +75,38 @@ export default async function FinancialsPage({
 
       <StudioHealthFinanceStrip data={studioHealth} variant="finance" />
 
-      <Tabs key={activeTab} defaultValue={activeTab} className="w-full">
-        <TabsList className="mb-4 flex w-full md:inline-flex md:w-fit">
-          <TabsTrigger value="invoices" className="text-xs sm:text-sm">Invoices & Revenue</TabsTrigger>
-          <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
-        </TabsList>
+      <div className="flex flex-col xl:grid xl:grid-cols-4 gap-6 items-start">
+        <div className="xl:col-span-3 min-w-0 order-2 xl:order-1 w-full">
+          <Tabs key={activeTab} defaultValue={activeTab} className="w-full">
+            <TabsList className="mb-4 flex w-full md:inline-flex md:w-fit">
+              <TabsTrigger value="invoices" className="text-xs sm:text-sm">Invoices & Revenue</TabsTrigger>
+              <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="invoices" className="mt-0">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-3">
-              <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+            <TabsContent value="invoices" className="mt-0">
+              <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 overflow-hidden">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">All Invoices</h2>
                 <InvoiceTable invoices={invoices as any} />
               </div>
-            </div>
-            <div className="lg:col-span-1">
-              <AgingBucketsCard buckets={agingBuckets} />
-            </div>
-          </div>
-        </TabsContent>
+            </TabsContent>
 
-        <TabsContent value="expenses" className="mt-0">
-          <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
-            <ExpenseTable
-              expenses={expenses as any}
-              projects={projects}
-              openNewExpense={shouldOpenNewExpense}
-              businessCurrency={studioHealth.currency || 'USD'}
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="expenses" className="mt-0">
+              <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 overflow-hidden">
+                <ExpenseTable
+                  expenses={expenses as any}
+                  projects={projects}
+                  openNewExpense={shouldOpenNewExpense}
+                  businessCurrency={studioHealth.currency || 'USD'}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        <div className="xl:col-span-1 min-w-0 order-1 xl:order-2 w-full">
+          <AgingBucketsCard buckets={agingBuckets} />
+        </div>
+      </div>
     </div>
   )
 }
