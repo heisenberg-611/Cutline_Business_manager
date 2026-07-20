@@ -469,46 +469,49 @@ export function AppLayout({
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Contextual Top bar */}
-        <header className="h-14 flex items-center justify-between px-4 md:px-6 border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0A0A0A] shrink-0">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="hidden md:flex items-center gap-2">
+        <header className="h-14 flex items-center justify-between px-3 md:px-6 border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0A0A0A] shrink-0">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1 pr-2">
+            <div className="hidden md:flex items-center gap-2 shrink-0">
               <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0">
                 <img src="/icon.svg" alt="Cutline OS Logo" className="w-full h-full object-contain dark:invert" />
               </div>
-              <h1 className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{getContextualTitle()}</h1>
+              <h1 className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 truncate">{getContextualTitle()}</h1>
             </div>
-            <div className="md:hidden">
+            <div className="md:hidden min-w-0 flex-1">
               <OrganizationSwitcher
                 hidePersonal
                 appearance={{
                   elements: {
-                    organizationSwitcherTrigger: "focus:shadow-none focus:outline-none justify-start px-0 py-0",
-                    organizationPreviewMainIdentifier: "font-semibold text-sm",
+                    organizationSwitcherTrigger: "focus:shadow-none focus:outline-none justify-start px-0 py-0 min-w-0 max-w-[130px] sm:max-w-[200px]",
+                    organizationPreviewMainIdentifier: "font-semibold text-sm truncate",
+                    organizationPreview: "min-w-0 overflow-hidden"
                   }
                 }}
               />
             </div>
           </div>
-          <div className="flex items-center gap-1 md:gap-2">
+          <div className="flex items-center gap-0 sm:gap-1 md:gap-2 shrink-0">
             <button
               onClick={() => setIsCommandOpen(true)}
-              className="md:hidden p-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-white/5 rounded-full transition-colors flex items-center justify-center"
+              className="md:hidden p-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-white/5 rounded-full transition-colors flex items-center justify-center shrink-0"
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
             </button>
-            <div className="md:hidden flex items-center justify-center p-2">
+            <div className="md:hidden flex items-center justify-center p-2 shrink-0">
               <ThemeToggle isCollapsed={true} variant="icon" />
             </div>
             <button
               onClick={() => setIsQuickActionsOpen(true)}
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm hover:opacity-90 transition-opacity"
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm hover:opacity-90 transition-opacity shrink-0"
             >
               <Plus className="h-3.5 w-3.5" />
               New
             </button>
-            <NotificationCenter initialPrefs={initialNotificationPreferences} />
-            <div className="flex items-center justify-center p-1">
+            <div className="shrink-0">
+              <NotificationCenter initialPrefs={initialNotificationPreferences} />
+            </div>
+            <div className="flex items-center justify-center p-1 shrink-0 ml-1">
               <UserButton 
                 appearance={{
                   elements: {

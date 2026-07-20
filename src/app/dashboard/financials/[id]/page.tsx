@@ -64,23 +64,23 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="w-full mx-auto space-y-6">
-      <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-5">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard/financials">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 border-b border-zinc-200 dark:border-zinc-800 pb-5">
+        <div className="flex items-start md:items-center gap-4">
+          <Link href="/dashboard/financials" className="mt-1 md:mt-0">
             <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div>
-            <h3 className="text-xl font-semibold leading-6 text-zinc-900 dark:text-zinc-100 flex items-center gap-3">
-              Invoice {invoice.invoiceNumber}
+            <h3 className="text-xl font-semibold leading-6 text-zinc-900 dark:text-zinc-100 flex flex-wrap items-center gap-2 md:gap-3">
+              <span className="break-all">Invoice {invoice.invoiceNumber}</span>
               <Badge variant="outline">{invoice.status}</Badge>
             </h3>
             <p className="text-sm text-zinc-500 mt-1">{invoice.client.displayName}</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full md:w-auto [&>*]:w-full sm:[&>*]:w-auto [&_button]:w-full sm:[&_button]:w-auto">
           {invoice.status === 'DRAFT' && (
             <EditInvoiceButton 
               invoice={invoice} 
@@ -94,8 +94,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <form action={async () => {
               'use server'
               await sendInvoice(invoice.id)
-            }}>
-              <Button type="submit" variant="outline" className="text-zinc-500">
+            }} className="w-full sm:w-auto">
+              <Button type="submit" variant="outline" className="text-zinc-500 w-full sm:w-auto">
                 {invoice.client.email ? (
                   <><Mail className="h-4 w-4 mr-2" /> Mark as Sent</>
                 ) : (
@@ -108,26 +108,30 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           <form action={async () => {
             'use server'
             await deleteInvoice(invoice.id)
-          }}>
-            <Button type="submit" variant="outline" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
+          }} className="w-full sm:w-auto">
+            <Button type="submit" variant="outline" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 w-full sm:w-auto">
               <Ban className="h-4 w-4 mr-2" /> Delete
             </Button>
           </form>
           
           {/* Client-side instant download (generates PDF in browser) */}
           {invoiceDataForPdf && (
-            <DownloadInvoiceButton invoiceData={invoiceDataForPdf} />
+            <div className="w-full sm:w-auto">
+              <DownloadInvoiceButton invoiceData={invoiceDataForPdf} />
+            </div>
           )}
           
           {/* Fallback: server-side PDF (opens in new tab via API route) */}
-          <a href={`/api/invoices/${invoice.id}/pdf`} target="_blank" rel="noreferrer">
-            <Button variant="outline" className="text-zinc-500">
+          <a href={`/api/invoices/${invoice.id}/pdf`} target="_blank" rel="noreferrer" className="w-full sm:w-auto">
+            <Button variant="outline" className="text-zinc-500 w-full sm:w-auto">
               <ExternalLink className="h-4 w-4 mr-2" /> Open PDF
             </Button>
           </a>
           
           {['SENT', 'PARTIALLY_PAID', 'OVERDUE'].includes(invoice.status) && invoice.amountDueCents > 0 && (
-            <RecordPaymentDialog invoiceId={invoice.id} amountDueCents={invoice.amountDueCents} currency={invoice.currency} />
+            <div className="w-full sm:w-auto">
+              <RecordPaymentDialog invoiceId={invoice.id} amountDueCents={invoice.amountDueCents} currency={invoice.currency} />
+            </div>
           )}
         </div>
       </div>

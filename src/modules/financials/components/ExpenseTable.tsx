@@ -93,8 +93,62 @@ export function ExpenseTable({ expenses, projects, openNewExpense = false, busin
         </Button>
       </div>
 
-      <div className="border border-zinc-200 dark:border-zinc-800 rounded-md overflow-x-auto">
-        <Table className="min-w-[800px]">
+      {/* Mobile Card Layout */}
+      <div className="grid grid-cols-1 gap-4 md:hidden mb-6">
+        {expenses.length === 0 ? (
+          <div className="text-center py-8 text-zinc-500 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+            No expenses found
+          </div>
+        ) : (
+          expenses.map((expense) => (
+            <div key={expense.id} className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 space-y-4 bg-white dark:bg-[#0A0A0A]">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {expense.description || 'No Description'}
+                  </div>
+                  <div className="text-sm text-zinc-500 mt-1">{formatDate(expense.dateIncurred)}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    {formatMoney(expense.amountCents, businessCurrency)}
+                  </div>
+                  <div className="mt-1">
+                    <Badge variant="secondary" className="font-normal text-[10px]">{expense.category}</Badge>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between items-center text-sm border-t border-zinc-100 dark:border-zinc-800 pt-3">
+                <div className="text-zinc-500 truncate max-w-[200px]">
+                  {expense.project?.title || 'General Expense'}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger 
+                    render={<Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={isDeleting === expense.id} />}
+                  >
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setEditingExpense(expense)}>
+                      <Edit2 className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => handleDelete(expense.id)}>
+                      <Trash className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <div className="hidden md:block border border-zinc-200 dark:border-zinc-800 rounded-md overflow-hidden bg-white dark:bg-[#0A0A0A]">
+        <Table className="min-w-full">
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
@@ -125,7 +179,7 @@ export function ExpenseTable({ expenses, projects, openNewExpense = false, busin
                   <TableCell>
                     {expense.project?.title || '-'}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right font-medium">
                     {formatMoney(expense.amountCents, businessCurrency)}
                   </TableCell>
                   <TableCell className="text-right">
