@@ -1,117 +1,174 @@
-'use client'
+import React from 'react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { auth } from '@clerk/nextjs/server';
 
-import React from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Scissors, ArrowRight, ChevronRight, Sparkles } from 'lucide-react'
-import { ThemeToggle } from '@/components/theme-toggle'
+export const metadata: Metadata = {
+  title: 'Cutline | Your creative business, finally organized',
+  description: 'Clients, projects, invoicing, and feedback — all in one place. Built for photographers, designers, video editors, and creative studios.',
+  openGraph: {
+    title: 'Cutline | Your creative business, finally organized',
+    description: 'Clients, projects, invoicing, and feedback — all in one place. Built for creative professionals.',
+    url: 'https://cutline.app',
+    siteName: 'Cutline',
+    images: [
+      {
+        url: '/og-image.jpg', // Replace with your actual OG image URL in the public directory
+        width: 1200,
+        height: 630,
+        alt: 'Cutline - Your creative business, finally organized',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cutline | Your creative business, finally organized',
+    description: 'Clients, projects, invoicing, and feedback — all in one place. Built for creative professionals.',
+    images: ['/og-image.jpg'],
+  },
+};
 
-export default function Home() {
+export default async function MarketingHomepage() {
+  const { userId } = await auth();
   return (
-    <div className="min-h-[100dvh] bg-zinc-50 dark:bg-[#050505] text-zinc-900 dark:text-zinc-100 flex flex-col relative overflow-hidden selection:bg-indigo-500/30">
-      {/* AMBIENT BACKGROUND GLOWS */}
-      <div className="absolute top-[-10%] md:top-[-20%] left-[-10%] w-[80%] md:w-[50%] h-[60%] md:h-[50%] rounded-full bg-indigo-300/40 dark:bg-indigo-500/20 blur-[100px] dark:blur-[120px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
-      <div className="absolute bottom-[-10%] md:bottom-[-20%] right-[-10%] w-[80%] md:w-[50%] h-[60%] md:h-[50%] rounded-full bg-fuchsia-300/40 dark:bg-fuchsia-500/20 blur-[100px] dark:blur-[120px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
-      
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 py-4 md:px-12 md:py-6">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="flex items-center gap-2.5"
-        >
-          <div className="bg-zinc-900 text-white dark:bg-white dark:text-black p-1.5 rounded-lg flex items-center justify-center">
-            <Scissors className="w-5 h-5" strokeWidth={2.5} />
+    <div className="min-h-screen bg-white text-zinc-950 flex flex-col font-sans">
+      {/* Navigation */}
+      <header className="sticky top-0 z-50 w-full border-b border-zinc-100 bg-white/80 backdrop-blur-md">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="font-bold text-xl tracking-tight">
+              Cutline
+            </Link>
+            <nav className="hidden md:flex gap-6 text-sm font-medium text-zinc-600">
+              <Link href="#features" className="hover:text-zinc-950 transition-colors">Features</Link>
+              <Link href="#pricing" className="hover:text-zinc-950 transition-colors">Pricing</Link>
+              <Link href="#about" className="hover:text-zinc-950 transition-colors">About</Link>
+            </nav>
           </div>
-          <span className="font-semibold text-lg tracking-tight text-zinc-900 dark:text-white">Cutline OS</span>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-          className="flex items-center gap-4"
-        >
-          <Link 
-            href="/sign-in" 
-            className="inline-flex h-9 items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-5 py-1 text-sm font-medium text-zinc-900 dark:text-zinc-100 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900 whitespace-nowrap"
-          >
-            Log in
-          </Link>
-          <div className="hidden sm:block">
-            <ThemeToggle />
+          <div className="flex items-center gap-4">
+            {userId ? (
+              <Link href="/dashboard" className={buttonVariants({ variant: "default" })}>Go to dashboard</Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-medium text-zinc-600 hover:text-zinc-950 transition-colors">
+                  Log in
+                </Link>
+                <Link href="/sign-up" className={buttonVariants({ variant: "default" })}>Start free</Link>
+              </>
+            )}
           </div>
-          <div className="sm:hidden">
-            <ThemeToggle isCollapsed={true} />
-          </div>
-        </motion.div>
+        </div>
       </header>
 
-      {/* HERO SECTION */}
-      <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-4 sm:px-6 pt-20 pb-12">
-        <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
-          
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mb-8 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-md text-xs font-medium text-zinc-600 dark:text-zinc-300"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-            <span>Cutline OS v1.0</span>
-          </motion.div>
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="py-24 md:py-32 lg:py-40 text-center px-4">
+          <div className="container mx-auto max-w-4xl flex flex-col items-center">
+            <div className="inline-block rounded-full bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-800 mb-6">
+              Built for creative professionals
+            </div>
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
+              Your creative business, finally organized
+            </h1>
+            <p className="text-xl text-zinc-600 mb-10 max-w-2xl">
+              Clients, projects, invoicing, and feedback — all in one place.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center mb-12">
+              <Link href="/sign-up" className={buttonVariants({ variant: "default", size: "lg" })}>Start free</Link>
+              <Link href="#how-it-works" className={buttonVariants({ variant: "outline", size: "lg" })}>See how it works</Link>
+            </div>
+            <p className="text-sm text-zinc-500 font-medium">
+              Built for photographers, designers, video editors, and creative studios
+            </p>
+          </div>
+        </section>
 
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter leading-[1.05] text-transparent bg-clip-text bg-gradient-to-b from-zinc-900 to-zinc-500 dark:from-white dark:to-white/60 mb-6 sm:mb-8 pb-2"
-          >
-            Creative work,<br />
-            perfectly pipelined.
-          </motion.h1>
+        {/* Feature grid */}
+        <section id="features" className="py-24 bg-zinc-50 px-4">
+          <div className="container mx-auto max-w-6xl">
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="border-none shadow-none bg-white">
+                <CardHeader>
+                  <CardTitle className="text-xl mb-2">Client and project pipeline</CardTitle>
+                  <CardDescription className="text-base">Every client and project in one clean, trackable view.</CardDescription>
+                </CardHeader>
+              </Card>
+              <Card className="border-none shadow-none bg-white">
+                <CardHeader>
+                  <CardTitle className="text-xl mb-2">Invoicing that just works</CardTitle>
+                  <CardDescription className="text-base">Sequential, organized, no manual number chasing.</CardDescription>
+                </CardHeader>
+              </Card>
+              <Card className="border-none shadow-none bg-white">
+                <CardHeader>
+                  <CardTitle className="text-xl mb-2">Feedback in the workflow</CardTitle>
+                  <CardDescription className="text-base">Client revisions and testimonials, right where the work lives.</CardDescription>
+                </CardHeader>
+              </Card>
+              <Card className="border-none shadow-none bg-white">
+                <CardHeader>
+                  <CardTitle className="text-xl mb-2">Room to grow</CardTitle>
+                  <CardDescription className="text-base">Roles, assignment, and messaging for when you build a team.</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          </div>
+        </section>
 
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-12 font-light leading-relaxed"
-          >
-            Manage your creative workflows, track project assets, handle client invoicing, and deliver work faster than ever. Built for the modern creative professional.
-          </motion.p>
+        {/* How it works */}
+        <section id="how-it-works" className="py-24 px-4">
+          <div className="container mx-auto max-w-4xl">
+            <h2 className="text-3xl font-bold text-center mb-16 tracking-tight">How it works</h2>
+            <div className="space-y-12">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-start">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-zinc-950 text-white flex items-center justify-center font-bold text-xl">1</div>
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Add your clients</h3>
+                  <p className="text-zinc-600 text-lg">Bring your existing clients and projects into one dashboard.</p>
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-start">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-zinc-950 text-white flex items-center justify-center font-bold text-xl">2</div>
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Track the work</h3>
+                  <p className="text-zinc-600 text-lg">Move projects through your pipeline and collect feedback.</p>
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-start">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-zinc-950 text-white flex items-center justify-center font-bold text-xl">3</div>
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Get paid</h3>
+                  <p className="text-zinc-600 text-lg">Send invoices and keep every payment in view.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
-          >
-            <Link 
-              href="/sign-in"
-              className="group relative flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 bg-zinc-900 dark:bg-white font-semibold rounded-full overflow-hidden transition-all hover:scale-[1.02] active:scale-95 shadow-xl hover:shadow-2xl ring-1 ring-zinc-900/5 dark:ring-white/10"
-            >
-              {/* Professional subtle hover background */}
-              <div className="absolute inset-0 bg-zinc-800 dark:bg-zinc-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
-              <span className="relative text-white dark:text-zinc-950 transition-colors duration-300 flex items-center gap-2 drop-shadow-sm whitespace-nowrap">
-                Sign In to Workspace
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </span>
-            </Link>
-          </motion.div>
-        </div>
+        {/* Closing CTA */}
+        <section className="py-24 bg-zinc-950 text-white text-center px-4">
+          <div className="container mx-auto max-w-3xl">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">Ready to get organized?</h2>
+            <p className="text-xl text-zinc-400 mb-10">Start free, no card required.</p>
+            <Link href="/sign-up" className={buttonVariants({ variant: "default", size: "lg", className: "bg-white text-zinc-950 hover:bg-zinc-100" })}>Start free</Link>
+          </div>
+        </section>
       </main>
 
-      {/* FOOTER */}
-      <motion.footer 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1 }}
-        className="py-8 text-center text-xs text-zinc-600 font-medium relative z-10"
-      >
-        <p>&copy; {new Date().getFullYear()} Cutline OS. All rights reserved.</p>
-      </motion.footer>
+      {/* Footer */}
+      <footer className="py-8 border-t border-zinc-100 px-4">
+        <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-zinc-500">
+          <p>© Cutline</p>
+          <div className="flex gap-6">
+            <Link href="#" className="hover:text-zinc-950 transition-colors">Privacy</Link>
+            <Link href="#" className="hover:text-zinc-950 transition-colors">Terms</Link>
+          </div>
+        </div>
+      </footer>
     </div>
-  )
+  );
 }
