@@ -26,7 +26,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {children}
         </div>
       </main>
-      
+
       <footer className="relative z-10 py-6 text-center text-xs text-zinc-500">
         &copy; {new Date().getFullYear()} Cutline OS. All rights reserved.
       </footer>

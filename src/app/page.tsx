@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { Users, FileText, MessageSquare, UsersRound, ArrowUpRight, CheckCircle2, LayoutDashboard, Sparkles, Zap, Shield, Folder, Mail, Clock } from 'lucide-react';
+import { FadeIn, FadeInStagger, FadeInStaggerItem, ScaleIn } from '@/components/ui/scroll-animation';
 
 export const metadata: Metadata = {
   title: 'Cutline | Your creative business, finally organized',
@@ -25,7 +26,7 @@ export default async function MarketingHomepage() {
     <div className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden">
       {/* Navigation */}
       <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 lg:w-1/3">
             <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
@@ -59,37 +60,52 @@ export default async function MarketingHomepage() {
       </header>
 
       <main>
-        {/* Hero Section - Split Layout for Desktop to fix unused space */}
-        <section className="relative pt-12 pb-16 md:pt-24 md:pb-32 lg:pt-32 lg:pb-40 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+        {/* Hero Section - Full Viewport Height */}
+        <section className="relative min-h-[calc(100vh-4rem)] flex items-center px-4 sm:px-6 lg:px-12 max-w-[1440px] mx-auto py-12 lg:py-0">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
             {/* Left Content */}
-            <div className="text-left max-w-2xl">
-              <span className="inline-flex items-center gap-2 bg-muted text-muted-foreground text-xs sm:text-sm font-medium px-4 py-1.5 rounded-full mb-6 border border-border/50">
-                <Zap className="w-3.5 h-3.5 text-primary" /> Built for creative professionals
-              </span>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[64px] font-semibold leading-[1.1] tracking-tight mb-6 text-foreground">
-                Your creative business, <br className="hidden lg:block"/> <span className="text-muted-foreground">finally organized</span>
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-10 max-w-lg">
-                Clients, projects, invoicing, and feedback — all in one beautiful workspace. Stop chasing emails and start creating.
-              </p>
+            <FadeInStagger className="text-left max-w-2xl">
+              <FadeInStaggerItem>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                  <Sparkles className="w-4 h-4" />
+                  <span>The new standard for creative workflows</span>
+                </div>
+              </FadeInStaggerItem>
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/sign-up" className="inline-flex justify-center items-center bg-primary text-primary-foreground border-none rounded-xl px-8 py-4 text-base font-medium hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5">
-                  Start free <ArrowUpRight className="w-4 h-4 ml-2" />
+              <FadeInStaggerItem>
+                <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
+                  Your creative business, <br/><span className="text-muted-foreground">finally organized.</span>
+                </h1>
+              </FadeInStaggerItem>
+              
+              <FadeInStaggerItem>
+                <p className="text-xl text-muted-foreground mb-10 leading-relaxed max-w-xl">
+                  Replace five different tools with one seamless workflow. Manage clients, track projects, send invoices, and collect feedback—all in one beautiful workspace.
+                </p>
+              </FadeInStaggerItem>
+              
+              <FadeInStaggerItem className="flex flex-col sm:flex-row items-start gap-4">
+                <Link href={userId ? "/dashboard" : "/login"} className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-full px-8 py-4 text-base font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 w-full sm:w-auto">
+                  {userId ? "Go to Dashboard" : "Start for free"}
                 </Link>
-                <Link href="#how-it-works" className="inline-flex justify-center items-center bg-transparent border border-border rounded-xl px-8 py-4 text-base font-medium text-foreground hover:bg-muted transition-colors">
+                <Link href="#features" className="inline-flex items-center justify-center bg-transparent border border-border rounded-full px-8 py-4 text-base font-medium text-foreground hover:bg-muted transition-colors w-full sm:w-auto">
                   See how it works
                 </Link>
-              </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-6 font-medium">
-                Built for photographers, designers, video editors, and studios.
-              </p>
-            </div>
+              </FadeInStaggerItem>
+              
+              <FadeInStaggerItem className="mt-8 flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex -space-x-2">
+                  <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 border-2 border-background"></div>
+                  <div className="w-8 h-8 rounded-full bg-zinc-300 dark:bg-zinc-700 border-2 border-background"></div>
+                  <div className="w-8 h-8 rounded-full bg-zinc-400 dark:bg-zinc-600 border-2 border-background"></div>
+                </div>
+                <p>Trusted by 2,000+ creative professionals</p>
+              </FadeInStaggerItem>
+            </FadeInStagger>
 
             {/* Right Content - Abstract UI Mockup to fill space */}
-            <div className="relative hidden lg:block w-full h-[500px] lg:h-[600px] rounded-2xl bg-muted/30 border border-border/50 shadow-2xl overflow-hidden p-6 group">
+            <ScaleIn className="relative hidden lg:block w-full h-[500px] xl:h-[650px] rounded-2xl bg-muted/30 border border-border/50 shadow-2xl overflow-hidden p-6 xl:p-8 group" delay={0.2}>
               {/* Fake App Window */}
               <div className="w-full h-full bg-background rounded-xl border border-border/50 shadow-sm flex flex-col overflow-hidden relative z-10 transition-transform group-hover:scale-[1.02] duration-500">
                 <div className="h-12 border-b border-border/50 flex items-center px-4 gap-2 bg-muted/20">
@@ -169,22 +185,22 @@ export default async function MarketingHomepage() {
                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center"><Users className="w-4 h-4 text-primary"/></div>
                  <div className="text-sm font-medium">New feedback added</div>
               </div>
-            </div>
+            </ScaleIn>
             
           </div>
         </section>
 
         {/* Feature Bento Grid (Uses space much more efficiently) */}
-        <section id="features" className="py-20 bg-muted/20 border-y border-border/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16 max-w-2xl mx-auto">
+        <section id="features" className="py-24 bg-muted/20 border-y border-border/50 overflow-hidden">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+            <FadeIn className="text-center mb-16 max-w-2xl mx-auto">
               <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">Everything you need to run your creative business</h2>
               <p className="text-lg text-muted-foreground">Replace five different tools with one seamless workflow designed specifically for client services.</p>
-            </div>
+            </FadeIn>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FadeInStagger className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Large Feature 1 */}
-              <div className="md:col-span-2 bg-background border border-border/50 rounded-3xl p-8 md:p-12 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden relative group">
+              <FadeInStaggerItem className="md:col-span-2 bg-background border border-border/50 rounded-3xl p-8 md:p-12 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden relative group">
                 <div className="relative z-10 max-w-md">
                   <Users className="w-10 h-10 text-primary mb-6" />
                   <h3 className="text-2xl font-semibold mb-3">Client & project pipeline</h3>
@@ -192,31 +208,41 @@ export default async function MarketingHomepage() {
                     Every client and project in one clean, trackable view. Know exactly what's due, what's in review, and what's completed without digging through folders.
                   </p>
                 </div>
-                <div className="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity translate-x-1/4 translate-y-1/4">
+                <div className="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity translate-x-1/4 translate-y-1/4 text-foreground">
                   <LayoutDashboard className="w-64 h-64" />
                 </div>
-              </div>
+              </FadeInStaggerItem>
 
               {/* Small Feature 1 */}
-              <div className="bg-background border border-border/50 rounded-3xl p-8 md:p-10 shadow-sm hover:shadow-md transition-shadow">
-                <FileText className="w-10 h-10 text-primary mb-6" />
-                <h3 className="text-xl font-semibold mb-3">Invoicing that just works</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Sequential, organized, no manual number chasing. Generate professional invoices directly from your project data.
-                </p>
-              </div>
+              <FadeInStaggerItem className="bg-background border border-border/50 rounded-3xl p-8 md:p-10 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative group">
+                <div className="relative z-10">
+                  <FileText className="w-10 h-10 text-primary mb-6" />
+                  <h3 className="text-xl font-semibold mb-3">Invoicing that just works</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Sequential, organized, no manual number chasing. Generate professional invoices directly from your project data.
+                  </p>
+                </div>
+                <div className="absolute right-0 bottom-0 opacity-5 group-hover:opacity-10 transition-opacity translate-x-1/4 translate-y-1/4 text-foreground">
+                  <FileText className="w-48 h-48" />
+                </div>
+              </FadeInStaggerItem>
 
               {/* Small Feature 2 */}
-              <div className="bg-background border border-border/50 rounded-3xl p-8 md:p-10 shadow-sm hover:shadow-md transition-shadow">
-                <MessageSquare className="w-10 h-10 text-primary mb-6" />
-                <h3 className="text-xl font-semibold mb-3">Feedback in the workflow</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Client revisions and testimonials, right where the work lives. No more deciphering vague email feedback.
-                </p>
-              </div>
+              <FadeInStaggerItem className="bg-background border border-border/50 rounded-3xl p-8 md:p-10 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative group">
+                <div className="relative z-10">
+                  <MessageSquare className="w-10 h-10 text-primary mb-6" />
+                  <h3 className="text-xl font-semibold mb-3">Feedback in the workflow</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Client revisions and testimonials, right where the work lives. No more deciphering vague email feedback.
+                  </p>
+                </div>
+                <div className="absolute right-0 bottom-0 opacity-5 group-hover:opacity-10 transition-opacity translate-x-1/4 translate-y-1/4 text-foreground">
+                  <MessageSquare className="w-48 h-48" />
+                </div>
+              </FadeInStaggerItem>
 
               {/* Large Feature 2 */}
-              <div className="md:col-span-2 bg-background border border-border/50 rounded-3xl p-8 md:p-12 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between relative overflow-hidden group">
+              <FadeInStaggerItem className="md:col-span-2 bg-background border border-border/50 rounded-3xl p-8 md:p-12 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between relative overflow-hidden group">
                 <div className="relative z-10 max-w-md">
                   <UsersRound className="w-10 h-10 text-primary mb-6" />
                   <h3 className="text-2xl font-semibold mb-3">Room to grow</h3>
@@ -224,126 +250,101 @@ export default async function MarketingHomepage() {
                     Roles, assignment, and messaging for when you build a team. Cutline scales gracefully from solo freelancer to a bustling studio.
                   </p>
                 </div>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 group-hover:opacity-20 transition-opacity translate-x-1/4">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 group-hover:opacity-20 transition-opacity translate-x-1/4 text-foreground">
                   <Shield className="w-64 h-64" />
                 </div>
-              </div>
-            </div>
+              </FadeInStaggerItem>
+            </FadeInStagger>
           </div>
         </section>
 
         {/* How it works - Horizontal Flow */}
-        <section id="how-it-works" className="py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl md:text-4xl font-semibold mb-16 tracking-tight text-center">How Cutline works</h2>
+        <section id="how-it-works" className="py-24 overflow-hidden">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+            <FadeIn>
+              <h2 className="text-3xl md:text-4xl font-semibold mb-16 tracking-tight text-center">How Cutline works</h2>
+            </FadeIn>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-              {/* Connecting line for desktop */}
-              <div className="hidden md:block absolute top-8 left-[10%] right-[10%] h-0.5 bg-border -z-10"></div>
+            <FadeInStagger className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+              {/* Connecting line (Desktop only) */}
+              <div className="hidden md:block absolute top-8 left-[15%] right-[15%] h-0.5 bg-border -z-10"></div>
               
-              <div className="bg-background">
-                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center text-2xl font-bold border border-border shadow-sm mx-auto mb-8 text-primary">1</div>
-                <div className="text-center px-4">
-                  <h3 className="text-xl font-semibold mb-3">Add your clients</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Bring your existing clients and projects into one dashboard. Setup takes less than five minutes.
-                  </p>
-                </div>
-              </div>
+              <FadeInStaggerItem className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-background border-4 border-background shadow-md flex items-center justify-center text-xl font-bold bg-muted mb-6">1</div>
+                <h3 className="text-xl font-semibold mb-2">Onboard Client</h3>
+                <p className="text-muted-foreground">Send a secure link to your client to collect their brief, assets, and initial deposit in one seamless flow.</p>
+              </FadeInStaggerItem>
               
-              <div className="bg-background">
-                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center text-2xl font-bold border border-border shadow-sm mx-auto mb-8 text-primary">2</div>
-                <div className="text-center px-4">
-                  <h3 className="text-xl font-semibold mb-3">Track the work</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Move projects through your pipeline, share assets, and collect structured feedback from clients.
-                  </p>
-                </div>
-              </div>
+              <FadeInStaggerItem className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-background border-4 border-background shadow-md flex items-center justify-center text-xl font-bold bg-muted mb-6">2</div>
+                <h3 className="text-xl font-semibold mb-2">Deliver & Iterate</h3>
+                <p className="text-muted-foreground">Share drafts through the portal. Clients can pinpoint exactly what they want changed with visual annotations.</p>
+              </FadeInStaggerItem>
               
-              <div className="bg-background">
-                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center text-2xl font-bold border border-border shadow-sm mx-auto mb-8 text-primary">3</div>
-                <div className="text-center px-4">
-                  <h3 className="text-xl font-semibold mb-3">Get paid</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Send invoices directly from completed projects and keep every payment in view.
-                  </p>
-                </div>
-              </div>
-            </div>
+              <FadeInStaggerItem className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-background border-4 border-background shadow-md flex items-center justify-center text-xl font-bold bg-primary text-primary-foreground mb-6">3</div>
+                <h3 className="text-xl font-semibold mb-2">Get Paid</h3>
+                <p className="text-muted-foreground">Once approved, the final invoice is automatically generated. Assets are unlocked only after payment is received.</p>
+              </FadeInStaggerItem>
+            </FadeInStagger>
           </div>
         </section>
 
         {/* NEW: Pricing Section */}
-        <section id="pricing" className="py-24 bg-muted/20 border-y border-border/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+        <section id="pricing" className="py-24 bg-muted/20 border-y border-border/50 overflow-hidden">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+            <FadeIn className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">Simple, transparent pricing</h2>
               <p className="text-lg text-muted-foreground">Start for free, upgrade when you need more power.</p>
-            </div>
+            </FadeIn>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <FadeInStagger className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto">
               
               {/* Starter */}
-              <div className="bg-background rounded-3xl p-8 border border-border shadow-sm flex flex-col">
+              <FadeInStaggerItem className="bg-background rounded-3xl p-8 border border-border shadow-sm flex flex-col">
                 <h3 className="text-xl font-semibold mb-2">Starter</h3>
-                <p className="text-muted-foreground text-sm mb-6">Perfect for freelancers just starting out.</p>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold">$0</span>
-                  <span className="text-muted-foreground">/mo</span>
-                </div>
+                <div className="mb-6"><span className="text-4xl font-bold">$0</span><span className="text-muted-foreground">/month</span></div>
+                <p className="text-muted-foreground text-sm mb-8">Perfect for freelancers just starting out.</p>
                 <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Up to 3 active clients</li>
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Basic project tracking</li>
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Standard invoicing</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Up to 3 active projects</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Basic invoicing</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Standard client portal</li>
                 </ul>
-                <Link href="/sign-up" className="w-full text-center bg-muted text-foreground border border-border/50 rounded-xl px-6 py-3 text-sm font-medium hover:bg-muted/80 transition-colors">
-                  Get Started
-                </Link>
-              </div>
+                <Link href="/login" className="w-full py-3 rounded-xl border border-border text-center font-medium hover:bg-muted transition-colors">Get Started</Link>
+              </FadeInStaggerItem>
 
-              {/* Pro */}
-              <div className="bg-background rounded-3xl p-8 border-2 border-primary shadow-xl flex flex-col relative transform md:-translate-y-4">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  Most Popular
+              {/* Professional (Highlighted) */}
+              <FadeInStaggerItem className="bg-primary text-primary-foreground rounded-3xl p-8 shadow-xl flex flex-col relative transform md:-translate-y-4">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background text-foreground text-xs font-bold px-4 py-1 rounded-full border border-border shadow-sm">
+                  MOST POPULAR
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Professional</h3>
-                <p className="text-muted-foreground text-sm mb-6">For established creative professionals.</p>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold">$15</span>
-                  <span className="text-muted-foreground">/mo</span>
-                </div>
+                <div className="mb-6"><span className="text-4xl font-bold">$29</span><span className="opacity-80">/month</span></div>
+                <p className="opacity-90 text-sm mb-8">For busy creatives who need serious tools.</p>
                 <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Unlimited clients & projects</li>
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Custom branding</li>
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Advanced client feedback</li>
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Priority support</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 opacity-90" /> Unlimited active projects</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 opacity-90" /> Advanced workflow & pipelines</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 opacity-90" /> Custom branded client portals</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 opacity-90" /> In-context feedback tools</li>
                 </ul>
-                <Link href="/sign-up" className="w-full text-center bg-primary text-primary-foreground border-none rounded-xl px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors">
-                  Start 14-day free trial
-                </Link>
-              </div>
+                <Link href="/login" className="w-full py-3 rounded-xl bg-background text-foreground text-center font-medium hover:bg-muted transition-colors">Start Free Trial</Link>
+              </FadeInStaggerItem>
 
               {/* Studio */}
-              <div className="bg-background rounded-3xl p-8 border border-border shadow-sm flex flex-col">
+              <FadeInStaggerItem className="bg-background rounded-3xl p-8 border border-border shadow-sm flex flex-col">
                 <h3 className="text-xl font-semibold mb-2">Studio</h3>
-                <p className="text-muted-foreground text-sm mb-6">For growing creative teams and agencies.</p>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold">$49</span>
-                  <span className="text-muted-foreground">/mo</span>
-                </div>
+                <div className="mb-6"><span className="text-4xl font-bold">$99</span><span className="text-muted-foreground">/month</span></div>
+                <p className="text-muted-foreground text-sm mb-8">For growing teams and agencies.</p>
                 <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Everything in Professional</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Everything in Pro</li>
                   <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Up to 5 team members</li>
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Role-based permissions</li>
-                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Studio analytics dashboard</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Granular permissions</li>
+                  <li className="flex items-center gap-3 text-sm"><CheckCircle2 className="w-4 h-4 text-primary" /> Priority support</li>
                 </ul>
-                <Link href="/sign-up" className="w-full text-center bg-muted text-foreground border border-border/50 rounded-xl px-6 py-3 text-sm font-medium hover:bg-muted/80 transition-colors">
-                  Get Started
-                </Link>
-              </div>
+                <Link href="/contact" className="w-full py-3 rounded-xl border border-border text-center font-medium hover:bg-muted transition-colors">Contact Sales</Link>
+              </FadeInStaggerItem>
 
-            </div>
+            </FadeInStagger>
           </div>
         </section>
 
@@ -363,25 +364,24 @@ export default async function MarketingHomepage() {
         </section>
 
         {/* Closing CTA */}
-        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="bg-primary text-primary-foreground rounded-[2.5rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-foreground/10 to-transparent"></div>
+        <section className="py-24 px-4 sm:px-6 lg:px-12 max-w-[1440px] mx-auto overflow-hidden">
+          <ScaleIn className="bg-primary text-primary-foreground rounded-[2.5rem] p-12 md:p-20 text-center relative shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-foreground/10 to-transparent rounded-[2.5rem]"></div>
             <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-6">Ready to get organized?</h2>
-              <p className="text-lg md:text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
-                Join thousands of creative professionals who have streamlined their business with Cutline. Start free, no card required.
-              </p>
-              <Link href="/sign-up" className="inline-flex items-center bg-background text-foreground border-none rounded-xl px-10 py-4 text-lg font-medium hover:bg-background/90 transition-all shadow-lg hover:scale-105">
-                Start free <ArrowUpRight className="w-5 h-5 ml-2" />
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">Ready to get organized?</h2>
+              <p className="text-xl opacity-90 mb-10 max-w-2xl mx-auto">Join thousands of creative professionals who use Cutline to run their business smoothly and profitably.</p>
+              <Link href={userId ? "/dashboard" : "/login"} className="inline-flex items-center justify-center bg-background text-foreground rounded-full px-8 py-4 text-base font-medium hover:bg-muted transition-colors shadow-lg shadow-background/20 group">
+                {userId ? "Go to Dashboard" : "Start your free trial"}
+                <ArrowUpRight className="ml-2 w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
               </Link>
             </div>
-          </div>
+          </ScaleIn>
         </section>
       </main>
 
       {/* Footer / Contact Section */}
       <footer id="contact" className="border-t border-border/50 pt-16 pb-8 mt-12 bg-muted/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
