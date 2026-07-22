@@ -90,14 +90,25 @@ export function EditSubscriptionModal({
 
         <div className="p-6 overflow-y-auto flex-1 space-y-8">
           
-          {/* Plan Selection */}
           <div>
             <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3 block">Forced Plan Tier</label>
             <div className="grid grid-cols-3 gap-3">
               {(['FREE', 'PRO', 'BUSINESS'] as SubscriptionPlan[]).map(p => (
                 <button
                   key={p}
-                  onClick={() => setPlan(p)}
+                  onClick={() => {
+                    setPlan(p);
+                    // Auto-set 30-day period when switching to a paid plan with no expiry
+                    if (p !== 'FREE' && !periodEnd) {
+                      const d = new Date();
+                      d.setDate(d.getDate() + 30);
+                      setPeriodEnd(d.toISOString().split('T')[0]);
+                    }
+                    // Clear expiry when switching to FREE
+                    if (p === 'FREE') {
+                      setPeriodEnd('');
+                    }
+                  }}
                   className={`p-3 rounded-xl border text-sm font-medium transition-all ${
                     plan === p 
                       ? 'border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-500 dark:text-indigo-300' 
@@ -112,10 +123,14 @@ export function EditSubscriptionModal({
 
           {/* Expiry Date Selection */}
           <div className={plan === 'FREE' ? 'opacity-50 pointer-events-none' : ''}>
-            <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3 flex items-center justify-between">
+            <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1 flex items-center justify-between">
               Expiration Date
               <span className="text-xs font-normal text-zinc-500">Local Time</span>
             </label>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mb-3 flex items-center gap-1">
+              <Zap className="w-3 h-3" />
+              No expiry = indefinite access
+            </p>
             
             <input 
               type="date" 

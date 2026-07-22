@@ -53,7 +53,7 @@ export const PLAN_FEATURES = {
 
 export function isSubscriptionActive(business: { subscriptionPlan: SubscriptionPlan; subscriptionPeriodEnd: Date | null }) {
   if (business.subscriptionPlan === PLANS.FREE) return true;
-  if (!business.subscriptionPeriodEnd) return false;
+  if (!business.subscriptionPeriodEnd) return true; // Admin override: no expiry = indefinite access
   return new Date() < business.subscriptionPeriodEnd;
 }
 
