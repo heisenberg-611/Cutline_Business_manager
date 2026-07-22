@@ -3,23 +3,35 @@ import prisma from '@/modules/core/db/prisma';
 import { OrganizationsTable } from './components/OrganizationsTable';
 import { Building2 } from 'lucide-react';
 import { PaginationControls } from '../components/PaginationControls';
+import { SearchOrganizations } from './components/SearchOrganizations';
 
 export const metadata = {
   title: 'Organizations | Admin',
 };
 
 export default async function OrganizationsPage(props: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
   await requireAdmin();
 
   const resolvedParams = await props.searchParams;
   const currentPage = Math.max(1, parseInt(resolvedParams?.page || '1', 10));
+  const searchQuery = resolvedParams?.q || '';
   const ITEMS_PER_PAGE = 20;
 
+  const whereClause = searchQuery
+    ? {
+        OR: [
+          { name: { contains: searchQuery, mode: 'insensitive' as const } },
+          { id: { contains: searchQuery, mode: 'insensitive' as const } },
+        ],
+      }
+    : {};
+
   const [totalBusinesses, businesses] = await prisma.$transaction([
-    prisma.business.count(),
+    prisma.business.count({ where: whereClause }),
     prisma.business.findMany({
+      where: whereClause,
       orderBy: { name: 'asc' },
       take: ITEMS_PER_PAGE,
       skip: (currentPage - 1) * ITEMS_PER_PAGE,
@@ -49,13 +61,16 @@ export default async function OrganizationsPage(props: {
         </p>
       </div>
 
-      <OrganizationsTable businesses={businesses} />
-      <div className="bg-white dark:bg-zinc-950 rounded-b-xl border-x border-b border-zinc-200 dark:border-white/10 -mt-1 shadow-sm overflow-hidden">
-        <PaginationControls 
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalBusinesses}
-        />
+      <div>
+        <SearchOrganizations />
+        <OrganizationsTable businesses={businesses} />
+        <div className="bg-white dark:bg-zinc-950 rounded-b-xl border-x border-b border-zinc-200 dark:border-white/10 -mt-1 shadow-sm overflow-hidden">
+          <PaginationControls 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalBusinesses}
+          />
+        </div>
       </div>
     </div>
   );
