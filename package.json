@@ -42,7 +42,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.81.0",
     "react-virtuoso": "^4.18.10",
-    "recharts": "^3.9.2",
+    "recharts": "^3.10.0",
     "resend": "^6.17.2",
     "serwist": "^9.5.11",
     "shadcn": "^4.13.0",
