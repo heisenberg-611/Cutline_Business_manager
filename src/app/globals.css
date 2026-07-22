@@ -205,3 +205,28 @@
   background-size: 200% 100%;
   animation: shimmer-sweep 1.8s ease-in-out infinite;
 }
+
+/* -------------------------------------------------------------------------
+   Clerk: Hide all member-related UI when members feature is restricted.
+   Toggled via the `.clerk-no-members` class on <body>.
+   ------------------------------------------------------------------------- */
+body.clerk-no-members {
+  /* Members page & navigation in Organization Profile */
+  .cl-organizationProfileNavbarItem__members,
+  .cl-navbar-item__members,
+  .cl-organizationProfilePage__members,
+  .cl-profilePage__organizationMembers,
+  .cl-organizationProfilePageLink__members,
+  .cl-membersPageInviteButton,
+  /* Member count / seats badge anywhere in Clerk UI */
+  .cl-organizationSwitcherPopoverCard__action--manageMembers,
+  .cl-organizationPreviewSecondaryIdentifier__organizationSwitcher,
+  .cl-organizationSwitcherPreviewButton__organizationMembersCount,
+  [class*="cl-organizationMembersCount"],
+  [class*="cl-memberCount"],
+  [class*="cl-seats"],
+  /* Hide "Members" text in popover actions */
+  .cl-organizationSwitcherPopoverActionButton__manageMembers {
+    display: none !important;
+  }
+}
