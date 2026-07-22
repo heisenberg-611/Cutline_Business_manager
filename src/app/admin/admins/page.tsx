@@ -1,5 +1,5 @@
 import prisma from '@/modules/core/db/prisma';
-import { addAdmin, removeAdmin } from '../actions';
+import { addAdmin, removeAdmin, requireAdmin } from '../actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2 } from 'lucide-react';
@@ -9,6 +9,7 @@ export const metadata = {
 };
 
 export default async function ManageAdminsPage() {
+  await requireAdmin();
   const admins = await prisma.globalAdmin.findMany({
     orderBy: { createdAt: 'desc' },
   });

@@ -7,6 +7,25 @@ import { revalidatePath } from 'next/cache';
 
 const COOKIE_NAME = 'admin_session';
 
+export async function verifyAdminSession() {
+  const cookieStore = await cookies();
+  const email = cookieStore.get(COOKIE_NAME)?.value;
+  if (!email) return null;
+
+  const admin = await prisma.globalAdmin.findUnique({ where: { email } });
+  if (!admin || !admin.passwordHash) return null;
+  
+  return admin;
+}
+
+export async function requireAdmin() {
+  const admin = await verifyAdminSession();
+  if (!admin) {
+    throw new Error('Unauthorized');
+  }
+  return admin;
+}
+
 export async function loginAdmin(email: string, password: string) {
   const admin = await prisma.globalAdmin.findUnique({ where: { email } });
   
@@ -31,8 +50,9 @@ export async function loginAdmin(email: string, password: string) {
   cookieStore.set(COOKIE_NAME, email, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 60 * 60 * 24, // 24 hours
+    sameSite: 'strict',
     path: '/',
+    // Omit maxAge so it becomes a session cookie (cleared when browser closes)
   });
 
   revalidatePath('/admin');
@@ -46,6 +66,7 @@ export async function logoutAdmin() {
 }
 
 export async function addAdmin(email: string) {
+  await requireAdmin(); // SECURITY CHECK
   await prisma.globalAdmin.create({
     data: { email },
   });
@@ -54,6 +75,7 @@ export async function addAdmin(email: string) {
 }
 
 export async function removeAdmin(email: string) {
+  await requireAdmin(); // SECURITY CHECK
   await prisma.globalAdmin.delete({
     where: { email },
   });

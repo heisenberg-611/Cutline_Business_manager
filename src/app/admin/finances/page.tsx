@@ -1,11 +1,13 @@
 import prisma from '@/modules/core/db/prisma';
 import { PLAN_PRICES } from '@/lib/subscription';
+import { requireAdmin } from '../actions';
 
 export const metadata = {
   title: 'Finances Admin',
 };
 
 export default async function AdminFinancesPage() {
+  await requireAdmin();
   const approvedRequests = await prisma.subscriptionRequest.findMany({
     where: { status: 'APPROVED' },
     orderBy: { updatedAt: 'desc' },

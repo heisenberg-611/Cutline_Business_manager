@@ -1,6 +1,7 @@
 import prisma from '@/modules/core/db/prisma';
 import { approveRequest, rejectRequest } from './actions';
 import { Badge } from '@/components/ui/badge';
+import { requireAdmin } from '../actions';
 import { Check, X } from 'lucide-react';
 
 export const metadata = {
@@ -8,6 +9,7 @@ export const metadata = {
 };
 
 export default async function AdminSubscriptionsPage() {
+  await requireAdmin();
   const requests = await prisma.subscriptionRequest.findMany({
     orderBy: { createdAt: 'desc' },
     include: { business: { select: { name: true } } },

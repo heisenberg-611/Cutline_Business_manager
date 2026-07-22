@@ -1,11 +1,14 @@
 import prisma from '@/modules/core/db/prisma';
 import { Users, Briefcase, Activity, CreditCard } from 'lucide-react';
+import { requireAdmin } from './actions';
 
 export const metadata = {
   title: 'Admin Overview',
 };
 
 export default async function AdminOverviewPage() {
+  await requireAdmin();
+
   const [totalBusinesses, totalUsers, pendingRequests, approvedRequests] = await Promise.all([
     prisma.business.count(),
     prisma.user.count(),

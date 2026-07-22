@@ -806,3 +806,17 @@ model GlobalAdmin {
   
   @@map("global_admins")
 }
+
+// -----------------------------------------------------------------------------
+// GLOBAL SETTINGS
+// -----------------------------------------------------------------------------
+
+model GlobalSettings {
+  id               String @id @default("default")
+  paymentMethod    String @default("bKash Personal / Nagad")
+  paymentNumber    String @default("01XXX-XXXXXX")
+  qrCodeUrl        String?
+  updatedAt        DateTime @updatedAt
+  
+  @@map("global_settings")
+}
