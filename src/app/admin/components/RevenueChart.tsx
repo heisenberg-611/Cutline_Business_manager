@@ -47,7 +47,7 @@ export function RevenueChart({ data }: { data: { month: string; revenue: number 
           <Tooltip 
             contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', borderColor: 'var(--tooltip-border, #e4e4e7)', borderRadius: '8px' }}
             itemStyle={{ color: '#4f46e5', fontWeight: 'bold' }}
-            formatter={(value: number) => [`$${value}`, 'Revenue']}
+            formatter={(value: any) => [`$${value}`, 'Revenue']}
           />
           <Area 
             type="monotone" 
