@@ -51,7 +51,7 @@ export default async function MarketingHomepage() {
               </Link>
             ) : (
               <>
-                <Link href="/login" className="bg-transparent border-none text-sm font-medium text-foreground hover:text-muted-foreground transition-colors hidden sm:block">
+                <Link href="/login" className="bg-transparent border-none text-sm font-medium text-foreground hover:text-muted-foreground transition-colors">
                   Log in
                 </Link>
                 <Link href="/sign-up" className="bg-primary text-primary-foreground border-none rounded-md px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm">

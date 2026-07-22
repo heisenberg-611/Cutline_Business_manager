@@ -4,6 +4,7 @@ export default function SignInPage() {
   return (
     <SignIn 
       fallbackRedirectUrl="/dashboard"
+      signUpUrl="/sign-up"
       appearance={{
         elements: {
           rootBox: "w-full mx-auto flex justify-center",
