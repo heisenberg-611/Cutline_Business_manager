@@ -33,7 +33,7 @@ export async function approveRequest(requestId: string, businessId: string, plan
     })
   ]);
 
-  revalidatePath('/admin/subscriptions');
+  revalidatePath('/hq/subscriptions');
 }
 
 export async function rejectRequest(requestId: string) {
@@ -51,7 +51,7 @@ export async function rejectRequest(requestId: string) {
     }
   });
   
-  revalidatePath('/admin/subscriptions');
+  revalidatePath('/hq/subscriptions');
 }
 
 export async function deleteRequest(requestId: string) {
@@ -69,6 +69,6 @@ export async function deleteRequest(requestId: string) {
     }
   });
   
-  revalidatePath('/admin/subscriptions');
-  revalidatePath('/admin/finances');
+  revalidatePath('/hq/subscriptions');
+  revalidatePath('/hq/finances');
 }

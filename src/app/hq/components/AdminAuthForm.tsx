@@ -17,9 +17,12 @@ export function AdminAuthForm() {
     setLoading(true);
     
     try {
-      await loginAdmin(email, password);
+      const res = await loginAdmin(email, password);
+      if (!res.success) {
+        setError(res.error || 'Invalid credentials');
+      }
     } catch (err: any) {
-      setError(err.message || 'Invalid credentials');
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

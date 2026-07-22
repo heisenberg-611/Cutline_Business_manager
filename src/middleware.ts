@@ -11,6 +11,18 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
+  // Admin / HQ Protection
+  if (req.nextUrl.pathname.startsWith('/hq')) {
+    const adminSession = req.cookies.get('admin_session')?.value;
+    if (!adminSession) {
+      const secretKey = req.nextUrl.searchParams.get('key');
+      const validKey = process.env.ADMIN_SECRET_KEY || 'cutline-admin-key';
+      if (secretKey !== validKey) {
+        return NextResponse.redirect(new URL('/', req.url));
+      }
+    }
+  }
+
   if (isProtectedRoute(req)) {
     // 1. Ensure user is signed in
     await auth.protect();
@@ -48,7 +60,7 @@ export const config = {
     '/',
     // Only run middleware on dashboard, admin, and API routes to save Vercel Fluid Compute
     '/dashboard(.*)',
-    '/admin(.*)',
+    '/hq(.*)',
     '/api(.*)',
     '/claim-trial(.*)',
   ],

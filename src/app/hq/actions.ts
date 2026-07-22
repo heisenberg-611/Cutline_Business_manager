@@ -2,8 +2,9 @@
 
 import prisma from '@/modules/core/db/prisma';
 import bcrypt from 'bcryptjs';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import { checkAdminAuthRateLimit } from '@/lib/utils/rate-limit';
 
 const COOKIE_NAME = 'admin_session';
 
@@ -27,10 +28,19 @@ export async function requireAdmin() {
 }
 
 export async function loginAdmin(email: string, password: string) {
+  const headerList = await headers();
+  const ip = headerList.get("x-forwarded-for") ?? "anonymous";
+  
+  const rateLimit = await checkAdminAuthRateLimit(ip);
+  if (!rateLimit.success) {
+    return { success: false, error: rateLimit.error };
+  }
+
   const admin = await prisma.globalAdmin.findUnique({ where: { email } });
   
   if (!admin) {
-    throw new Error('Access denied: You are not a global admin.');
+    // Return generic error to avoid user enumeration
+    return { success: false, error: 'Invalid credentials' };
   }
 
   // If passwordHash is null, this is their first time logging in, so we SET it.
@@ -43,7 +53,7 @@ export async function loginAdmin(email: string, password: string) {
   } else {
     // If passwordHash exists, verify it
     const isValid = await bcrypt.compare(password, admin.passwordHash);
-    if (!isValid) throw new Error('Invalid credentials');
+    if (!isValid) return { success: false, error: 'Invalid credentials' };
   }
 
   const cookieStore = await cookies();
@@ -55,14 +65,14 @@ export async function loginAdmin(email: string, password: string) {
     // Omit maxAge so it becomes a session cookie (cleared when browser closes)
   });
 
-  revalidatePath('/admin');
+  revalidatePath('/hq');
   return { success: true };
 }
 
 export async function logoutAdmin() {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
-  revalidatePath('/admin');
+  revalidatePath('/hq');
 }
 
 export async function addAdmin(email: string) {
@@ -70,7 +80,7 @@ export async function addAdmin(email: string) {
   await prisma.globalAdmin.create({
     data: { email },
   });
-  revalidatePath('/admin/admins');
+  revalidatePath('/hq/admins');
   return { success: true };
 }
 
@@ -79,6 +89,6 @@ export async function removeAdmin(email: string) {
   await prisma.globalAdmin.delete({
     where: { email },
   });
-  revalidatePath('/admin/admins');
+  revalidatePath('/hq/admins');
   return { success: true };
 }

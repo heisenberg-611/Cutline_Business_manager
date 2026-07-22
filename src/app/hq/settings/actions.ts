@@ -32,7 +32,7 @@ export async function updateGlobalSettings(data: {
     }
   });
   
-  revalidatePath('/admin/settings');
+  revalidatePath('/hq/settings');
   revalidatePath('/dashboard/settings/billing/checkout');
   
   return { success: true };

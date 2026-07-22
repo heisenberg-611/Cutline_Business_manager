@@ -44,8 +44,8 @@ export async function forceUpdateSubscription(businessId: string, plan: Subscrip
 
   await prisma.$transaction(operations);
 
-  revalidatePath('/admin/organizations');
-  revalidatePath('/admin/finances');
+  revalidatePath('/hq/organizations');
+  revalidatePath('/hq/finances');
   revalidatePath('/dashboard/settings/billing');
 }
 
@@ -69,6 +69,6 @@ export async function revokeSubscription(businessId: string) {
     }
   });
 
-  revalidatePath('/admin/organizations');
+  revalidatePath('/hq/organizations');
   revalidatePath('/dashboard/settings/billing');
 }

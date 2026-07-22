@@ -12,7 +12,7 @@ export async function markMessageAsRead(id: string) {
     data: { isRead: true },
   });
   
-  revalidatePath('/admin/messages');
+  revalidatePath('/hq/messages');
 }
 
 export async function deleteMessage(id: string) {
@@ -30,5 +30,5 @@ export async function deleteMessage(id: string) {
     }
   });
   
-  revalidatePath('/admin/messages');
+  revalidatePath('/hq/messages');
 }

@@ -60,3 +60,34 @@ export async function checkMessageRateLimit(userId: string) {
     throw new Error("You are sending messages too quickly. Please wait a moment.");
   }
 }
+
+// -----------------------------------------------------------------------------
+// ADMIN AUTH RATE LIMITER
+// -----------------------------------------------------------------------------
+let adminAuthLimiter: Ratelimit | null = null;
+
+try {
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    adminAuthLimiter = new Ratelimit({
+      redis: Redis.fromEnv(),
+      // Max 5 attempts per 5 minutes
+      limiter: Ratelimit.slidingWindow(5, "5 m"),
+      analytics: true,
+    });
+  }
+} catch (error) {
+  console.warn("Failed to initialize Upstash Redis for admin auth:", error);
+}
+
+export async function checkAdminAuthRateLimit(ip: string) {
+  if (!adminAuthLimiter) return { success: true };
+  
+  const { success, remaining, reset } = await adminAuthLimiter.limit(`admin_auth_${ip}`);
+  if (!success) {
+    return { 
+      success: false, 
+      error: `Too many login attempts. Please try again after ${Math.ceil((reset - Date.now()) / 1000 / 60)} minutes.` 
+    };
+  }
+  return { success: true };
+}
