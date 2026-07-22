@@ -43,9 +43,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, message: 'Ignored non-receive event' });
     }
 
-    const { from, to, subject, html, text } = payload.data;
+    const { to } = payload.data;
 
-    const toAddressStr = to.join(', ').toLowerCase();
+    // Handle both array and string formats for 'to' field securely
+    const toArray = Array.isArray(to) ? to : [to];
+    const toAddressStr = toArray.join(', ').toLowerCase();
     
     // Get the destination email from environment variables, fallback to a catch-all
     let forwardTo = process.env.PERSONAL_FORWARD_EMAIL;
@@ -61,22 +63,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: 'Forwarding email not configured' }, { status: 500 });
     }
 
-    // Forward the email using Resend
-    const { error } = await resend.emails.send({
-      from: 'contact@cutlin.tech', // Must be your verified sending domain
+    // Forward the email using Resend's built-in forwarding method
+    // This correctly fetches the original email (including HTML/text/attachments) 
+    // and forwards it to the destination.
+    const { error } = await resend.emails.receiving.forward({
+      emailId: payload.data.email_id,
       to: forwardTo,
-      replyTo: from, // So hitting 'Reply' in your Gmail replies directly to the original sender
-      subject: `[Forwarded] ${subject}`,
-      html: `
-        <div style="background-color: #f4f4f5; padding: 16px; margin-bottom: 24px; border-radius: 8px;">
-          <p style="margin: 0 0 8px 0;"><strong>From:</strong> ${from}</p>
-          <p style="margin: 0 0 8px 0;"><strong>To:</strong> ${to.join(', ')}</p>
-          <p style="margin: 0;"><strong>Subject:</strong> ${subject}</p>
-        </div>
-        <div>
-          ${html || text}
-        </div>
-      `,
+      from: 'contact@cutlin.tech', // Must be your verified sending domain
     });
 
     if (error) {
