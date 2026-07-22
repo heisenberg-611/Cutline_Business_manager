@@ -44,7 +44,7 @@ export default async function SettingsPage() {
 
       {/* ROW 1: General Settings (4 Columns/Wrap) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
+
         {/* Business Info */}
         <section className="space-y-4 flex flex-col">
           <div className="flex items-center gap-3">
@@ -95,17 +95,17 @@ export default async function SettingsPage() {
               <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Manage Templates</p>
               <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">Setup dynamic placeholders and custom invoice numbering formats.</p>
             </div>
-            <Link href="/dashboard/settings/invoice" className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 shadow transition-colors hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 w-full">
+            <Link href="/dashboard/settings/invoice" className="mt-2 inline-flex h-9 items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 shadow transition-colors hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 w-full">
               Configure
             </Link>
           </div>
         </section>
-        
+
         {/* Billing & Subscription */}
         <section className="space-y-4 flex flex-col">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-900">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Billing & Plan</h4>
@@ -117,7 +117,7 @@ export default async function SettingsPage() {
               <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Current Plan: <span className="capitalize font-bold text-indigo-600 dark:text-indigo-400">{business.subscriptionPlan.toLowerCase()}</span></p>
               <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">Upgrade to unlock Pro or Business features.</p>
             </div>
-            <Link href="/dashboard/settings/billing" className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 shadow transition-colors hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 w-full">
+            <Link href="/dashboard/settings/billing" className="mt-2 inline-flex h-9 items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 shadow transition-colors hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 w-full">
               Manage Billing
             </Link>
           </div>
@@ -165,7 +165,7 @@ export default async function SettingsPage() {
 
       {/* ROW 3: Customization Editors (2x2 Grid) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-start">
-        
+
         {/* Pipeline Stages */}
         <section className="space-y-4">
           <div className="flex items-center gap-3">
@@ -190,7 +190,7 @@ export default async function SettingsPage() {
         <section className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-900">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500"><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></svg>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Navigation Preferences</h4>
@@ -198,8 +198,8 @@ export default async function SettingsPage() {
             </div>
           </div>
           <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl p-6">
-            <NavPreferencesEditor 
-              initialPreferences={user?.navPreferences as any} 
+            <NavPreferencesEditor
+              initialPreferences={user?.navPreferences as any}
             />
           </div>
         </section>
@@ -216,8 +216,8 @@ export default async function SettingsPage() {
             </div>
           </div>
           <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl p-6">
-            <QuickActionsEditor 
-              initialPreferences={user?.quickActionPreferences as any} 
+            <QuickActionsEditor
+              initialPreferences={user?.quickActionPreferences as any}
             />
           </div>
         </section>

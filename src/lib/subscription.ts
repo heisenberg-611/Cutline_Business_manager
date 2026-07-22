@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from "@prisma/client";
+import type { SubscriptionPlan } from "@prisma/client";
 
 export const PLANS = {
   FREE: "FREE" as SubscriptionPlan,
@@ -13,28 +13,7 @@ export const PLAN_PRICES = {
   BUSINESS: 299,
 };
 
-// ==========================================
-// PAYMENT SETTINGS (PUBLIC)
-// ==========================================
-export async function getPublicPaymentSettings() {
-  const settings = await prisma.globalSettings.findUnique({
-    where: { id: 'default' }
-  });
-  
-  if (!settings) {
-    return {
-      paymentMethod: 'bKash Personal / Nagad',
-      paymentNumber: '01XXX-XXXXXX',
-      qrCodeUrl: null
-    };
-  }
-  
-  return {
-    paymentMethod: settings.paymentMethod,
-    paymentNumber: settings.paymentNumber,
-    qrCodeUrl: settings.qrCodeUrl
-  };
-}
+
 
 export function isSubscriptionActive(business: { subscriptionPlan: SubscriptionPlan; subscriptionPeriodEnd: Date | null }) {
   if (business.subscriptionPlan === PLANS.FREE) return true;
