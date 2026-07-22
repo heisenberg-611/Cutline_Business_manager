@@ -218,10 +218,20 @@ export function AppLayout({
                   avatarBox: "!w-8 !h-8",
                   avatarImage: "!w-8 !h-8",
                   organizationPreview: "gap-3 items-center",
-                  ...(canInvite ? {} : {
-                    organizationProfilePageLink__members: "!hidden",
-                    organizationProfilePage__members: "!hidden"
-                  })
+                }
+              }}
+              organizationProfileProps={{
+                appearance: {
+                  elements: {
+                    ...(canInvite ? {} : {
+                      membersPageInviteButton: "!hidden",
+                      'profilePage__organizationMembers': "!hidden",
+                      'navbar-item__members': "!hidden",
+                      organizationProfilePage__members: "!hidden",
+                      organizationProfilePageLink__members: "!hidden",
+                      organizationProfileNavbarItem__members: "!hidden",
+                    })
+                  }
                 }
               }}
             />
@@ -491,10 +501,20 @@ export function AppLayout({
                     organizationSwitcherTrigger: "focus:shadow-none focus:outline-none justify-start px-0 py-0 min-w-0 max-w-[130px] sm:max-w-[200px]",
                     organizationPreviewMainIdentifier: "font-semibold text-sm truncate",
                     organizationPreview: "min-w-0 overflow-hidden",
-                    ...(canInvite ? {} : {
-                      organizationProfilePageLink__members: "!hidden",
-                      organizationProfilePage__members: "!hidden"
-                    })
+                  }
+                }}
+                organizationProfileProps={{
+                  appearance: {
+                    elements: {
+                      ...(canInvite ? {} : {
+                        membersPageInviteButton: "!hidden",
+                        'profilePage__organizationMembers': "!hidden",
+                        'navbar-item__members': "!hidden",
+                        organizationProfilePage__members: "!hidden",
+                        organizationProfilePageLink__members: "!hidden",
+                        organizationProfileNavbarItem__members: "!hidden",
+                      })
+                    }
                   }
                 }}
               />
