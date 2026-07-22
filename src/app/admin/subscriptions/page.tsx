@@ -3,17 +3,32 @@ import { approveRequest, rejectRequest } from './actions';
 import { Badge } from '@/components/ui/badge';
 import { requireAdmin } from '../actions';
 import { Check, X } from 'lucide-react';
+import { PaginationControls } from '../components/PaginationControls';
 
 export const metadata = {
   title: 'Subscriptions Admin',
 };
 
-export default async function AdminSubscriptionsPage() {
+export default async function AdminSubscriptionsPage(props: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireAdmin();
-  const requests = await prisma.subscriptionRequest.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { business: { select: { name: true } } },
-  });
+
+  const resolvedParams = await props.searchParams;
+  const currentPage = Math.max(1, parseInt(resolvedParams?.page || '1', 10));
+  const ITEMS_PER_PAGE = 20;
+
+  const [totalRequests, requests] = await prisma.$transaction([
+    prisma.subscriptionRequest.count(),
+    prisma.subscriptionRequest.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: ITEMS_PER_PAGE,
+      skip: (currentPage - 1) * ITEMS_PER_PAGE,
+      include: { business: { select: { name: true } } },
+    })
+  ]);
+
+  const totalPages = Math.ceil(totalRequests / ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-8">
@@ -87,6 +102,11 @@ export default async function AdminSubscriptionsPage() {
             )}
           </tbody>
         </table>
+        <PaginationControls 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalRequests}
+        />
       </div>
     </div>
   );

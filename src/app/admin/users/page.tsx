@@ -5,38 +5,48 @@ import { format } from 'date-fns';
 import Image from 'next/image';
 import { SearchUsers } from './components/SearchUsers';
 import { Suspense } from 'react';
+import { PaginationControls } from '../components/PaginationControls';
 
 export const metadata = {
   title: 'Users Directory | Admin',
 };
 
-export default async function UsersPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
+export default async function UsersPage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
   await requireAdmin();
 
-  const resolvedParams = await searchParams;
+  const resolvedParams = await props.searchParams;
   const query = resolvedParams?.q || '';
+  const currentPage = Math.max(1, parseInt(resolvedParams?.page || '1', 10));
+  const ITEMS_PER_PAGE = 20;
 
-  const users = await prisma.user.findMany({
-    where: query ? {
-      OR: [
-        { email: { contains: query, mode: 'insensitive' } },
-        { firstName: { contains: query, mode: 'insensitive' } },
-        { lastName: { contains: query, mode: 'insensitive' } },
-      ]
-    } : undefined,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      memberships: {
-        include: {
-          business: true
+  const whereClause = query ? {
+    OR: [
+      { email: { contains: query, mode: 'insensitive' as const } },
+      { firstName: { contains: query, mode: 'insensitive' as const } },
+      { lastName: { contains: query, mode: 'insensitive' as const } },
+    ]
+  } : {};
+
+  const [totalUsers, users] = await prisma.$transaction([
+    prisma.user.count({ where: whereClause }),
+    prisma.user.findMany({
+      where: whereClause,
+      take: ITEMS_PER_PAGE,
+      skip: (currentPage - 1) * ITEMS_PER_PAGE,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        memberships: {
+          include: {
+            business: true
+          }
         }
       }
-    }
-  });
+    })
+  ]);
+
+  const totalPages = Math.ceil(totalUsers / ITEMS_PER_PAGE);
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -122,6 +132,11 @@ export default async function UsersPage({
             </tbody>
           </table>
         </div>
+        <PaginationControls 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalUsers}
+        />
       </div>
     </div>
   );

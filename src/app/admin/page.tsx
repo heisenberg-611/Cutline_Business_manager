@@ -13,24 +13,32 @@ export const metadata = {
 export default async function AdminOverviewPage() {
   await requireAdmin();
 
-  const [totalBusinesses, totalUsers, pendingRequests, allBusinesses, approvedRequests] = await Promise.all([
+  const sixMonthsAgo = subMonths(startOfMonth(new Date()), 5);
+
+  const [totalBusinesses, totalUsers, pendingRequests, businessesByPlan, recentBusinesses, recentRequests] = await Promise.all([
     prisma.business.count(),
     prisma.user.count(),
     prisma.subscriptionRequest.count({ where: { status: 'PENDING' } }),
-    prisma.business.findMany({ select: { subscriptionPlan: true, createdAt: true } }),
+    prisma.business.groupBy({
+      by: ['subscriptionPlan'],
+      _count: { id: true }
+    }),
+    prisma.business.findMany({ 
+      where: { createdAt: { gte: sixMonthsAgo } },
+      select: { createdAt: true } 
+    }),
     prisma.subscriptionRequest.findMany({ 
-      where: { status: 'APPROVED' }, 
-      select: { businessId: true, planRequested: true, updatedAt: true },
+      where: { status: 'APPROVED', updatedAt: { gte: sixMonthsAgo } }, 
+      select: { planRequested: true, updatedAt: true },
       orderBy: { updatedAt: 'asc' }
     }),
   ]);
 
-  // Compute Current MRR
-  let currentMrr = 0;
-  allBusinesses.forEach(b => {
-    if (b.subscriptionPlan === 'PRO') currentMrr += PLAN_PRICES.PRO;
-    if (b.subscriptionPlan === 'BUSINESS') currentMrr += PLAN_PRICES.BUSINESS;
-  });
+  // Current Monthly Recurring Revenue
+  const currentMrr = businessesByPlan.reduce((acc, group) => {
+    const planPrice = PLAN_PRICES[group.subscriptionPlan as keyof typeof PLAN_PRICES] || 0;
+    return acc + (group._count.id * planPrice);
+  }, 0);
 
   // Compute last 6 months charts
   const revenueData: { month: string; revenue: number }[] = [];
@@ -39,24 +47,25 @@ export default async function AdminOverviewPage() {
   for (let i = 5; i >= 0; i--) {
     const date = subMonths(new Date(), i);
     const monthName = format(date, 'MMM');
-    const start = startOfMonth(date);
-    const end = endOfMonth(date);
+    const monthStart = startOfMonth(date);
+    const monthEnd = endOfMonth(date);
     
-    let mrrForMonth = 0;
-    let signupsForMonth = 0;
+    // 2) Find all signups in that month
+    const signupsForMonth = recentBusinesses.filter(b => {
+      const bDate = new Date(b.createdAt);
+      return bDate >= monthStart && bDate <= monthEnd;
+    }).length;
 
-    // Calculate Total Monthly Revenue based on all payments (approved requests) in the month
-    approvedRequests.forEach(req => {
-      if (req.updatedAt >= start && req.updatedAt <= end) {
-        if (req.planRequested === 'PRO') mrrForMonth += PLAN_PRICES.PRO;
-        if (req.planRequested === 'BUSINESS') mrrForMonth += PLAN_PRICES.BUSINESS;
-      }
+    // 3) Calculate total revenue from approved payments in that month
+    const requestsInMonth = recentRequests.filter(req => {
+      const reqDate = new Date(req.updatedAt);
+      return reqDate >= monthStart && reqDate <= monthEnd;
     });
 
-    allBusinesses.forEach(b => {
-      if (b.createdAt >= start && b.createdAt <= end) {
-        signupsForMonth++;
-      }
+    let mrrForMonth = 0;
+    requestsInMonth.forEach(req => {
+      const planPrice = PLAN_PRICES[req.planRequested as keyof typeof PLAN_PRICES] || 0;
+      mrrForMonth += planPrice;
     });
 
     revenueData.push({ month: monthName, revenue: mrrForMonth });

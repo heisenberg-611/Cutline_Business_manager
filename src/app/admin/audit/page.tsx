@@ -2,18 +2,31 @@ import { requireAdmin } from '../actions';
 import prisma from '@/modules/core/db/prisma';
 import { ShieldCheck, Activity } from 'lucide-react';
 import { format } from 'date-fns';
+import { PaginationControls } from '../components/PaginationControls';
 
 export const metadata = {
   title: 'Audit Logs | Admin',
 };
 
-export default async function AuditLogsPage() {
+export default async function AuditLogsPage(props: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireAdmin();
 
-  const logs = await prisma.adminAuditLog.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 100, // Show last 100 actions
-  });
+  const resolvedParams = await props.searchParams;
+  const currentPage = Math.max(1, parseInt(resolvedParams?.page || '1', 10));
+  const ITEMS_PER_PAGE = 20;
+
+  const [totalLogs, logs] = await prisma.$transaction([
+    prisma.adminAuditLog.count(),
+    prisma.adminAuditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: ITEMS_PER_PAGE,
+      skip: (currentPage - 1) * ITEMS_PER_PAGE,
+    })
+  ]);
+
+  const totalPages = Math.ceil(totalLogs / ITEMS_PER_PAGE);
 
   const getActionColor = (action: string) => {
     if (action.includes('DELETE') || action.includes('REVOKE') || action.includes('REJECT')) {
@@ -95,6 +108,11 @@ export default async function AuditLogsPage() {
             </tbody>
           </table>
         </div>
+        <PaginationControls 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalLogs}
+        />
       </div>
     </div>
   );

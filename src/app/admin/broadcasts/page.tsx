@@ -2,17 +2,31 @@ import { requireAdmin } from '../actions';
 import prisma from '@/modules/core/db/prisma';
 import { Megaphone } from 'lucide-react';
 import { BroadcastClient } from './components/BroadcastClient';
+import { PaginationControls } from '../components/PaginationControls';
 
 export const metadata = {
   title: 'Global Broadcasts | Admin',
 };
 
-export default async function BroadcastsPage() {
+export default async function BroadcastsPage(props: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireAdmin();
 
-  const alerts = await prisma.systemAlert.findMany({
-    orderBy: { createdAt: 'desc' }
-  });
+  const resolvedParams = await props.searchParams;
+  const currentPage = Math.max(1, parseInt(resolvedParams?.page || '1', 10));
+  const ITEMS_PER_PAGE = 20;
+
+  const [totalAlerts, alerts] = await prisma.$transaction([
+    prisma.systemAlert.count(),
+    prisma.systemAlert.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: ITEMS_PER_PAGE,
+      skip: (currentPage - 1) * ITEMS_PER_PAGE,
+    })
+  ]);
+
+  const totalPages = Math.ceil(totalAlerts / ITEMS_PER_PAGE);
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -30,6 +44,13 @@ export default async function BroadcastsPage() {
       </div>
 
       <BroadcastClient alerts={alerts} />
+      <div className="bg-white dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-white/10 shadow-sm overflow-hidden">
+        <PaginationControls 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalAlerts}
+        />
+      </div>
     </div>
   );
 }
