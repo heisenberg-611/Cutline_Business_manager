@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import prisma from '@/modules/core/db/prisma'
 import { getActivePlan, PLANS, PLAN_PRICES } from '@/lib/subscription'
+import { cancelSubscription, downgradeToPro, restoreBusinessPlan } from './actions'
 import { Check, X } from 'lucide-react'
 import Link from 'next/link'
 
@@ -58,6 +59,20 @@ export default async function BillingPage() {
 
   const activePlan = getActivePlan(business)
 
+  let canRestoreBusiness = false;
+  if (activePlan === PLANS.PRO && business.subscriptionPeriodEnd && new Date() < business.subscriptionPeriodEnd) {
+    const lastRequest = await prisma.subscriptionRequest.findFirst({
+      where: {
+        businessId: orgId,
+        status: 'APPROVED'
+      },
+      orderBy: { updatedAt: 'desc' }
+    });
+    if (lastRequest?.planRequested === PLANS.BUSINESS) {
+      canRestoreBusiness = true;
+    }
+  }
+
   return (
     <div className="max-w-7xl w-full mx-auto pb-24 space-y-8 md:space-y-12">
       <div className="border-b border-zinc-200 dark:border-white/10 pb-5">
@@ -72,7 +87,9 @@ export default async function BillingPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {[PLANS.FREE, PLANS.PRO, PLANS.BUSINESS].map((plan) => {
           const isActive = activePlan === plan;
-          const isUpgrade = plan !== PLANS.FREE && activePlan === PLANS.FREE; // Simplified logic
+          const isDowngrade = plan === PLANS.FREE && activePlan !== PLANS.FREE;
+          const isDowngradeToPro = plan === PLANS.PRO && activePlan === PLANS.BUSINESS;
+          const isRestoreBusiness = plan === PLANS.BUSINESS && canRestoreBusiness;
           
           return (
             <div key={plan} className={`flex flex-col p-6 rounded-2xl border ${isActive ? 'border-indigo-500 shadow-md ring-1 ring-indigo-500' : 'border-zinc-200 dark:border-zinc-800'} bg-white dark:bg-zinc-950`}>
@@ -102,8 +119,26 @@ export default async function BillingPage() {
                   <button disabled className="w-full rounded-md bg-indigo-50 dark:bg-indigo-900/20 px-3 py-2 text-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 ring-1 ring-inset ring-indigo-200 dark:ring-indigo-900 cursor-not-allowed">
                     Current Plan
                   </button>
+                ) : isDowngrade ? (
+                  <form action={cancelSubscription}>
+                    <button type="submit" className="block w-full rounded-md bg-red-50 dark:bg-red-950/30 px-3 py-2 text-center text-sm font-semibold text-red-600 dark:text-red-400 shadow-sm hover:bg-red-100 dark:hover:bg-red-900/50 ring-1 ring-inset ring-red-200 dark:ring-red-900 transition-colors">
+                      Cancel Plan
+                    </button>
+                  </form>
+                ) : isDowngradeToPro ? (
+                  <form action={downgradeToPro}>
+                    <button type="submit" className="block w-full rounded-md bg-orange-50 dark:bg-orange-950/30 px-3 py-2 text-center text-sm font-semibold text-orange-600 dark:text-orange-400 shadow-sm hover:bg-orange-100 dark:hover:bg-orange-900/50 ring-1 ring-inset ring-orange-200 dark:ring-orange-900 transition-colors">
+                      Downgrade to Pro
+                    </button>
+                  </form>
+                ) : isRestoreBusiness ? (
+                  <form action={restoreBusinessPlan}>
+                    <button type="submit" className="block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors">
+                      Restore Business Plan
+                    </button>
+                  </form>
                 ) : (
-                  <Link href={`/dashboard/settings/billing/checkout?plan=${plan}`} className="block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  <Link href={`/dashboard/settings/billing/checkout?plan=${plan}`} className="block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors">
                     Upgrade to {plan.charAt(0) + plan.slice(1).toLowerCase()}
                   </Link>
                 )}

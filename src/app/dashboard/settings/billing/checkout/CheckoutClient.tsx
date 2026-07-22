@@ -1,20 +1,27 @@
 "use client";
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PLANS, PLAN_PRICES } from '@/lib/subscription';
-import { ArrowLeft, Upload, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function CheckoutClient({ paymentSettings }: { paymentSettings: any }) {
+export default function CheckoutClient({ paymentMethods }: { paymentMethods: any[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const plan = searchParams.get('plan') || PLANS.PRO;
   
+  // Find first method ID for default
+  const defaultMethodId = paymentMethods.length > 0 ? paymentMethods[0].id : '';
+
   const [trxId, setTrxId] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('bKash');
+  const [selectedMethodId, setSelectedMethodId] = useState(defaultMethodId);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const selectedMethod = useMemo(() => {
+    return paymentMethods.find(m => m.id === selectedMethodId) || null;
+  }, [selectedMethodId, paymentMethods]);
 
   // Validate plan
   if (plan !== PLANS.PRO && plan !== PLANS.BUSINESS) {
@@ -30,7 +37,7 @@ export default function CheckoutClient({ paymentSettings }: { paymentSettings: a
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!trxId.trim()) return;
+    if (!trxId.trim() || !selectedMethod) return;
 
     setIsSubmitting(true);
     
@@ -38,7 +45,7 @@ export default function CheckoutClient({ paymentSettings }: { paymentSettings: a
       const res = await fetch('/api/subscription/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan, trxId, paymentMethod })
+        body: JSON.stringify({ plan, trxId, paymentMethod: selectedMethod.name })
       });
 
       if (!res.ok) throw new Error('Failed to submit request');
@@ -70,6 +77,16 @@ export default function CheckoutClient({ paymentSettings }: { paymentSettings: a
     );
   }
 
+  if (paymentMethods.length === 0) {
+    return (
+      <div className="max-w-xl mx-auto py-12 text-center">
+        <h2 className="text-xl font-bold">Checkout Unavailable</h2>
+        <p className="text-zinc-500 mt-2">No payment methods have been configured by the admin yet.</p>
+        <Link href="/dashboard/settings/billing" className="text-indigo-600 mt-4 block">Return to Billing</Link>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto pb-24">
       <div className="mb-8">
@@ -94,22 +111,24 @@ export default function CheckoutClient({ paymentSettings }: { paymentSettings: a
                 <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">৳{price}</span>
               </div>
               
-              <div className="space-y-3">
-                <div>
-                  <span className="block text-xs font-medium text-zinc-500 mb-1">{paymentSettings.paymentMethod}</span>
-                  <span className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 select-all">{paymentSettings.paymentNumber}</span>
+              {selectedMethod && (
+                <div className="space-y-3">
+                  <div>
+                    <span className="block text-xs font-medium text-zinc-500 mb-1">{selectedMethod.name}</span>
+                    <span className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 select-all">{selectedMethod.accountNumber}</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
           
           <div className="mt-8 text-center">
-            {paymentSettings.qrCodeUrl ? (
+            {selectedMethod?.qrCodeUrl ? (
               <>
                 <div className="w-48 h-48 mx-auto bg-white border-2 border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center p-2">
-                  <img src={paymentSettings.qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
+                  <img src={selectedMethod.qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
                 </div>
-                <p className="text-xs text-zinc-500 mt-3">Scan to pay with your mobile app</p>
+                <p className="text-xs text-zinc-500 mt-3">Scan to pay with {selectedMethod.name}</p>
               </>
             ) : (
               <p className="text-sm text-zinc-500 italic">No QR Code available.</p>
@@ -128,14 +147,13 @@ export default function CheckoutClient({ paymentSettings }: { paymentSettings: a
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Payment Method</label>
               <select 
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
+                value={selectedMethodId}
+                onChange={(e) => setSelectedMethodId(e.target.value)}
                 className="block w-full rounded-md border-0 py-2.5 px-3 text-zinc-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-zinc-300 dark:ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 bg-white dark:bg-zinc-950"
               >
-                <option value="bKash">bKash</option>
-                <option value="Nagad">Nagad</option>
-                <option value="Rocket">Rocket</option>
-                <option value="BankTransfer">Bank Transfer</option>
+                {paymentMethods.map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
               </select>
             </div>
 

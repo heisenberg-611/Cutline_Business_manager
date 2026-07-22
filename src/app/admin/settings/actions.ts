@@ -11,7 +11,7 @@ export async function getGlobalSettings() {
   
   if (!settings) {
     return await prisma.globalSettings.create({
-      data: { id: 'default' }
+      data: { id: 'default', paymentMethods: [] }
     });
   }
   
@@ -19,18 +19,16 @@ export async function getGlobalSettings() {
 }
 
 export async function updateGlobalSettings(data: {
-  paymentMethod: string;
-  paymentNumber: string;
-  qrCodeUrl: string;
+  paymentMethods: any[];
 }) {
   await requireAdmin(); // SECURITY CHECK
   
   await prisma.globalSettings.upsert({
     where: { id: 'default' },
-    update: data,
+    update: { paymentMethods: data.paymentMethods },
     create: {
       id: 'default',
-      ...data
+      paymentMethods: data.paymentMethods
     }
   });
   

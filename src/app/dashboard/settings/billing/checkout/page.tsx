@@ -10,13 +10,16 @@ export default async function CheckoutPage() {
     where: { id: 'default' }
   });
   
-  const paymentSettings = {
-    paymentMethod: settings?.paymentMethod || 'bKash Personal / Nagad',
-    paymentNumber: settings?.paymentNumber || '01XXX-XXXXXX',
-    qrCodeUrl: settings?.qrCodeUrl || null
-  };
+  let paymentMethods = [];
+  try {
+    if (settings?.paymentMethods && Array.isArray(settings.paymentMethods)) {
+      paymentMethods = settings.paymentMethods;
+    }
+  } catch (e) {
+    // ignore
+  }
   
   return (
-    <CheckoutClient paymentSettings={paymentSettings} />
+    <CheckoutClient paymentMethods={paymentMethods} />
   );
 }
