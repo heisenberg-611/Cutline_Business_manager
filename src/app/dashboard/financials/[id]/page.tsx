@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { getInvoiceDataForPdf } from '@/lib/invoices/pdf-data'
 import { DownloadInvoiceButton } from '@/components/invoices/DownloadInvoiceButton'
 import { PreviewInvoiceDialog } from '@/modules/financials/components/PreviewInvoiceDialog'
+import { canSendEmails, getActivePlan } from '@/lib/subscription'
 
 const formatMoney = (cents: number, currency = 'USD') => {
   return new Intl.NumberFormat('en-US', {
@@ -32,7 +33,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     include: {
       client: true,
       lineItems: true,
-      payments: { orderBy: { createdAt: 'desc' } }
+      payments: { orderBy: { createdAt: 'desc' } },
+      business: { select: { subscriptionPlan: true, subscriptionPeriodEnd: true } }
     }
   })
 
@@ -92,18 +94,33 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           )}
 
           {invoice.status === 'DRAFT' && (
-            <form action={async () => {
-              'use server'
-              await sendInvoice(invoice.id)
-            }} className="w-full sm:w-auto">
-              <Button type="submit" variant="outline" className="text-zinc-500 w-full sm:w-auto">
-                {invoice.client.email ? (
-                  <><Mail className="h-4 w-4 mr-2" /> Mark as Sent</>
-                ) : (
-                  <><Check className="h-4 w-4 mr-2" /> Mark as Sent (No Email)</>
-                )}
-              </Button>
-            </form>
+            <div className="w-full sm:w-auto relative group">
+              <form action={async () => {
+                'use server'
+                if (!canSendEmails(getActivePlan(invoice.business))) return;
+                await sendInvoice(invoice.id)
+              }} className="w-full sm:w-auto">
+                <Button 
+                  type="submit" 
+                  variant="outline" 
+                  className="text-zinc-500 w-full sm:w-auto"
+                  disabled={!canSendEmails(getActivePlan(invoice.business))}
+                >
+                  {invoice.client.email ? (
+                    <><Mail className="h-4 w-4 mr-2" /> Mark as Sent</>
+                  ) : (
+                    <><Check className="h-4 w-4 mr-2" /> Mark as Sent (No Email)</>
+                  )}
+                </Button>
+              </form>
+              {!canSendEmails(getActivePlan(invoice.business)) && (
+                <div className="absolute -top-12 left-1/2 -translate-x-1/2 hidden group-hover:block w-max">
+                  <div className="bg-zinc-900 text-white text-xs rounded py-1 px-2">
+                    Upgrade to Pro to send emails directly
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           <form action={async () => {
