@@ -42,8 +42,8 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      {/* ROW 1: General Settings (3 Columns) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* ROW 1: General Settings (4 Columns/Wrap) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Business Info */}
         <section className="space-y-4 flex flex-col">
@@ -97,6 +97,28 @@ export default async function SettingsPage() {
             </div>
             <Link href="/dashboard/settings/invoice" className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 shadow transition-colors hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 w-full">
               Configure
+            </Link>
+          </div>
+        </section>
+        
+        {/* Billing & Subscription */}
+        <section className="space-y-4 flex flex-col">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-900">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Billing & Plan</h4>
+              <p className="text-xs text-zinc-500">Manage your subscription tier</p>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl p-6 flex-1 flex flex-col justify-center space-y-4">
+            <div>
+              <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Current Plan: <span className="capitalize font-bold text-indigo-600 dark:text-indigo-400">{business.subscriptionPlan.toLowerCase()}</span></p>
+              <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">Upgrade to unlock Pro or Business features.</p>
+            </div>
+            <Link href="/dashboard/settings/billing" className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 shadow transition-colors hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 w-full">
+              Manage Billing
             </Link>
           </div>
         </section>

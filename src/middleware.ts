@@ -18,22 +18,25 @@ export default clerkMiddleware(async (auth, req) => {
     // 2. Ensure they are operating within a Business context (Organization)
     const { orgId, orgRole } = await auth();
     
-    // If accessing the dashboard without an active organization context, 
-    // redirect them to an org selection/creation page
-    if (!orgId && !req.nextUrl.pathname.startsWith('/dashboard/select-business')) {
-      return NextResponse.redirect(new URL('/dashboard/select-business', req.url));
-    }
+    // Only apply Organization context rules if they are accessing /dashboard
+    if (req.nextUrl.pathname.startsWith('/dashboard')) {
+      // If accessing the dashboard without an active organization context, 
+      // redirect them to an org selection/creation page
+      if (!orgId && !req.nextUrl.pathname.startsWith('/dashboard/select-business')) {
+        return NextResponse.redirect(new URL('/dashboard/select-business', req.url));
+      }
 
-    if (orgRole !== 'org:admin') {
-      const restrictedPrefixes = [
-        '/dashboard/financials', 
-        '/dashboard/analytics', 
-        '/dashboard/settings', 
-        '/dashboard/archive', 
-        '/dashboard/clients'
-      ];
-      if (restrictedPrefixes.some(prefix => req.nextUrl.pathname.startsWith(prefix))) {
-        return NextResponse.redirect(new URL('/dashboard/pipeline', req.url));
+      if (orgRole !== 'org:admin') {
+        const restrictedPrefixes = [
+          '/dashboard/financials', 
+          '/dashboard/analytics', 
+          '/dashboard/settings', 
+          '/dashboard/archive', 
+          '/dashboard/clients'
+        ];
+        if (restrictedPrefixes.some(prefix => req.nextUrl.pathname.startsWith(prefix))) {
+          return NextResponse.redirect(new URL('/dashboard/pipeline', req.url));
+        }
       }
     }
   }
@@ -43,8 +46,9 @@ export const config = {
   matcher: [
     // Include root route for homepage auth checks
     '/',
-    // Only run middleware on dashboard and API routes to save Vercel Fluid Compute
+    // Only run middleware on dashboard, admin, and API routes to save Vercel Fluid Compute
     '/dashboard(.*)',
+    '/admin(.*)',
     '/api(.*)',
   ],
 }

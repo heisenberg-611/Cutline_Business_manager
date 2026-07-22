@@ -18,6 +18,12 @@ enum WorkspaceType {
   RESEARCH
 }
 
+enum SubscriptionPlan {
+  FREE
+  PRO
+  BUSINESS
+}
+
 model Business {
   id              String        @id // Matches Clerk Organization ID
   name            String
@@ -38,9 +44,14 @@ model Business {
   // Messaging Settings
   realtimeMessagesEnabled      Boolean @default(false)
 
+  // Subscription Details
+  subscriptionPlan      SubscriptionPlan @default(FREE)
+  subscriptionPeriodEnd DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  subscriptionRequests SubscriptionRequest[]
   memberships        BusinessMembership[]
   clients            Client[]
   projects           Project[]
@@ -101,6 +112,33 @@ model BusinessMembership {
   @@unique([businessId, userId])
   @@index([userId])
   @@map("business_memberships")
+}
+
+// -----------------------------------------------------------------------------
+// SUBSCRIPTIONS & PAYMENTS
+// -----------------------------------------------------------------------------
+
+enum SubscriptionRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model SubscriptionRequest {
+  id             String                    @id @default(cuid())
+  businessId     String
+  planRequested  SubscriptionPlan
+  transactionId  String                    @unique
+  paymentMethod  String
+  status         SubscriptionRequestStatus @default(PENDING)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([status])
+  @@map("subscription_requests")
 }
 
 // -----------------------------------------------------------------------------
@@ -753,4 +791,18 @@ model Message {
   @@index([conversationId])
   @@index([senderId])
   @@map("messages")
+}
+
+// -----------------------------------------------------------------------------
+// GLOBAL ADMIN
+// -----------------------------------------------------------------------------
+
+model GlobalAdmin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@map("global_admins")
 }
