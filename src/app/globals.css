@@ -107,6 +107,38 @@
   --sidebar-ring: #A3A3A3;
 }
 
+.force-light {
+  /* Soothing, low-contrast Light Mode */
+  --background: #FCFBF9; /* Warm off-white */
+  --foreground: #334155; /* Slate 700 */
+  --card: #FFFFFF; /* Pure white for contrast against background */
+  --card-foreground: #334155;
+  --popover: #FFFFFF;
+  --popover-foreground: #334155;
+  --primary: #0F172A; /* Slate 900 */
+  --primary-foreground: #F8FAFC; 
+  --secondary: #F1F5F9; /* Slate 100 */
+  --secondary-foreground: #334155;
+  --muted: #F8FAFC; /* Slate 50 */
+  --muted-foreground: #64748B; /* Slate 500 */
+  --accent: #F1F5F9;
+  --accent-foreground: #0F172A;
+  --destructive: #EF4444; 
+  --destructive-foreground: #FAFAFA;
+  --border: #E2E8F0; /* Slate 200 */
+  --input: #E2E8F0;
+  --ring: #CBD5E1; /* Slate 300 */
+  
+  --sidebar: #F8FAFC; 
+  --sidebar-foreground: #334155;
+  --sidebar-primary: #0F172A;
+  --sidebar-primary-foreground: #F8FAFC;
+  --sidebar-accent: #F1F5F9;
+  --sidebar-accent-foreground: #334155;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #CBD5E1;
+}
+
 .dark {
   /* True Grays for Dark Mode (Deep Black) */
   --background: #0A0A0A; /* Neutral 950 */

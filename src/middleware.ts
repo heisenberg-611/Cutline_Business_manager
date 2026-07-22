@@ -41,6 +41,8 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
+    // Include root route for homepage auth checks
+    '/',
     // Only run middleware on dashboard and API routes to save Vercel Fluid Compute
     '/dashboard(.*)',
     '/api(.*)',
