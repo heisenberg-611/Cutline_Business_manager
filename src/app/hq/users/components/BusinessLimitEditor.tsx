@@ -38,14 +38,14 @@ export function BusinessLimitEditor({
     <button 
       onClick={handleEdit}
       disabled={loading}
-      className="ml-2 p-1 inline-flex items-center gap-1 text-zinc-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded transition-colors"
+      className="ml-2 px-2 py-1 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-indigo-100 hover:text-indigo-600 dark:hover:bg-indigo-500/20 dark:hover:text-indigo-400 border border-zinc-200 dark:border-white/10 rounded-md transition-colors"
       title={customLimit !== null ? `Custom Limit: ${customLimit} projects` : "Set Custom Project Limit"}
     >
-      <Settings2 className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-      {customLimit !== null && (
-        <span className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400">
-          Limit: {customLimit}
-        </span>
+      <Settings2 className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+      {customLimit !== null ? (
+        <span>Limit: {customLimit}</span>
+      ) : (
+        <span>Set Limit</span>
       )}
     </button>
   );
