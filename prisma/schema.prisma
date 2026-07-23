@@ -889,3 +889,20 @@ model SystemContactMessage {
 
   @@map("system_contact_messages")
 }
+
+// -----------------------------------------------------------------------------
+// PLATFORM FEEDBACK
+// -----------------------------------------------------------------------------
+
+model PlatformFeedback {
+  id        String   @id @default(cuid())
+  userId    String?  
+  email     String?  
+  type      String   // 'issue', 'idea', 'other'
+  message   String   @db.Text
+  url       String?  
+  status    String   @default("NEW") // NEW, REVIEWED, RESOLVED
+  createdAt DateTime @default(now())
+
+  @@map("platform_feedback")
+}

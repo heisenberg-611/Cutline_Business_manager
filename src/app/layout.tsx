@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { PWARegister } from "@/components/pwa-register"
 import { OneSignalInit } from "@/components/onesignal-init"
 import { Toaster } from "@/components/ui/sonner"
+import { PlatformFeedbackPill } from "@/components/PlatformFeedbackPill"
 import Script from "next/script";
 import "./globals.css";
 
@@ -84,6 +85,7 @@ export default function RootLayout({
             <PWARegister />
             <Toaster position="top-right" richColors />
             {children}
+            <PlatformFeedbackPill />
           </ThemeProvider>
         </body>
       </html>
