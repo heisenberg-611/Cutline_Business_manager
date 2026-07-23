@@ -5,6 +5,8 @@ import { requireAdmin } from '../actions';
 import { revalidatePath } from 'next/cache';
 
 export async function getGlobalSettings() {
+  await requireAdmin(); // SECURITY CHECK: Prevent unauthenticated users from fetching global settings
+
   const settings = await prisma.globalSettings.findUnique({
     where: { id: 'default' }
   });
