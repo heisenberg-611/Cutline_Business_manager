@@ -1,6 +1,28 @@
 import { SignUp } from "@clerk/nextjs"
+import prisma from "@/modules/core/db/prisma"
+import Link from "next/link"
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  const settings = await prisma.globalSettings.findUnique({
+    where: { id: 'default' }
+  });
+
+  if (settings && settings.allowNewSignups === false) {
+    return (
+      <div className="w-full mx-auto max-w-md bg-white dark:bg-[#0f0f0f] border border-zinc-200 dark:border-white/10 shadow-2xl shadow-indigo-500/5 rounded-2xl p-8 text-center space-y-4">
+        <h1 className="text-zinc-900 dark:text-zinc-100 font-bold tracking-tight text-2xl">Registrations Closed</h1>
+        <p className="text-zinc-500">
+          We are currently not accepting new registrations at this time.
+        </p>
+        <div className="pt-4 border-t border-zinc-200 dark:border-white/10 mt-6">
+          <Link href="/login" className="text-indigo-600 hover:text-indigo-500 font-medium">
+            Already have an account? Sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <SignUp 
       fallbackRedirectUrl="/dashboard"

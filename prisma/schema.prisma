@@ -84,6 +84,7 @@ model User {
   navPreferences          Json?
   quickActionPreferences  Json?
   notificationPreferences Json?
+  hasUsedFreeTrial        Boolean  @default(false)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
@@ -824,9 +825,32 @@ model GlobalAdmin {
 // -----------------------------------------------------------------------------
 
 model GlobalSettings {
-  id             String   @id @default("default")
-  paymentMethods Json     @default("[]")
-  updatedAt      DateTime @updatedAt
+  id                    String   @id @default("default")
+  paymentMethods        Json     @default("[]")
+  
+  // 1. Maintenance & Access Control
+  maintenanceMode       Boolean  @default(false)
+  allowNewSignups       Boolean  @default(true)
+
+  // 2. Trial & Subscription Defaults
+  defaultTrialDays      Int      @default(30)
+  defaultPlanId         String   @default("FREE")
+
+  // 3. Communication & Support Overrides
+  supportEmail          String?
+  replyToEmail          String?
+  termsUrl              String?
+  privacyUrl            String?
+
+  // 4. Platform Limitations & Quotas
+  freeTierProjectLimit  Int      @default(3)
+  proTierProjectLimit   Int      @default(20)
+
+  // 5. Security & Rate Limiting
+  maxFailedLogins       Int      @default(5)
+  sessionTimeoutMinutes Int      @default(15)
+
+  updatedAt             DateTime @updatedAt
 
   @@map("global_settings")
 }

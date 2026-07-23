@@ -49,6 +49,26 @@ export const PLAN_FEATURES = {
   ]
 };
 
+export function getPlanFeatures(settings?: { freeTierProjectLimit?: number | null, proTierProjectLimit?: number | null }) {
+  const freeLimit = settings?.freeTierProjectLimit ?? 3;
+  const proLimit = settings?.proTierProjectLimit ?? 20;
+
+  return {
+    [PLANS.FREE]: [
+      { name: `Up to ${freeLimit} Active Projects`, included: true },
+      ...PLAN_FEATURES[PLANS.FREE].filter(f => f.name !== 'Client & Project Management')
+    ],
+    [PLANS.PRO]: [
+      { name: `Up to ${proLimit} Active Projects`, included: true },
+      ...PLAN_FEATURES[PLANS.PRO].filter(f => f.name !== 'Client & Project Management')
+    ],
+    [PLANS.BUSINESS]: [
+      { name: 'Unlimited Active Projects', included: true },
+      ...PLAN_FEATURES[PLANS.BUSINESS].filter(f => f.name !== 'Client & Project Management')
+    ]
+  };
+}
+
 
 
 export function isSubscriptionActive(business: { subscriptionPlan: SubscriptionPlan; subscriptionPeriodEnd: Date | null }) {

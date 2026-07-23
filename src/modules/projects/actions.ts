@@ -72,6 +72,32 @@ export async function createProject(data: FormData) {
 
   const deadline = deadlineStr ? new Date(deadlineStr) : null
 
+  // --- Quota Enforcement ---
+  const [businessData, globalSettings, currentProjectCount] = await Promise.all([
+    prisma.business.findUnique({ where: { id: orgId }, select: { subscriptionPlan: true } }),
+    prisma.globalSettings.findUnique({ where: { id: 'default' } }),
+    prisma.project.count({ where: { businessId: orgId } })
+  ])
+
+  if (!businessData) {
+    throw new Error('Business not found')
+  }
+
+  const plan = businessData.subscriptionPlan
+  
+  if (plan === 'FREE') {
+    const limit = globalSettings?.freeTierProjectLimit ?? 3
+    if (currentProjectCount >= limit) {
+      throw new Error(`Free tier limit reached (${limit} projects). Please upgrade to add more projects.`)
+    }
+  } else if (plan === 'PRO') {
+    const limit = globalSettings?.proTierProjectLimit ?? 20
+    if (currentProjectCount >= limit) {
+      throw new Error(`Pro tier limit reached (${limit} projects). Please upgrade to Business plan to add more.`)
+    }
+  }
+  // -------------------------
+
   const business = await prisma.business.update({
     where: { id: orgId },
     data: { projectSequence: { increment: 1 } },

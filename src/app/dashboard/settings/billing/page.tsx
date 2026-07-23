@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import prisma from '@/modules/core/db/prisma'
-import { getActivePlan, PLANS, PLAN_PRICES, PLAN_FEATURES } from '@/lib/subscription'
+import { getActivePlan, PLANS, PLAN_PRICES, getPlanFeatures } from '@/lib/subscription'
 import { cancelSubscription, downgradeToPro, restoreBusinessPlan } from './actions'
 import { Check, X } from 'lucide-react'
 import Link from 'next/link'
@@ -23,6 +23,9 @@ export default async function BillingPage() {
   if (!business) redirect('/dashboard/select-business')
 
   const activePlan = getActivePlan(business)
+  
+  const settings = await prisma.globalSettings.findUnique({ where: { id: 'default' } });
+  const features = getPlanFeatures(settings || undefined);
 
   let canRestoreBusiness = false;
   if (activePlan === PLANS.PRO && business.subscriptionPeriodEnd && new Date() < business.subscriptionPeriodEnd) {
@@ -67,7 +70,7 @@ export default async function BillingPage() {
               </div>
               
               <ul className="mt-8 space-y-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400 flex-1">
-                {PLAN_FEATURES[plan as keyof typeof PLAN_FEATURES].map((feature) => (
+                {features[plan as keyof typeof features].map((feature) => (
                   <li key={feature.name} className="flex gap-x-3">
                     {feature.included ? (
                       <Check className="h-6 w-5 flex-none text-indigo-600" aria-hidden="true" />

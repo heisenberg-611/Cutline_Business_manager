@@ -51,13 +51,17 @@ export async function POST(req: Request) {
     if (eventType === 'organization.created' || eventType === 'organization.updated') {
       const { id, name } = evt.data
       
+      const settings = await prisma.globalSettings.findUnique({ where: { id: 'default' } });
+      const planId = settings?.defaultPlanId || 'FREE';
+      
       await prisma.business.upsert({
         where: { id },
         update: { name },
         create: {
           id,
           name,
-          defaultCurrency: 'USD'
+          defaultCurrency: 'USD',
+          subscriptionPlan: planId as any
         }
       })
     }
@@ -95,6 +99,9 @@ export async function POST(req: Request) {
       const { organization, public_user_data, role } = evt.data
       
       if (public_user_data && public_user_data.user_id) {
+        const settings = await prisma.globalSettings.findUnique({ where: { id: 'default' } });
+        const planId = settings?.defaultPlanId || 'FREE';
+
         // Defensively ensure parent rows exist — Clerk doesn't guarantee webhook ordering
         await prisma.business.upsert({
           where: { id: organization.id },
@@ -102,7 +109,8 @@ export async function POST(req: Request) {
           create: {
             id: organization.id,
             name: organization.name || `Business ${organization.id}`,
-            defaultCurrency: 'USD'
+            defaultCurrency: 'USD',
+            subscriptionPlan: planId as any
           }
         })
 

@@ -14,22 +14,36 @@ export default async function ClaimTrialPage() {
     redirect('/dashboard/select-business?redirect_url=/claim-trial');
   }
 
-  const business = await prisma.business.findUnique({
-    where: { id: orgId }
-  });
+  const [business, user, settings] = await Promise.all([
+    prisma.business.findUnique({ where: { id: orgId } }),
+    prisma.user.findUnique({ where: { id: userId } }),
+    prisma.globalSettings.findUnique({ where: { id: 'default' } })
+  ]);
+
+  if (!user || user.hasUsedFreeTrial) {
+    redirect('/dashboard?error=trial_already_used');
+  }
 
   // Only grant if they are currently on FREE and haven't active plan
   if (business && business.subscriptionPlan === PLANS.FREE) {
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    const trialDays = settings?.defaultTrialDays || 30;
+    const trialEndDate = new Date();
+    trialEndDate.setDate(trialEndDate.getDate() + trialDays);
 
-    await prisma.business.update({
-      where: { id: orgId },
-      data: {
-        subscriptionPlan: PLANS.PRO,
-        subscriptionPeriodEnd: thirtyDaysFromNow
-      }
-    });
+    // Transaction to update both business plan and user's trial flag
+    await prisma.$transaction([
+      prisma.business.update({
+        where: { id: orgId },
+        data: {
+          subscriptionPlan: PLANS.PRO,
+          subscriptionPeriodEnd: trialEndDate
+        }
+      }),
+      prisma.user.update({
+        where: { id: userId },
+        data: { hasUsedFreeTrial: true }
+      })
+    ]);
   }
 
   // Add a query param to show a success toast on dashboard (if implemented)

@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import prisma from '@/modules/core/db/prisma'
 import { GlobalAlerts } from './components/GlobalAlerts'
 import { getActivePlan, canInviteMembers } from '@/lib/subscription'
+import { redirect } from 'next/navigation'
 
 export default async function DashboardLayout({
   children,
@@ -31,10 +32,17 @@ export default async function DashboardLayout({
     }
   }
 
-  const activeAlerts = await prisma.systemAlert.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: 'desc' }
-  });
+  const [activeAlerts, globalSettings] = await Promise.all([
+    prisma.systemAlert.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.globalSettings.findUnique({ where: { id: 'default' } })
+  ]);
+
+  if (globalSettings?.maintenanceMode) {
+    redirect('/maintenance');
+  }
 
   let canInvite = false;
   if (orgId) {
@@ -55,6 +63,11 @@ export default async function DashboardLayout({
         initialQuickActionPreferences={initialQuickActionPreferences} 
         initialNotificationPreferences={initialNotificationPreferences}
         canInvite={canInvite}
+        globalSettings={{
+          termsUrl: globalSettings?.termsUrl,
+          privacyUrl: globalSettings?.privacyUrl,
+          supportEmail: globalSettings?.supportEmail
+        }}
       >
         {children}
       </AppLayout>

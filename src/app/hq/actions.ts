@@ -56,13 +56,16 @@ export async function loginAdmin(email: string, password: string) {
     if (!isValid) return { success: false, error: 'Invalid credentials' };
   }
 
+  const settings = await prisma.globalSettings.findUnique({ where: { id: 'default' } });
+  const timeoutMinutes = settings?.sessionTimeoutMinutes || 15;
+
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, email, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
-    maxAge: 15 * 60,
+    maxAge: timeoutMinutes * 60,
   });
 
   revalidatePath('/hq');

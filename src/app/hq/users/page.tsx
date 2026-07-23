@@ -91,8 +91,13 @@ export default async function UsersPage(props: {
                         </div>
                       )}
                       <div>
-                        <div className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        <div className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
                           {user.firstName} {user.lastName}
+                          {user.hasUsedFreeTrial && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px] font-bold tracking-wide uppercase">
+                              Trial Used
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-zinc-500">{user.email}</div>
                         <div className="text-[10px] text-zinc-400 font-mono mt-0.5">{user.id}</div>

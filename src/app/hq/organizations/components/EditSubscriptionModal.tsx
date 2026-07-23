@@ -129,7 +129,7 @@ export function EditSubscriptionModal({
             </label>
             <p className="text-xs text-amber-600 dark:text-amber-400 mb-3 flex items-center gap-1">
               <Zap className="w-3 h-3" />
-              No expiry = indefinite access
+              {periodEnd ? `Expires on ${periodEnd}` : 'No expiry = indefinite access'}
             </p>
             
             <input 

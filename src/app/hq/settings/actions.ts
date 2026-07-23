@@ -20,15 +20,27 @@ export async function getGlobalSettings() {
 
 export async function updateGlobalSettings(data: {
   paymentMethods: any[];
+  maintenanceMode: boolean;
+  allowNewSignups: boolean;
+  defaultTrialDays: number;
+  defaultPlanId: string;
+  supportEmail: string;
+  replyToEmail: string;
+  termsUrl: string;
+  privacyUrl: string;
+  freeTierProjectLimit: number;
+  proTierProjectLimit: number;
+  maxFailedLogins: number;
+  sessionTimeoutMinutes: number;
 }) {
   await requireAdmin(); // SECURITY CHECK
   
   await prisma.globalSettings.upsert({
     where: { id: 'default' },
-    update: { paymentMethods: data.paymentMethods },
+    update: { ...data },
     create: {
       id: 'default',
-      paymentMethods: data.paymentMethods
+      ...data
     }
   });
   

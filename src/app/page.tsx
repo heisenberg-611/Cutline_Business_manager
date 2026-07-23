@@ -5,7 +5,8 @@ import { auth } from '@clerk/nextjs/server';
 import { Users, FileText, MessageSquare, UsersRound, ArrowUpRight, CheckCircle2, LayoutDashboard, Sparkles, Zap, Shield, Folder, Mail, Clock } from 'lucide-react';
 import { FadeIn, FadeInStagger, FadeInStaggerItem, ScaleIn } from '@/components/ui/scroll-animation';
 import { HeroMockup } from '@/components/marketing/hero-mockup';
-import { PLAN_PRICES, PLAN_FEATURES, PLANS } from '@/lib/subscription';
+import { PLAN_PRICES, getPlanFeatures, PLANS } from '@/lib/subscription';
+import prisma from '@/modules/core/db/prisma';
 import { ContactForm } from '@/components/marketing/ContactForm';
 import { X } from 'lucide-react';
 
@@ -25,6 +26,12 @@ export const metadata: Metadata = {
 
 export default async function MarketingHomepage() {
   const { userId } = await auth();
+  
+  const settings = await prisma.globalSettings.findUnique({
+    where: { id: 'default' }
+  });
+  
+  const features = getPlanFeatures(settings || undefined);
   
   return (
     <div className="force-light min-h-screen bg-background text-foreground font-sans overflow-x-hidden">
@@ -232,7 +239,7 @@ export default async function MarketingHomepage() {
                 <div className="mb-6"><span className="text-4xl font-bold">৳{PLAN_PRICES.FREE}</span><span className="text-muted-foreground">/month</span></div>
                 <p className="text-muted-foreground text-sm mb-8">Perfect for freelancers just starting out.</p>
                 <ul className="space-y-3 mb-8 flex-1">
-                  {PLAN_FEATURES[PLANS.FREE].map((feature) => (
+                  {features[PLANS.FREE].map((feature) => (
                     <li key={feature.name} className="flex items-start gap-3 text-sm">
                       {feature.included ? (
                         <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
@@ -255,7 +262,7 @@ export default async function MarketingHomepage() {
                 <div className="mb-6"><span className="text-4xl font-bold">৳{PLAN_PRICES.PRO}</span><span className="opacity-80">/month</span></div>
                 <p className="opacity-90 text-sm mb-8">For busy creatives who need serious tools.</p>
                 <ul className="space-y-3 mb-8 flex-1">
-                  {PLAN_FEATURES[PLANS.PRO].map((feature) => (
+                  {features[PLANS.PRO].map((feature) => (
                     <li key={feature.name} className="flex items-start gap-3 text-sm">
                       {feature.included ? (
                         <CheckCircle2 className="w-4 h-4 opacity-90 mt-0.5 shrink-0" />
@@ -275,7 +282,7 @@ export default async function MarketingHomepage() {
                 <div className="mb-6"><span className="text-4xl font-bold">৳{PLAN_PRICES.BUSINESS}</span><span className="text-muted-foreground">/month</span></div>
                 <p className="text-muted-foreground text-sm mb-8">For growing teams and agencies.</p>
                 <ul className="space-y-3 mb-8 flex-1">
-                  {PLAN_FEATURES[PLANS.BUSINESS].map((feature) => (
+                  {features[PLANS.BUSINESS].map((feature) => (
                     <li key={feature.name} className="flex items-start gap-3 text-sm">
                       {feature.included ? (
                         <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />

@@ -53,13 +53,19 @@ export function AppLayout({
   initialNavPreferences,
   initialQuickActionPreferences,
   initialNotificationPreferences,
-  canInvite = false
+  canInvite = false,
+  globalSettings
 }: { 
   children: React.ReactNode
   initialNavPreferences?: { href: string; visible: boolean }[]
   initialQuickActionPreferences?: QuickActionPreference[]
   initialNotificationPreferences?: { tone: string; dnd: boolean }
   canInvite?: boolean
+  globalSettings?: {
+    termsUrl?: string | null;
+    privacyUrl?: string | null;
+    supportEmail?: string | null;
+  }
 }) {
   const [isCommandOpen, setIsCommandOpen] = useState(false)
   const [isPinned, setIsPinned] = useState(false)
@@ -495,6 +501,20 @@ export function AppLayout({
               </AnimatePresence>
             </button>
           </motion.div>
+
+          {globalSettings && (!isCollapsed) && (
+            <div className="pt-3 mt-3 border-t border-border/50 flex flex-wrap gap-x-3 gap-y-1 px-3 text-[10px] text-muted-foreground/70 uppercase tracking-wider">
+              {globalSettings.supportEmail && (
+                <a href={`mailto:${globalSettings.supportEmail}`} className="hover:text-foreground transition-colors">Support</a>
+              )}
+              {globalSettings.termsUrl && (
+                <a href={globalSettings.termsUrl} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Terms</a>
+              )}
+              {globalSettings.privacyUrl && (
+                <a href={globalSettings.privacyUrl} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Privacy</a>
+              )}
+            </div>
+          )}
         </div>
       </aside>
 
