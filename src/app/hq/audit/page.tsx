@@ -1,6 +1,6 @@
 import { requireAdmin } from '../actions';
 import prisma from '@/modules/core/db/prisma';
-import { ShieldCheck, Activity } from 'lucide-react';
+import { ShieldCheck, Activity, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { PaginationControls } from '../components/PaginationControls';
 
@@ -44,17 +44,24 @@ export default async function AuditLogsPage(props: {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <div>
-        <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 mb-2">
-          <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-            <ShieldCheck className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 mb-2">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <span className="font-semibold tracking-wide uppercase text-sm">Security</span>
           </div>
-          <span className="font-semibold tracking-wide uppercase text-sm">Security</span>
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">Audit Logs</h1>
+          <p className="mt-2 text-zinc-500 max-w-2xl">
+            A chronological, read-only security feed of all actions taken by administrators.
+          </p>
         </div>
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">Audit Logs</h1>
-        <p className="mt-2 text-zinc-500 max-w-2xl">
-          A chronological, read-only security feed of all actions taken by administrators.
-        </p>
+        
+        <a href="/hq/audit/export" className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-zinc-700 dark:text-zinc-300 shadow-sm shrink-0">
+          <Download className="w-4 h-4" />
+          Export CSV
+        </a>
       </div>
 
       <div className="bg-white dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-white/10 shadow-sm overflow-hidden overflow-x-auto w-full">
