@@ -12,6 +12,8 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // Admin / HQ Protection
+  let res = NextResponse.next();
+
   if (req.nextUrl.pathname.startsWith('/hq')) {
     const adminSession = req.cookies.get('admin_session')?.value;
     if (!adminSession) {
@@ -20,6 +22,15 @@ export default clerkMiddleware(async (auth, req) => {
       if (secretKey !== validKey) {
         return NextResponse.redirect(new URL('/', req.url));
       }
+    } else {
+      // Refresh the session timeout (15 mins of inactivity)
+      res.cookies.set('admin_session', adminSession, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 15 * 60,
+      });
     }
   }
 
@@ -52,6 +63,8 @@ export default clerkMiddleware(async (auth, req) => {
       }
     }
   }
+
+  return res;
 })
 
 export const config = {

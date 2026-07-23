@@ -62,7 +62,7 @@ export async function loginAdmin(email: string, password: string) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
-    // Omit maxAge so it becomes a session cookie (cleared when browser closes)
+    maxAge: 15 * 60,
   });
 
   revalidatePath('/hq');
