@@ -31,7 +31,7 @@ export default async function AdminFinancesPage() {
         <h3 className="text-4xl font-bold text-green-600 mt-2">৳{totalRevenue.toLocaleString()}</h3>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden overflow-x-auto w-full">
         <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
           <thead className="bg-zinc-50 dark:bg-zinc-900/50">
             <tr>

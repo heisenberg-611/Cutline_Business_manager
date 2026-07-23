@@ -20,10 +20,13 @@ export function AdminAuthForm() {
       const res = await loginAdmin(email, password);
       if (!res.success) {
         setError(res.error || 'Invalid credentials');
+        setLoading(false);
+      } else {
+        // Hard redirect for mobile reliability
+        window.location.href = '/hq';
       }
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
-    } finally {
+      setError(err.message || 'An unexpected error occurred. Please check your connection.');
       setLoading(false);
     }
   }

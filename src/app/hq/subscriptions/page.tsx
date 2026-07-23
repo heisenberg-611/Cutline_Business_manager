@@ -36,7 +36,7 @@ export default async function AdminSubscriptionsPage(props: {
         <p className="text-sm text-zinc-500">Approve or reject manual payments submitted by users.</p>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden overflow-x-auto w-full">
         <SubscriptionRequestsTable initialRequests={requests} />
         <PaginationControls 
           currentPage={currentPage}

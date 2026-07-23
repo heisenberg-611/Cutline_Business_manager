@@ -42,12 +42,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   // Render the Admin Panel
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-500/15 via-purple-500/15 to-pink-500/15 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10 flex flex-col md:flex-row text-foreground">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-500/15 via-purple-500/15 to-pink-500/15 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10 flex flex-row text-foreground">
       {/* Sidebar */}
       <AdminSidebar adminEmail={adminEmail!} logoutAction={logoutAdmin} />
 
       {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full">
         {children}
       </main>
     </div>
