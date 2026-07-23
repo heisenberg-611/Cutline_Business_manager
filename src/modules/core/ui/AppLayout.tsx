@@ -664,7 +664,7 @@ export function AppLayout({
 
       {/* MOBILE BOTTOM NAV */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/60 backdrop-blur-xl border-t border-border/50 grid grid-cols-5 h-[68px] shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-[env(safe-area-inset-bottom)]">
-        {navItems.filter(i => ['/dashboard', '/dashboard/projects', '/dashboard/financials', '/dashboard/clients'].includes(i.href)).slice(0, 4).map((item) => {
+        {navItems.slice(0, 4).map((item) => {
           const currentPath = optimisticPathname || pathname
           const isActive = currentPath === item.href || (item.href !== '/dashboard' && currentPath.startsWith(item.href))
           return (
@@ -729,7 +729,7 @@ export function AppLayout({
               
               <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <div className="grid grid-cols-2 gap-2">
-                  {navItems.filter(i => !['/dashboard', '/dashboard/projects', '/dashboard/financials', '/dashboard/clients'].includes(i.href)).map((item) => {
+                  {navItems.slice(4).map((item) => {
                     const currentPath = optimisticPathname || pathname
                     const isActive = currentPath === item.href || (item.href !== '/dashboard' && currentPath.startsWith(item.href))
                     return (
