@@ -34,9 +34,9 @@ export default async function MaintenancePage() {
         </div>
 
         <div className="pt-4">
-          <Link href="/dashboard" className="text-sm font-medium text-primary hover:underline underline-offset-4">
+          <a href="/dashboard" className="text-sm font-medium text-primary hover:underline underline-offset-4">
             Try refreshing the page
-          </Link>
+          </a>
         </div>
       </div>
     </div>

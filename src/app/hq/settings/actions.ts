@@ -33,19 +33,24 @@ export async function updateGlobalSettings(data: {
   maxFailedLogins: number;
   sessionTimeoutMinutes: number;
 }) {
-  await requireAdmin(); // SECURITY CHECK
-  
-  await prisma.globalSettings.upsert({
-    where: { id: 'default' },
-    update: { ...data },
-    create: {
-      id: 'default',
-      ...data
-    }
-  });
-  
-  revalidatePath('/hq/settings');
-  revalidatePath('/dashboard/settings/billing/checkout');
-  
-  return { success: true };
+  try {
+    await requireAdmin(); // SECURITY CHECK
+    
+    await prisma.globalSettings.upsert({
+      where: { id: 'default' },
+      update: { ...data },
+      create: {
+        id: 'default',
+        ...data
+      }
+    });
+    
+    revalidatePath('/hq/settings');
+    revalidatePath('/dashboard/settings/billing/checkout');
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to update global settings:", error);
+    return { success: false, error: error.message || 'An unknown error occurred while saving' };
+  }
 }

@@ -73,9 +73,13 @@ export function SettingsForm({ initialData }: { initialData: any }) {
     setSuccess(false);
 
     try {
-      await updateGlobalSettings({ ...formData, paymentMethods: methods });
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      const res = await updateGlobalSettings({ ...formData, paymentMethods: methods });
+      if (res?.success) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        alert(res?.error || 'Failed to update settings');
+      }
     } catch (err: any) {
       alert(err.message || 'Failed to update settings');
     } finally {
