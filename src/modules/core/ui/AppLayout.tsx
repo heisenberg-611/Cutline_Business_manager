@@ -207,17 +207,17 @@ export function AppLayout({
   }
 
   return (
-    <div className="flex h-[100dvh] w-full bg-zinc-50 dark:bg-[#0A0A0A] text-zinc-900 dark:text-zinc-100 overflow-hidden font-sans">
+    <div className="flex h-[100dvh] w-full bg-background bg-gradient-to-br from-indigo-500/15 via-background to-purple-500/15 dark:from-indigo-500/10 dark:via-background dark:to-purple-500/10 text-foreground overflow-hidden font-sans">
 
       {/* LEFT SIDEBAR */}
       <aside
         ref={sidebarRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`hidden md:flex border-r border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-[#0A0A0A] flex-col transition-all duration-300 ease-in-out-smooth z-20 ${isExpanded ? 'w-64' : 'w-16'}`}
+        className={`hidden md:flex border-r border-border/50 bg-background/60 backdrop-blur-xl flex-col transition-all duration-300 ease-in-out-smooth z-20 ${isExpanded ? 'w-64' : 'w-16'}`}
       >
         {/* Business Switcher Top Header */}
-        <div className={`h-14 flex items-center border-b border-zinc-200 dark:border-white/10 overflow-hidden shrink-0 transition-all ${isCollapsed ? 'px-0 justify-center' : 'px-4'}`}>
+        <div className={`h-14 flex items-center border-b border-border/50 overflow-hidden shrink-0 transition-all ${isCollapsed ? 'px-0 justify-center' : 'px-4'}`}>
           <div className={`transition-all duration-200 flex items-center ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-full'}`}>
             <OrganizationSwitcher
               hidePersonal
@@ -253,11 +253,11 @@ export function AppLayout({
             />
           </div>
           {isCollapsed && (
-            <div className="flex justify-center items-center w-[32px] min-w-[32px] h-[32px] text-zinc-900 dark:text-white font-bold">
+            <div className="flex justify-center items-center w-[32px] min-w-[32px] h-[32px] text-foreground font-bold">
               {organization?.imageUrl ? (
                 <img src={organization.imageUrl} alt={organization.name} className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-md object-cover shrink-0" />
               ) : (
-                <div className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-md bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0 text-sm">C</div>
+                <div className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-md bg-muted/50 flex items-center justify-center shrink-0 text-sm">C</div>
               )}
             </div>
           )}
@@ -285,15 +285,15 @@ export function AppLayout({
                     }
                   }}
                   className={`group relative z-0 flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-                      ? 'text-zinc-900 dark:text-white'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5'
+                      ? 'text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                     } ${isCollapsed ? 'justify-center' : ''}`}
                   title={isCollapsed ? item.label : undefined}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="activeNavPill"
-                      className="absolute inset-0 bg-zinc-200/70 dark:bg-white/10 rounded-md -z-10"
+                      className="absolute inset-0 bg-primary shadow-sm rounded-md -z-10"
                       transition={{ type: "spring", stiffness: 300, damping: 25 }}
                     />
                   )}
@@ -328,11 +328,11 @@ export function AppLayout({
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-3 border-t border-zinc-200 dark:border-white/10 space-y-1">
+        <div className="p-3 border-t border-border/50 space-y-1">
           <motion.div initial="initial" whileHover="hover" whileTap="tap">
             <button
               onClick={() => setIsCommandOpen(true)}
-              className={`group relative z-0 w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+              className={`group relative z-0 w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50 ${isCollapsed ? 'justify-center' : 'justify-between'}`}
               title={isCollapsed ? 'Search (Cmd+K)' : undefined}
             >
               <div className="flex items-center gap-3 overflow-hidden">
@@ -369,7 +369,7 @@ export function AppLayout({
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.8, x: -10 }}
                     transition={{ duration: 0.2, ease: "easeInOut" }}
-                    className="flex items-center text-xs opacity-50 bg-zinc-200 dark:bg-white/10 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0 font-normal"
+                    className="flex items-center text-xs opacity-50 bg-muted/50 border border-border px-1.5 py-0.5 rounded whitespace-nowrap shrink-0 font-normal"
                   >
                     <CmdIcon className="h-3 w-3 mr-0.5 shrink-0" /> K
                   </motion.span>
@@ -381,7 +381,7 @@ export function AppLayout({
           <motion.div initial="initial" whileHover="hover" whileTap="tap">
             <button 
               onClick={() => setIsCurrencyConverterOpen(true)}
-              className={`group relative z-0 w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 ${isCollapsed ? 'justify-center' : ''}`}
+              className={`group relative z-0 w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50 ${isCollapsed ? 'justify-center' : ''}`}
               title={isCollapsed ? 'Currency Converter' : undefined}
             >
               <motion.div
@@ -417,15 +417,15 @@ export function AppLayout({
                 href="/dashboard/settings"
                 className={`group relative z-0 flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                   (optimisticPathname || pathname)?.startsWith('/dashboard/settings')
-                    ? 'text-zinc-900 dark:text-white'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5'
+                    ? 'text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 } ${isCollapsed ? 'justify-center' : ''}`}
                 title={isCollapsed ? 'Settings' : undefined}
               >
                 {(optimisticPathname || pathname)?.startsWith('/dashboard/settings') && (
                   <motion.div
                     layoutId="activeNavPill"
-                    className="absolute inset-0 bg-zinc-200/70 dark:bg-white/10 rounded-md -z-10"
+                    className="absolute inset-0 bg-primary shadow-sm rounded-md -z-10"
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
                   />
                 )}
@@ -462,7 +462,7 @@ export function AppLayout({
           <motion.div initial="initial" whileHover="hover" whileTap="tap">
             <button 
               onClick={togglePin}
-              className={`group relative z-0 w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 dark:hover:text-zinc-100 dark:hover:bg-white/5 ${isExpanded ? '' : 'justify-center'}`}
+              className={`group relative z-0 w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50 ${isExpanded ? '' : 'justify-center'}`}
               title={isExpanded ? (isPinned ? 'Unpin Sidebar' : 'Pin Sidebar') : undefined}
             >
               <motion.div
@@ -501,13 +501,13 @@ export function AppLayout({
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Contextual Top bar */}
-        <header className="h-14 flex items-center justify-between px-3 md:px-6 border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0A0A0A] shrink-0">
+        <header className="h-14 flex items-center justify-between px-3 md:px-6 border-b border-border/50 bg-background/60 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1 pr-2">
             <div className="hidden md:flex items-center gap-2 shrink-0">
               <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0">
                 <img src="/icon.svg" alt="Cutline OS Logo" className="w-full h-full object-contain dark:invert" />
               </div>
-              <h1 className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 truncate">{getContextualTitle()}</h1>
+              <h1 className="text-base font-bold tracking-tight text-foreground truncate">{getContextualTitle()}</h1>
             </div>
             <div className="md:hidden min-w-0 flex-1">
               <OrganizationSwitcher
@@ -543,7 +543,7 @@ export function AppLayout({
           <div className="flex items-center gap-0 sm:gap-1 md:gap-2 shrink-0">
             <button
               onClick={() => setIsCommandOpen(true)}
-              className="md:hidden p-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-white/5 rounded-full transition-colors flex items-center justify-center shrink-0"
+              className="md:hidden p-2 text-muted-foreground hover:bg-muted/50 rounded-full transition-colors flex items-center justify-center shrink-0"
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
@@ -553,7 +553,7 @@ export function AppLayout({
             </div>
             <button
               onClick={() => setIsQuickActionsOpen(true)}
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm hover:opacity-90 transition-opacity shrink-0"
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground shadow-sm hover:opacity-90 transition-opacity shrink-0"
             >
               <Plus className="h-3.5 w-3.5" />
               New
@@ -597,7 +597,7 @@ export function AppLayout({
           {isQuickActionsOpen && (
             <motion.aside
               aria-label="Quick Actions"
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-sm border-l border-zinc-200 bg-white shadow-2xl dark:border-white/10 dark:bg-zinc-950"
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-sm border-l border-border/50 bg-background/60 backdrop-blur-xl shadow-2xl"
               initial={{ x: '100%', opacity: 0.98 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0.98 }}
@@ -606,11 +606,11 @@ export function AppLayout({
             >
               <div className="p-6">
                 <div className="mb-8 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Quick Actions</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Quick Actions</h2>
                   <button
                     type="button"
                     onClick={() => setIsQuickActionsOpen(false)}
-                    className="rounded-md p-2 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                    className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
                     <X className="h-4 w-4" />
                     <span className="sr-only">Close Quick Actions</span>
@@ -623,14 +623,14 @@ export function AppLayout({
                         key={action.id}
                         href={action.href} 
                         onClick={() => setIsQuickActionsOpen(false)} 
-                        className="block p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-white/20 transition-colors"
+                        className="block p-4 rounded-xl border border-border/50 bg-muted/20 hover:border-border transition-colors"
                       >
-                        <div className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{action.label}</div>
-                        <div className="text-xs text-zinc-500 mt-1">{action.description}</div>
+                        <div className="font-medium text-foreground text-sm">{action.label}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{action.description}</div>
                       </Link>
                     ))
                   ) : (
-                    <div className="text-sm text-zinc-500 italic p-4 text-center">No quick actions enabled.</div>
+                    <div className="text-sm text-muted-foreground italic p-4 text-center">No quick actions enabled.</div>
                   )}
                 </div>
               </div>
@@ -643,7 +643,7 @@ export function AppLayout({
       <CurrencyConverter open={isCurrencyConverterOpen} onOpenChange={setIsCurrencyConverterOpen} />
 
       {/* MOBILE BOTTOM NAV */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#0A0A0A] border-t border-zinc-200 dark:border-white/10 grid grid-cols-5 h-[68px] shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-[env(safe-area-inset-bottom)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/60 backdrop-blur-xl border-t border-border/50 grid grid-cols-5 h-[68px] shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-[env(safe-area-inset-bottom)]">
         {navItems.filter(i => ['/dashboard', '/dashboard/projects', '/dashboard/financials', '/dashboard/clients'].includes(i.href)).slice(0, 4).map((item) => {
           const currentPath = optimisticPathname || pathname
           const isActive = currentPath === item.href || (item.href !== '/dashboard' && currentPath.startsWith(item.href))
@@ -658,11 +658,11 @@ export function AppLayout({
                 }
               }}
               className={`flex flex-col items-center justify-center gap-1 transition-colors ${isActive
-                  ? 'text-indigo-600 dark:text-indigo-400'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
-              <item.icon className={`w-5 h-5 ${isActive ? 'fill-indigo-50 dark:fill-indigo-900/20' : ''}`} />
+              <item.icon className={`w-5 h-5 ${isActive ? 'fill-primary/20' : ''}`} />
               <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           )
@@ -670,7 +670,7 @@ export function AppLayout({
 
         <button
           onClick={() => setIsMobileMenuOpen(true)}
-          className={`flex flex-col items-center justify-center gap-1 transition-colors ${isMobileMenuOpen ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
+          className={`flex flex-col items-center justify-center gap-1 transition-colors ${isMobileMenuOpen ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <Menu className="w-5 h-5" />
           <span className="text-[10px] font-medium">Menu</span>
@@ -695,13 +695,13 @@ export function AppLayout({
               exit={{ y: '100%' }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               style={{ willChange: 'transform' }}
-              className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#0A0A0A] rounded-t-3xl shadow-2xl flex flex-col max-h-[85vh] border-t border-zinc-200 dark:border-white/10"
+              className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl rounded-t-3xl shadow-2xl flex flex-col max-h-[85vh] border-t border-border/50"
             >
-              <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-white/5">
-                <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 pl-2">Menu</h2>
+              <div className="flex items-center justify-between p-4 border-b border-border/50">
+                <h2 className="text-lg font-semibold text-foreground pl-2">Menu</h2>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                  className="p-2 rounded-full bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -725,8 +725,8 @@ export function AppLayout({
                         }}
                         className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
                           isActive 
-                            ? 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-400 font-medium' 
-                            : 'bg-zinc-50 dark:bg-zinc-900/50 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900'
+                            ? 'bg-primary border-primary text-primary-foreground shadow-sm font-medium' 
+                            : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                         }`}
                       >
                         <item.icon className="w-5 h-5 shrink-0" />
@@ -736,19 +736,19 @@ export function AppLayout({
                   })}
                 </div>
 
-                <div className="h-[1px] w-full bg-zinc-100 dark:bg-white/5" />
+                <div className="h-[1px] w-full bg-border/50" />
                 
                 <div className="space-y-2">
-                  <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase tracking-wider px-2 mb-3">Tools & Preferences</h3>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-3">Tools & Preferences</h3>
                   
                   <button
                     onClick={() => {
                       setIsMobileMenuOpen(false)
                       setIsCurrencyConverterOpen(true)
                     }}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent bg-zinc-50 dark:bg-zinc-900/50 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
                   >
-                    <Calculator className="w-5 h-5 shrink-0 text-zinc-500 dark:text-zinc-400" />
+                    <Calculator className="w-5 h-5 shrink-0 text-muted-foreground" />
                     <span className="text-sm font-medium">Currency Converter</span>
                   </button>
 
@@ -762,9 +762,9 @@ export function AppLayout({
                           setOptimisticPathname('/dashboard/settings')
                         }
                       }}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent bg-zinc-50 dark:bg-zinc-900/50 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
                     >
-                      <Settings className="w-5 h-5 shrink-0 text-zinc-500 dark:text-zinc-400" />
+                      <Settings className="w-5 h-5 shrink-0 text-muted-foreground" />
                       <span className="text-sm font-medium">Settings</span>
                     </Link>
                   )}
