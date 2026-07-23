@@ -74,7 +74,7 @@ export async function createProject(data: FormData) {
 
   // --- Quota Enforcement ---
   const [businessData, globalSettings, currentProjectCount] = await Promise.all([
-    prisma.business.findUnique({ where: { id: orgId }, select: { subscriptionPlan: true } }),
+    prisma.business.findUnique({ where: { id: orgId }, select: { subscriptionPlan: true, customProjectLimit: true } }),
     prisma.globalSettings.findUnique({ where: { id: 'default' } }),
     prisma.project.count({ where: { businessId: orgId } })
   ])
@@ -85,7 +85,11 @@ export async function createProject(data: FormData) {
 
   const plan = businessData.subscriptionPlan
   
-  if (plan === 'FREE') {
+  if (businessData.customProjectLimit !== null) {
+    if (currentProjectCount >= businessData.customProjectLimit) {
+      throw new Error(`Custom project limit reached (${businessData.customProjectLimit} projects). Please contact support.`)
+    }
+  } else if (plan === 'FREE') {
     const limit = globalSettings?.freeTierProjectLimit ?? 3
     if (currentProjectCount >= limit) {
       throw new Error(`Free tier limit reached (${limit} projects). Please upgrade to add more projects.`)

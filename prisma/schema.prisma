@@ -47,6 +47,7 @@ model Business {
   // Subscription Details
   subscriptionPlan      SubscriptionPlan @default(FREE)
   subscriptionPeriodEnd DateTime?
+  customProjectLimit    Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

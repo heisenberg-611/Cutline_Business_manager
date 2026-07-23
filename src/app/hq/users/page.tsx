@@ -4,6 +4,7 @@ import { Users as UsersIcon, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { SearchUsers } from './components/SearchUsers';
+import { BusinessLimitEditor } from './components/BusinessLimitEditor';
 import { Suspense } from 'react';
 import { PaginationControls } from '../components/PaginationControls';
 
@@ -117,6 +118,7 @@ export default async function UsersPage(props: {
                             <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] text-zinc-500">
                               {membership.role.replace('org:', '')}
                             </span>
+                            <BusinessLimitEditor businessId={membership.business.id} customLimit={membership.business.customProjectLimit} />
                           </div>
                         ))}
                       </div>

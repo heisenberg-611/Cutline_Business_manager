@@ -17,7 +17,7 @@ export default async function BillingPage() {
 
   const business = await prisma.business.findUnique({
     where: { id: orgId },
-    select: { subscriptionPlan: true, subscriptionPeriodEnd: true }
+    select: { subscriptionPlan: true, subscriptionPeriodEnd: true, customProjectLimit: true }
   })
 
   if (!business) redirect('/dashboard/select-business')
@@ -26,6 +26,11 @@ export default async function BillingPage() {
   
   const settings = await prisma.globalSettings.findUnique({ where: { id: 'default' } });
   const features = getPlanFeatures(settings || undefined);
+  
+  // Override the visual limit if this business has a custom admin-granted limit
+  if (business.customProjectLimit !== null) {
+    features[activePlan][0].name = `Up to ${business.customProjectLimit} Active Projects (Custom)`;
+  }
 
   let canRestoreBusiness = false;
   if (activePlan === PLANS.PRO && business.subscriptionPeriodEnd && new Date() < business.subscriptionPeriodEnd) {
